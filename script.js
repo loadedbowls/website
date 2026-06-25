@@ -1,4 +1,3 @@
-
 const signatures = [
   {
     id: "loaded-fire-chicken",
@@ -90,22 +89,24 @@ const baseContent = {
   frieten: {
     title: "Frieten",
     image: "assets/base-fries.jpg",
+    badge: "The OG",
     copy: "Knapperig gefrituurd, perfect zout, sterk genoeg om de zwaarste topping te dragen zonder zacht te worden."
   },
   nachos: {
     title: "Nachos",
     image: "assets/thumb-nachos.jpg",
+    badge: "Crunch",
     copy: "Crunchy, stevig en ideaal voor cheddar, jalapeños en sauslagen met extra bite."
   },
   rijst: {
     title: "Rijst",
     image: "assets/thumb-rijst.jpg",
+    badge: "Comfort",
     copy: "Lichter, warm en vullend. De perfecte basis wanneer je bowl meer comfort dan crunch mag hebben."
   }
 };
 
 let cart = [];
-let pendingOrder = null;
 
 const money = new Intl.NumberFormat("nl-BE", {
   style: "currency",
@@ -115,11 +116,10 @@ const money = new Intl.NumberFormat("nl-BE", {
 const signatureGrid = document.querySelector("#signatureGrid");
 const dessertList = document.querySelector("#dessertList");
 const drinkList = document.querySelector("#drinkList");
+const navCartTotal = document.querySelector("#navCartTotal");
 const cartItems = document.querySelector("#cartItems");
 const cartTotal = document.querySelector("#cartTotal");
 const orderForm = document.querySelector("#orderForm");
-const paymentSection = document.querySelector("#payment");
-const paymentSummary = document.querySelector("#paymentSummary");
 const toast = document.querySelector("#toast");
 
 function showToast(message) {
@@ -221,6 +221,7 @@ function renderCart() {
 
   const total = lines.reduce((sum, item) => sum + item.price * item.quantity, 0);
   cartTotal.textContent = money.format(total);
+  navCartTotal.textContent = total > 0 ? money.format(total) : "";
 }
 
 function changeQuantity(key, direction) {
@@ -279,6 +280,7 @@ document.querySelector(".base-tabs").addEventListener("click", (event) => {
   document.querySelector("#baseCopy").textContent = content.copy;
   document.querySelector("#baseImage").src = content.image;
   document.querySelector("#baseImage").alt = `${content.title} loaded bowl`;
+  document.querySelector("#baseBadge").textContent = content.badge;
 });
 
 document.querySelector("#builderForm").addEventListener("submit", (event) => {
@@ -378,52 +380,14 @@ orderForm.addEventListener("submit", (event) => {
     total
   };
 
-  pendingOrder = order;
-  renderPayment(order);
-  paymentSection.classList.remove("hidden");
-  paymentSection.scrollIntoView({ behavior: "smooth", block: "start" });
-  showToast("Kies nu een betaalmethode om af te ronden.");
+  startPayment(order);
 });
 
-function renderPayment(order) {
-  const items = order.items.map((item) => `<li>${item.quantity}x ${item.name}</li>`).join("");
-  paymentSummary.innerHTML = `
-    <div>
-      <strong>${order.customer.name}</strong>
-      <span>${order.customer.method} · ${order.customer.phone}</span>
-    </div>
-    <ul>${items}</ul>
-    <p><span>Totaal te betalen</span><strong>${money.format(order.total)}</strong></p>
-  `;
-}
-
-document.querySelector("#payment").addEventListener("click", (event) => {
-  const button = event.target.closest("[data-pay]");
-  if (!button || !pendingOrder) return;
-
-  startPayment(button.dataset.pay);
-});
-
-async function startPayment(paymentMethod) {
+async function startPayment(order) {
   const orderForPayment = {
-    ...pendingOrder,
-    paymentMethod
+    ...order,
+    paymentMethod: "Mollie Checkout"
   };
-
-  if (paymentMethod === "Cash bij afhalen") {
-    const cashOrder = {
-      ...orderForPayment,
-      paymentStatus: "Te betalen bij afhalen"
-    };
-    saveOrders([cashOrder, ...readOrders()]);
-    pendingOrder = null;
-    cart = [];
-    orderForm.reset();
-    renderCart();
-    paymentSection.classList.add("hidden");
-    showToast("Bestelling bevestigd. Betaling gebeurt bij afhalen.");
-    return;
-  }
 
   try {
     showToast("Mollie betaalpagina wordt aangemaakt...");
@@ -445,14 +409,6 @@ async function startPayment(paymentMethod) {
   } catch (error) {
     showToast(error.message);
   }
-}
-
-function resetCheckoutAfterPayment() {
-  pendingOrder = null;
-  cart = [];
-  orderForm.reset();
-  renderCart();
-  paymentSection.classList.add("hidden");
 }
 
 renderSignatures();
