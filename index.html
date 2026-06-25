@@ -1,0 +1,326 @@
+<!doctype html>
+<html lang="nl">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Loaded Bowls | Online bestellen</title>
+    <link rel="stylesheet" href="styles.css">
+  </head>
+  <body>
+    <header class="topbar">
+      <a class="brand" href="#home" aria-label="Loaded Bowls home">
+        <img src="assets/loaded-bowls-logo.jpeg" alt="">
+        <span>Loaded<span>.</span>Bowls</span>
+      </a>
+      <nav class="nav" aria-label="Hoofdnavigatie">
+        <a href="#bases">Bases</a>
+        <a href="#build">Build</a>
+        <a href="#signatures">Menu</a>
+        <a href="#sweet">Drinks</a>
+        <a href="#order">Checkout</a>
+      </nav>
+      <a class="order-now" href="#order">Order now</a>
+    </header>
+
+    <main id="home">
+      <section class="hero section-shell">
+        <div class="hero-copy">
+          <h1>Build it.<br><span>Load</span> it.<br>Devour it.</h1>
+          <p>Kies je basis — frieten, rijst of nachos. Stapel je proteïne, toppings, sauzen en afwerking. Of ga direct voor een Signature Bowl. Vanaf <strong>€12,99.</strong></p>
+          <div class="hero-actions">
+            <a class="primary-btn" href="#build">Build your bowl <span>→</span></a>
+            <a class="ghost-btn" href="#signatures">See signatures</a>
+          </div>
+          <div class="base-line">Frieten <span>•</span> Nachos <span>•</span> Rijst <span>•</span></div>
+          <p class="micro">Drie bases. Eindeloze combinaties.</p>
+        </div>
+
+        <div class="hero-card">
+          <img src="assets/loaded-hero-bowl.jpg" alt="Loaded Fire Chicken bowl">
+          <div class="hero-label">
+            <small>Bestseller</small>
+            <strong>Loaded Fire Chicken</strong>
+          </div>
+          <div class="hero-price">
+            <small>Vanaf</small>
+            <strong>€16,50</strong>
+          </div>
+        </div>
+      </section>
+
+      <section id="bases" class="bases section-shell">
+        <div class="split-heading">
+          <div>
+            <p class="section-kicker">/01 — De basis</p>
+            <h2>Kies je <span>basis.</span></h2>
+          </div>
+          <p>Drie fundamenten, allemaal gebouwd om een berg topping te dragen. Make Your Own vanaf €12,99 medium / €15,99 large.</p>
+        </div>
+
+        <div class="base-tabs" aria-label="Basis keuzes">
+          <button class="base-tab active" type="button" data-base-tab="frieten">Frieten</button>
+          <button class="base-tab" type="button" data-base-tab="nachos">Nachos</button>
+          <button class="base-tab" type="button" data-base-tab="rijst">Rijst</button>
+        </div>
+
+        <div class="base-feature">
+          <div class="base-photo">
+            <img id="baseImage" src="assets/base-fries.jpg" alt="Frieten loaded bowl">
+            <span>The OG</span>
+          </div>
+          <div>
+            <h3 id="baseTitle">Frieten</h3>
+            <p id="baseCopy">Knapperig gefrituurd, perfect zout, sterk genoeg om de zwaarste topping te dragen zonder zacht te worden.</p>
+            <div class="included-card">
+              <p>Make your own — inclusief</p>
+              <div><strong>1× Proteïne</strong><span>naar keuze</span></div>
+              <div><strong>3× Toppings</strong><span>naar keuze</span></div>
+              <div><strong>2× Sauzen</strong><span>naar keuze</span></div>
+              <div><strong>1× Afwerking</strong><span>naar keuze</span></div>
+              <footer><span>Medium / Large</span><strong>€12,99 / €15,99</strong></footer>
+            </div>
+            <div class="thumb-row" aria-hidden="true">
+              <img src="assets/thumb-fries.jpg" alt="">
+              <img src="assets/thumb-nachos.jpg" alt="">
+              <img src="assets/thumb-rijst.jpg" alt="">
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section id="build" class="build section-shell">
+        <div class="split-heading">
+          <div>
+            <p class="section-kicker">/02 — Make your own</p>
+            <h2>Build je <span>bowl.</span></h2>
+          </div>
+          <p>Vijf stappen. Alles inbegrepen tot je extra wil. Selecteer je keuzes en voeg meteen toe aan je order.</p>
+        </div>
+
+        <form class="builder builder-detailed" id="builderForm">
+          <label>
+            Maat
+            <select name="size">
+              <option value="Medium" data-price="12.99">Medium — €12,99</option>
+              <option value="Large" data-price="15.99">Large — €15,99</option>
+            </select>
+          </label>
+          <label>
+            Basis
+            <select name="base">
+              <option>Frieten</option>
+              <option>Nachos</option>
+              <option>Rijst</option>
+            </select>
+          </label>
+          <label>
+            Proteïne
+            <select name="protein">
+              <option>Crispy Chicken</option>
+              <option>Kebab</option>
+              <option>Chicken Kebab</option>
+              <option>Pulled Chicken</option>
+              <option>Falafel</option>
+              <option>Stoofvlees</option>
+              <option>Bacon</option>
+            </select>
+          </label>
+          <label>
+            Topping 1
+            <select name="topping1">
+              <option>Geraspte wortel</option>
+              <option>Rode ui</option>
+              <option>Kerstomaten</option>
+              <option>Maïs</option>
+              <option>Jalapeños</option>
+              <option>Komkommer</option>
+            </select>
+          </label>
+          <label>
+            Topping 2
+            <select name="topping2">
+              <option>Rode ui</option>
+              <option>Geraspte wortel</option>
+              <option>Kerstomaten</option>
+              <option>Maïs</option>
+              <option>Jalapeños</option>
+              <option>Komkommer</option>
+            </select>
+          </label>
+          <label>
+            Topping 3
+            <select name="topping3">
+              <option>Maïs</option>
+              <option>Geraspte wortel</option>
+              <option>Rode ui</option>
+              <option>Kerstomaten</option>
+              <option>Jalapeños</option>
+              <option>Komkommer</option>
+            </select>
+          </label>
+          <label>
+            Saus 1
+            <select name="sauce1">
+              <option>Looksaus</option>
+              <option>Mayo</option>
+              <option>Samurai</option>
+              <option>Cocktail</option>
+              <option>Andalouse</option>
+              <option>Curry Sauce</option>
+              <option>BBQ Sauce</option>
+              <option>Cheddar Sauce</option>
+              <option>Sriracha Mayo</option>
+              <option>Sriracha Hot</option>
+            </select>
+          </label>
+          <label>
+            Saus 2
+            <select name="sauce2">
+              <option>Samurai</option>
+              <option>Looksaus</option>
+              <option>Mayo</option>
+              <option>Cocktail</option>
+              <option>Andalouse</option>
+              <option>Curry Sauce</option>
+              <option>BBQ Sauce</option>
+              <option>Cheddar Sauce</option>
+              <option>Sriracha Mayo</option>
+              <option>Sriracha Hot</option>
+            </select>
+          </label>
+          <label>
+            Afwerking
+            <select name="finish">
+              <option>Crispy Onion</option>
+              <option>Lente-ui</option>
+              <option>Chili Flakes</option>
+            </select>
+          </label>
+          <fieldset class="extras-field">
+            <legend>Extra's tegen meerprijs</legend>
+            <div class="extra-group">
+              <strong>Proteïne</strong>
+              <label><input type="checkbox" name="extras" value="Extra Crispy Chicken" data-price="1.99"> Crispy Chicken <span>+€1,99</span></label>
+              <label><input type="checkbox" name="extras" value="Extra Kebab" data-price="1.99"> Kebab <span>+€1,99</span></label>
+              <label><input type="checkbox" name="extras" value="Extra Chicken Kebab" data-price="1.99"> Chicken Kebab <span>+€1,99</span></label>
+              <label><input type="checkbox" name="extras" value="Extra Pulled Chicken" data-price="1.29"> Pulled Chicken <span>+€1,29</span></label>
+              <label><input type="checkbox" name="extras" value="Extra Falafel" data-price="1.29"> Falafel <span>+€1,29</span></label>
+              <label><input type="checkbox" name="extras" value="Extra Stoofvlees" data-price="2.49"> Stoofvlees <span>+€2,49</span></label>
+              <label><input type="checkbox" name="extras" value="Extra Bacon" data-price="1.99"> Bacon <span>+€1,99</span></label>
+            </div>
+            <div class="extra-group">
+              <strong>Toppings</strong>
+              <label><input type="checkbox" name="extras" value="Extra geraspte wortel" data-price="0.50"> Geraspte wortel <span>+€0,50</span></label>
+              <label><input type="checkbox" name="extras" value="Extra rode ui" data-price="0.50"> Rode ui <span>+€0,50</span></label>
+              <label><input type="checkbox" name="extras" value="Extra kerstomaten" data-price="0.50"> Kerstomaten <span>+€0,50</span></label>
+              <label><input type="checkbox" name="extras" value="Extra maïs" data-price="0.50"> Maïs <span>+€0,50</span></label>
+              <label><input type="checkbox" name="extras" value="Extra komkommer" data-price="0.50"> Komkommer <span>+€0,50</span></label>
+              <label><input type="checkbox" name="extras" value="Extra jalapeños" data-price="0.70"> Jalapeños <span>+€0,70</span></label>
+            </div>
+            <div class="extra-group">
+              <strong>Sauzen</strong>
+              <label><input type="checkbox" name="extras" value="Extra looksaus" data-price="0.80"> Looksaus <span>+€0,80</span></label>
+              <label><input type="checkbox" name="extras" value="Extra mayo" data-price="0.80"> Mayo <span>+€0,80</span></label>
+              <label><input type="checkbox" name="extras" value="Extra samurai" data-price="0.80"> Samurai <span>+€0,80</span></label>
+              <label><input type="checkbox" name="extras" value="Extra cocktail" data-price="0.80"> Cocktail <span>+€0,80</span></label>
+              <label><input type="checkbox" name="extras" value="Extra andalouse" data-price="0.80"> Andalouse <span>+€0,80</span></label>
+              <label><input type="checkbox" name="extras" value="Extra curry sauce" data-price="0.99"> Curry Sauce <span>+€0,99</span></label>
+              <label><input type="checkbox" name="extras" value="Extra BBQ sauce" data-price="0.99"> BBQ Sauce <span>+€0,99</span></label>
+              <label><input type="checkbox" name="extras" value="Extra cheddar sauce" data-price="0.99"> Cheddar Sauce <span>+€0,99</span></label>
+              <label><input type="checkbox" name="extras" value="Extra sriracha mayo" data-price="0.99"> Sriracha Mayo <span>+€0,99</span></label>
+              <label><input type="checkbox" name="extras" value="Extra sriracha hot" data-price="0.99"> Sriracha Hot <span>+€0,99</span></label>
+            </div>
+            <div class="extra-group">
+              <strong>Afwerking</strong>
+              <label><input type="checkbox" name="extras" value="Extra crispy onion" data-price="0.50"> Crispy Onion <span>+€0,50</span></label>
+              <label><input type="checkbox" name="extras" value="Extra lente-ui" data-price="0.50"> Lente-ui <span>+€0,50</span></label>
+              <label><input type="checkbox" name="extras" value="Extra chili flakes" data-price="0.50"> Chili Flakes <span>+€0,50</span></label>
+            </div>
+          </fieldset>
+          <button class="primary-btn builder-submit" type="submit">Toevoegen <span>→</span></button>
+        </form>
+
+      </section>
+
+      <section id="signatures" class="signatures section-shell">
+        <div class="menu-heading">
+          <div>
+            <p class="section-kicker">/03 — Signature bowls</p>
+            <h2>Signature <span>bowls.</span></h2>
+          </div>
+          <p>Basis naar keuze · Medium / Large</p>
+        </div>
+        <div class="signature-grid" id="signatureGrid"></div>
+      </section>
+
+      <section id="sweet" class="sweet section-shell">
+        <p class="section-kicker">/04 — Desserts & dranken</p>
+        <h2>Sweet <span>finish.</span></h2>
+        <div class="sweet-grid">
+          <article class="list-card">
+            <h3>Desserts</h3>
+            <div id="dessertList"></div>
+          </article>
+          <article class="list-card wide">
+            <h3>Dranken</h3>
+            <div id="drinkList" class="drink-columns"></div>
+          </article>
+        </div>
+      </section>
+
+      <section id="order" class="order-section section-shell">
+        <div class="order-panel">
+          <p class="section-kicker">/05 — Checkout</p>
+          <h2>Order <span>now.</span></h2>
+          <div id="cartItems" class="cart-items"></div>
+          <div class="cart-total">
+            <span>Totaal</span>
+            <strong id="cartTotal">€0,00</strong>
+          </div>
+        </div>
+
+        <form class="checkout" id="orderForm">
+          <label>
+            Naam
+            <input name="name" autocomplete="name" required placeholder="Voornaam en achternaam">
+          </label>
+          <label>
+            Telefoon
+            <input name="phone" autocomplete="tel" required placeholder="+32 ...">
+          </label>
+          <label>
+            Keuze
+            <select name="method" required>
+              <option value="Afhalen">Afhalen</option>
+              <option value="Levering">Levering</option>
+            </select>
+          </label>
+          <label>
+            Adres of opmerking
+            <textarea name="note" rows="4" placeholder="Adres, tijdstip, allergie of extra info"></textarea>
+          </label>
+          <button class="primary-btn builder-submit" type="submit">Verder naar betaling <span>→</span></button>
+          <p class="form-note">Na deze stap kiest de klant een betaalmethode. De order wordt pas bevestigd na betaling.</p>
+        </form>
+      </section>
+
+      <section id="payment" class="payment-section section-shell hidden">
+        <div class="payment-card">
+          <p class="section-kicker">/06 — Payment</p>
+          <h2>Betaling <span>afronden.</span></h2>
+          <div id="paymentSummary" class="payment-summary"></div>
+          <div class="payment-methods" aria-label="Betaalmethodes">
+            <button class="payment-method" type="button" data-pay="Bancontact">Bancontact</button>
+            <button class="payment-method" type="button" data-pay="Kaart">Kaart</button>
+            <button class="payment-method" type="button" data-pay="Apple Pay">Apple Pay</button>
+            <button class="payment-method" type="button" data-pay="Cash bij afhalen">Cash bij afhalen</button>
+          </div>
+          <p class="form-note">Demo: deze knoppen simuleren betaling. Voor echte betalingen koppel je hier bijvoorbeeld Mollie of Stripe.</p>
+        </div>
+      </section>
+    </main>
+
+    <div class="toast" id="toast" role="status" aria-live="polite"></div>
+    <script src="script.js"></script>
+  </body>
+</html>
