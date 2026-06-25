@@ -1,9 +1,3 @@
-const methodMap = {
-  Bancontact: "bancontact",
-  Kaart: "creditcard",
-  "Apple Pay": "applepay"
-};
-
 function getBaseUrl(req) {
   if (process.env.SITE_URL) return process.env.SITE_URL.replace(/\/$/, "");
   const host = req.headers["x-forwarded-host"] || req.headers.host;
@@ -32,7 +26,6 @@ export default async function handler(req, res) {
 
   const baseUrl = getBaseUrl(req);
   const orderId = order.id || `LB-${Date.now()}`;
-  const method = methodMap[order.paymentMethod];
 
   const payload = {
     amount: {
@@ -51,10 +44,6 @@ export default async function handler(req, res) {
       paymentMethod: order.paymentMethod
     }
   };
-
-  if (method) {
-    payload.method = method;
-  }
 
   const mollieResponse = await fetch("https://api.mollie.com/v2/payments", {
     method: "POST",
