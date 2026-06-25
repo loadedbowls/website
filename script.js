@@ -1,3 +1,4 @@
+
 const signatures = [
   {
     id: "loaded-fire-chicken",
@@ -400,20 +401,59 @@ document.querySelector("#payment").addEventListener("click", (event) => {
   const button = event.target.closest("[data-pay]");
   if (!button || !pendingOrder) return;
 
-  const paidOrder = {
+  startPayment(button.dataset.pay);
+});
+
+async function startPayment(paymentMethod) {
+  const orderForPayment = {
     ...pendingOrder,
-    paymentMethod: button.dataset.pay,
-    paymentStatus: button.dataset.pay === "Cash bij afhalen" ? "Te betalen bij afhalen" : "Betaald demo"
+    paymentMethod
   };
 
-  saveOrders([paidOrder, ...readOrders()]);
+  if (paymentMethod === "Cash bij afhalen") {
+    const cashOrder = {
+      ...orderForPayment,
+      paymentStatus: "Te betalen bij afhalen"
+    };
+    saveOrders([cashOrder, ...readOrders()]);
+    pendingOrder = null;
+    cart = [];
+    orderForm.reset();
+    renderCart();
+    paymentSection.classList.add("hidden");
+    showToast("Bestelling bevestigd. Betaling gebeurt bij afhalen.");
+    return;
+  }
+
+  try {
+    showToast("Mollie betaalpagina wordt aangemaakt...");
+    const response = await fetch("/api/create-payment", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify(orderForPayment)
+    });
+
+    const data = await response.json();
+
+    if (!response.ok || !data.checkoutUrl) {
+      throw new Error(data.error || "Mollie betaling kon niet worden aangemaakt.");
+    }
+
+    window.location.href = data.checkoutUrl;
+  } catch (error) {
+    showToast(error.message);
+  }
+}
+
+function resetCheckoutAfterPayment() {
   pendingOrder = null;
   cart = [];
   orderForm.reset();
   renderCart();
   paymentSection.classList.add("hidden");
-  showToast(`Betaling gekozen: ${paidOrder.paymentMethod}. Bestelling bevestigd.`);
-});
+}
 
 renderSignatures();
 renderSimpleList(dessertList, desserts);
