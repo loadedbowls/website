@@ -19,7 +19,7 @@
         <a href="#sweet">Drinks</a>
         <a href="#order">Checkout</a>
       </nav>
-      <a class="order-now" href="#order">Order now</a>
+      <a class="order-now" href="#order">Order now <small id="navCartTotal"></small></a>
     </header>
 
     <main id="home">
@@ -66,7 +66,7 @@
         <div class="base-feature">
           <div class="base-photo">
             <img id="baseImage" src="assets/base-fries.jpg" alt="Frieten loaded bowl">
-            <span>The OG</span>
+            <span id="baseBadge">The OG</span>
           </div>
           <div>
             <h3 id="baseTitle">Frieten</h3>
@@ -78,11 +78,6 @@
               <div><strong>2× Sauzen</strong><span>naar keuze</span></div>
               <div><strong>1× Afwerking</strong><span>naar keuze</span></div>
               <footer><span>Medium / Large</span><strong>€12,99 / €15,99</strong></footer>
-            </div>
-            <div class="thumb-row" aria-hidden="true">
-              <img src="assets/thumb-fries.jpg" alt="">
-              <img src="assets/thumb-nachos.jpg" alt="">
-              <img src="assets/thumb-rijst.jpg" alt="">
             </div>
           </div>
         </div>
@@ -300,23 +295,8 @@
             <textarea name="note" rows="4" placeholder="Adres, tijdstip, allergie of extra info"></textarea>
           </label>
           <button class="primary-btn builder-submit" type="submit">Verder naar betaling <span>→</span></button>
-          <p class="form-note">Na deze stap kiest de klant een betaalmethode. De order wordt pas bevestigd na betaling.</p>
+          <p class="form-note">Je wordt meteen doorgestuurd naar Mollie. Daar kies je Bancontact, kaart of een andere beschikbare betaalmethode.</p>
         </form>
-      </section>
-
-      <section id="payment" class="payment-section section-shell hidden">
-        <div class="payment-card">
-          <p class="section-kicker">/06 — Payment</p>
-          <h2>Betaling <span>afronden.</span></h2>
-          <div id="paymentSummary" class="payment-summary"></div>
-          <div class="payment-methods" aria-label="Betaalmethodes">
-            <button class="payment-method" type="button" data-pay="Bancontact">Bancontact</button>
-            <button class="payment-method" type="button" data-pay="Kaart">Kaart</button>
-            <button class="payment-method" type="button" data-pay="Apple Pay">Apple Pay</button>
-            <button class="payment-method" type="button" data-pay="Cash bij afhalen">Cash bij afhalen</button>
-          </div>
-          <p class="form-note">Demo: deze knoppen simuleren betaling. Voor echte betalingen koppel je hier bijvoorbeeld Mollie of Stripe.</p>
-        </div>
       </section>
     </main>
 
