@@ -136,8 +136,26 @@ button {
 }
 
 .order-now {
+  gap: 10px;
   padding: 0 22px;
   font-size: 1rem;
+}
+
+.order-now small {
+  display: inline-flex;
+  align-items: center;
+  min-height: 24px;
+  padding: 0 8px;
+  border-radius: 999px;
+  color: var(--text);
+  background: rgba(18, 13, 9, 0.9);
+  font-family: var(--body);
+  font-size: 0.75rem;
+  font-weight: 900;
+}
+
+.order-now small:empty {
+  display: none;
 }
 
 .primary-btn {
@@ -494,21 +512,6 @@ h3 {
   color: var(--orange);
   font-family: var(--chunk);
   font-size: 2rem;
-}
-
-.thumb-row {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 14px;
-  margin-top: 28px;
-}
-
-.thumb-row img {
-  width: 100%;
-  aspect-ratio: 1.35;
-  object-fit: cover;
-  border: 1px solid var(--line);
-  border-radius: 9px;
 }
 
 .builder {
@@ -1188,7 +1191,6 @@ h3 {
 
   .price-lines.two-col,
   .drink-columns,
-  .thumb-row,
   .extras-field,
   .signature-options {
     grid-template-columns: 1fr;
