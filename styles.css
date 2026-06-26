@@ -827,48 +827,18 @@ h3 {
 .signature-extra-tabs {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 10px;
+  gap: 12px;
   margin-top: 16px;
 }
 
-.signature-extra-group {
-  border: 1px solid var(--line);
-  border-radius: 8px;
-  background: rgba(255,255,255,0.035);
-  overflow: hidden;
-}
-
-.signature-extra-group summary {
-  min-height: 42px;
-  padding: 12px 14px;
-  color: var(--orange);
-  font-family: var(--chunk);
-  text-transform: uppercase;
-  cursor: pointer;
-}
-
-.signature-extra-group > div {
+.signature-extra-select {
   display: grid;
   gap: 8px;
-  padding: 0 14px 14px;
-}
-
-.signature-extra-group label {
-  display: grid;
-  grid-template-columns: auto 1fr auto;
-  align-items: center;
-  gap: 9px;
-  color: var(--muted);
-  font-size: 0.93rem;
-}
-
-.signature-extra-group input {
-  accent-color: var(--orange);
-}
-
-.signature-extra-group span {
   color: var(--orange);
+  font-size: 0.76rem;
   font-weight: 900;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
 }
 
 .card-actions {
@@ -1460,6 +1430,55 @@ h3 {
   .signature-head,
   .cart-line {
     grid-template-columns: 1fr;
+  }
+
+  .signature-card {
+    min-height: auto;
+    padding: 24px 18px;
+  }
+
+  .signature-head {
+    gap: 10px;
+  }
+
+  .signature-head h3 {
+    font-size: clamp(1.75rem, 10vw, 2.45rem);
+  }
+
+  .signature-price strong {
+    font-size: 1.35rem;
+  }
+
+  .protein {
+    margin: 8px 0 10px;
+  }
+
+  .chips {
+    gap: 6px;
+    margin: 10px 0 14px;
+  }
+
+  .chips span {
+    padding: 6px 9px;
+    font-size: 0.86rem;
+  }
+
+  .finish {
+    padding-top: 14px;
+    font-size: 0.72rem;
+    letter-spacing: 0.22em;
+  }
+
+  .signature-options {
+    margin-top: 14px;
+  }
+
+  .signature-extra-tabs {
+    margin-top: 10px;
+  }
+
+  .card-actions {
+    margin-top: 16px;
   }
 
   .price-card small,
