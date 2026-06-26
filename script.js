@@ -215,6 +215,7 @@ const cartItems = document.querySelector("#cartItems");
 const cartTotal = document.querySelector("#cartTotal");
 const orderForm = document.querySelector("#orderForm");
 const orderTime = document.querySelector("#orderTime");
+const hoursNote = document.querySelector("#hoursNote");
 const closedModal = document.querySelector("#closedModal");
 const closedMessage = document.querySelector("#closedMessage");
 const continueBrowsing = document.querySelector("#continueBrowsing");
@@ -304,6 +305,11 @@ function updateLocationStatus() {
   locationStatus.textContent = isOpenNow() ? "Open vandaag" : "Momenteel gesloten";
 }
 
+function updateHoursNote() {
+  if (!hoursNote) return;
+  hoursNote.classList.toggle("hidden", isOpenNow());
+}
+
 function addLine(line) {
   const existing = cart.find((item) => item.key === line.key);
   if (existing) {
@@ -318,18 +324,13 @@ function addLine(line) {
 
 function renderSignatureExtraGroup(title, items) {
   return `
-    <details class="signature-extra-group">
-      <summary>${title}</summary>
-      <div>
-        ${items.map((extra) => `
-          <label>
-            <input type="checkbox" data-signature-extra="${extra.name}" data-price="${extra.price}">
-            ${extra.name.replace("Extra ", "")}
-            <span>${money.format(extra.price)}</span>
-          </label>
-        `).join("")}
-      </div>
-    </details>
+    <label class="signature-extra-select">
+      ${title}
+      <select data-signature-extra-select>
+        <option value="" data-price="0">Geen extra</option>
+        ${items.map((extra) => `<option value="${extra.name}" data-price="${extra.price}">${extra.name.replace("Extra ", "")} +${money.format(extra.price)}</option>`).join("")}
+      </select>
+    </label>
   `;
 }
 
@@ -365,7 +366,7 @@ function renderSignatures() {
           </select>
         </label>
       </div>
-      <div class="signature-extra-tabs">
+      <div class="signature-extra-tabs" aria-label="Extra opties voor ${item.name}">
         ${renderSignatureExtraGroup("Extra proteine", signatureExtras.protein)}
         ${renderSignatureExtraGroup("Extra toppings", signatureExtras.toppings)}
         ${renderSignatureExtraGroup("Extra sauzen", signatureExtras.sauces)}
@@ -518,10 +519,15 @@ signatureGrid.addEventListener("click", (event) => {
   const card = button.closest(".signature-card");
   const base = card.querySelector(`[data-signature-base="${item.id}"]`).value;
   const sauce = card.querySelector(`[data-signature-sauce="${item.id}"]`).value;
-  const extras = [...card.querySelectorAll("[data-signature-extra]:checked")].map((input) => ({
-    name: input.dataset.signatureExtra,
-    price: Number(input.dataset.price || 0)
-  }));
+  const extras = [...card.querySelectorAll("[data-signature-extra-select]")]
+    .map((select) => {
+      const selected = select.options[select.selectedIndex];
+      return {
+        name: select.value,
+        price: Number(selected.dataset.price || 0)
+      };
+    })
+    .filter((extra) => extra.name);
   const extraTotal = extras.reduce((sum, extra) => sum + extra.price, 0);
   const extrasText = extras.length ? `Extra's: ${extras.map((extra) => `${extra.name} ${money.format(extra.price)}`).join(", ")}` : "Geen extra's";
 
@@ -650,7 +656,7 @@ async function checkDeliveryAddress(address) {
   }
 
   try {
-    showToast("We controleren of je binnen onze leverzone van 5 km ligt...");
+    showToast("We controleren of je binnen onze leverzone van 6 km ligt...");
     const response = await fetch("/api/check-delivery", {
       method: "POST",
       headers: {
@@ -661,7 +667,7 @@ async function checkDeliveryAddress(address) {
     const data = await response.json();
 
     if (!response.ok || !data.ok) {
-      showToast(data.error || "Levering kan enkel binnen 5 km van Loaded Bowls in Gent.");
+      showToast(data.error || "Levering kan enkel binnen 6 km van Loaded Bowls in Gent.");
       return false;
     }
 
@@ -678,6 +684,7 @@ renderSimpleList(dessertList, desserts);
 renderSimpleList(drinkList, drinks);
 renderOrderTimeOptions();
 updateLocationStatus();
+updateHoursNote();
 showClosedModalIfNeeded();
 renderCart();
 renderOrders();
