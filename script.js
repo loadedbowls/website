@@ -215,6 +215,8 @@ const cartItems = document.querySelector("#cartItems");
 const cartTotal = document.querySelector("#cartTotal");
 const orderForm = document.querySelector("#orderForm");
 const orderTime = document.querySelector("#orderTime");
+const paymentChoice = document.querySelector("#paymentChoice");
+const checkoutSubmit = document.querySelector("#checkoutSubmit");
 const hoursNote = document.querySelector("#hoursNote");
 const openBuilderModalButton = document.querySelector("#openBuilderModal");
 const builderModal = document.querySelector("#builderModal");
@@ -684,6 +686,7 @@ orderForm.addEventListener("submit", async (event) => {
   const method = formData.get("method");
   const address = String(formData.get("address") || "").trim();
   const note = String(formData.get("note") || "").trim();
+  const selectedPaymentChoice = formData.get("paymentChoice");
 
   if (!selectedTime || !isSelectableOrderTime(selectedMinutes)) {
     renderOrderTimeOptions();
@@ -709,10 +712,15 @@ orderForm.addEventListener("submit", async (event) => {
       note
     },
     items: lines,
-    total
+    total,
+    paymentMethod: selectedPaymentChoice === "later" ? "Betalen bij afhaal/levering" : "Online betalen"
   };
 
-  startPayment(order);
+  if (selectedPaymentChoice === "later") {
+    submitPayLaterOrder(order);
+  } else {
+    startPayment(order);
+  }
 });
 
 continueBrowsing.addEventListener("click", () => {
@@ -722,7 +730,7 @@ continueBrowsing.addEventListener("click", () => {
 async function startPayment(order) {
   const orderForPayment = {
     ...order,
-    paymentMethod: "Mollie Checkout"
+    paymentMethod: "Online betaald via Mollie"
   };
 
   try {
@@ -746,6 +754,39 @@ async function startPayment(order) {
     showToast(error.message);
   }
 }
+
+async function submitPayLaterOrder(order) {
+  try {
+    showToast("Bestelling wordt doorgestuurd...");
+    const response = await fetch("/api/submit-order", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify(order)
+    });
+
+    const data = await response.json();
+    if (!response.ok) {
+      throw new Error(data.error || "Bestelling kon niet worden doorgestuurd.");
+    }
+
+    cart = [];
+    renderCart();
+    orderForm.reset();
+    renderOrderTimeOptions();
+    showToast("Bestelling ontvangen. Je betaalt bij afhaal of levering.");
+  } catch (error) {
+    showToast(error.message);
+  }
+}
+
+paymentChoice?.addEventListener("change", () => {
+  if (!checkoutSubmit) return;
+  checkoutSubmit.innerHTML = paymentChoice.value === "later"
+    ? "Bestelling plaatsen <span>→</span>"
+    : "Verder naar betaling <span>→</span>";
+});
 
 async function checkDeliveryAddress(address) {
   if (address.length < 6) {
