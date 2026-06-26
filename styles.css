@@ -523,8 +523,37 @@ h3 {
   padding: 20px;
 }
 
+.build-launch {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 18px;
+  margin-bottom: 34px;
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  background: linear-gradient(115deg, rgba(249,187,33,0.08), rgba(255,255,255,0.015)), var(--panel);
+  padding: clamp(18px, 3vw, 28px);
+}
+
+.build-launch div {
+  display: grid;
+  gap: 8px;
+}
+
+.build-launch strong {
+  font-family: var(--chunk);
+  font-size: clamp(1.8rem, 3vw, 2.8rem);
+  text-transform: uppercase;
+}
+
+.build-launch span {
+  color: var(--muted);
+  font-weight: 800;
+}
+
 .builder label,
 .extras-field label,
+.extra-tab-select,
 .signature-options label,
 .signature-extra-select,
 .checkout label {
@@ -539,6 +568,7 @@ h3 {
 
 .builder input,
 .builder select,
+.extra-tab-select select,
 .signature-options select,
 .signature-extra-select select,
 .checkout input,
@@ -590,43 +620,8 @@ h3 {
   text-transform: uppercase;
 }
 
-.extras-field label {
-  grid-template-columns: auto 1fr auto;
-  align-items: center;
-  gap: 10px;
-  color: var(--text);
-  font-size: 0.9rem;
-  letter-spacing: 0;
-  text-transform: none;
-}
-
-.extras-field input {
-  width: 18px;
-  min-height: 18px;
-  accent-color: var(--orange);
-}
-
-.extras-field span {
-  color: var(--orange);
-  font-weight: 900;
-}
-
-.extra-group {
-  display: grid;
-  align-content: start;
-  gap: 11px;
-  padding: 12px;
-  border: 1px solid rgba(255,255,255,0.055);
-  border-radius: 10px;
-  background: rgba(0,0,0,0.12);
-}
-
-.extra-group > strong {
-  color: var(--orange);
-  font-size: 0.82rem;
-  font-weight: 900;
-  letter-spacing: 0.24em;
-  text-transform: uppercase;
+.extra-tab-select {
+  color: var(--gold);
 }
 
 .price-grid {
@@ -1199,6 +1194,76 @@ h3 {
   backdrop-filter: blur(10px);
 }
 
+body.modal-open {
+  overflow: hidden;
+}
+
+.choice-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 55;
+  display: grid;
+  place-items: center;
+  padding: 20px;
+  background: rgba(6, 4, 3, 0.78);
+  backdrop-filter: blur(10px);
+}
+
+.choice-card {
+  position: relative;
+  width: min(980px, 100%);
+  max-height: min(88vh, 900px);
+  overflow: auto;
+  border: 1px solid var(--line-hot);
+  border-radius: 17px;
+  background: linear-gradient(115deg, rgba(249,187,33,0.08), rgba(255,255,255,0.018)), var(--panel);
+  box-shadow: var(--shadow);
+  padding: clamp(22px, 4vw, 38px);
+}
+
+.choice-card h2 {
+  margin-bottom: 22px;
+  font-size: clamp(2.4rem, 6vw, 4.4rem);
+}
+
+.modal-close {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  display: grid;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  border: 1px solid var(--line);
+  border-radius: 50%;
+  color: var(--text);
+  background: #120e0c;
+  font-size: 1.6rem;
+  cursor: pointer;
+}
+
+.modal-form {
+  display: grid;
+  gap: 16px;
+}
+
+.modal-summary {
+  display: grid;
+  gap: 8px;
+  margin-bottom: 4px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: rgba(0,0,0,0.14);
+  padding: 16px;
+  color: var(--muted);
+}
+
+.modal-summary strong {
+  color: var(--orange);
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+}
+
 .closed-card {
   width: min(620px, 100%);
   border: 1px solid var(--line-hot);
@@ -1378,6 +1443,11 @@ h3 {
     grid-template-columns: 1fr;
   }
 
+  .build-launch {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
   .extras-field {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
@@ -1491,11 +1561,31 @@ h3 {
 
   .price-lines.two-col,
   .drink-columns,
+  .builder,
   .extras-field,
   .signature-options,
   .signature-extra-tabs,
   .location-list div {
     grid-template-columns: 1fr;
+  }
+
+  .choice-modal {
+    padding: 10px;
+    align-items: end;
+  }
+
+  .choice-card {
+    max-height: 92vh;
+    border-radius: 14px 14px 0 0;
+    padding: 22px 14px;
+  }
+
+  .choice-card h2 {
+    padding-right: 42px;
+  }
+
+  .builder {
+    padding: 14px;
   }
 
   .location-list dd {
