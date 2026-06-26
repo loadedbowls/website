@@ -1,7 +1,65 @@
 import { kv } from "@vercel/kv";
+import { createClient } from "redis";
 
 const ORDER_LIST_KEY = "loaded-bowls:orders";
 const ORDER_KEY_PREFIX = "loaded-bowls:order:";
+let redisClient;
+
+async function getRedisClient() {
+  if (!process.env.REDIS_URL) return null;
+
+  if (!redisClient) {
+    redisClient = createClient({
+      url: process.env.REDIS_URL
+    });
+
+    redisClient.on("error", (error) => {
+      console.error("Redis error:", error);
+    });
+  }
+
+  if (!redisClient.isOpen) {
+    await redisClient.connect();
+  }
+
+  return redisClient;
+}
+
+async function storeGet(key) {
+  const redis = await getRedisClient();
+  if (redis) return redis.get(key);
+  return kv.get(key);
+}
+
+async function storeSet(key, value) {
+  const redis = await getRedisClient();
+  if (redis) return redis.set(key, JSON.stringify(value));
+  return kv.set(key, value);
+}
+
+async function storeLPush(key, value) {
+  const redis = await getRedisClient();
+  if (redis) return redis.lPush(key, value);
+  return kv.lpush(key, value);
+}
+
+async function storeLTrim(key, start, stop) {
+  const redis = await getRedisClient();
+  if (redis) return redis.lTrim(key, start, stop);
+  return kv.ltrim(key, start, stop);
+}
+
+async function storeLRange(key, start, stop) {
+  const redis = await getRedisClient();
+  if (redis) return redis.lRange(key, start, stop);
+  return kv.lrange(key, start, stop);
+}
+
+async function storeMGet(keys) {
+  const redis = await getRedisClient();
+  if (redis) return redis.mGet(keys);
+  return kv.mget(...keys);
+}
 
 function parseOrder(value) {
   if (!value) return null;
@@ -36,7 +94,7 @@ export async function saveOrder(payload) {
   if (!id) return null;
 
   const key = `${ORDER_KEY_PREFIX}${id}`;
-  const existing = await kv.get(key);
+  const existing = await storeGet(key);
   if (existing) return parseOrder(existing);
 
   const record = {
@@ -51,9 +109,9 @@ export async function saveOrder(payload) {
     order: metadata
   };
 
-  await kv.set(key, record);
-  await kv.lpush(ORDER_LIST_KEY, id);
-  await kv.ltrim(ORDER_LIST_KEY, 0, 199);
+  await storeSet(key, record);
+  await storeLPush(ORDER_LIST_KEY, id);
+  await storeLTrim(ORDER_LIST_KEY, 0, 199);
   return record;
 }
 
@@ -66,16 +124,16 @@ export async function savePaidOrder(payload) {
 }
 
 export async function listOrders() {
-  const ids = await kv.lrange(ORDER_LIST_KEY, 0, 99);
+  const ids = await storeLRange(ORDER_LIST_KEY, 0, 99);
   if (!Array.isArray(ids) || !ids.length) return [];
 
-  const values = await kv.mget(...ids.map((id) => `${ORDER_KEY_PREFIX}${id}`));
+  const values = await storeMGet(ids.map((id) => `${ORDER_KEY_PREFIX}${id}`));
   return values.map(parseOrder).filter(Boolean);
 }
 
 export async function updateOrderStatus(id, status) {
   const key = `${ORDER_KEY_PREFIX}${id}`;
-  const existing = parseOrder(await kv.get(key));
+  const existing = parseOrder(await storeGet(key));
   if (!existing) return null;
 
   const updated = {
@@ -84,6 +142,6 @@ export async function updateOrderStatus(id, status) {
     updatedAt: new Date().toISOString()
   };
 
-  await kv.set(key, updated);
+  await storeSet(key, updated);
   return updated;
 }
