@@ -1,3 +1,6 @@
+import { savePaidOrder } from "./_order-store.js";
+import { forwardToPrinter } from "./_print-forward.js";
+
 export default async function handler(req, res) {
   if (req.method !== "POST") {
     res.setHeader("Allow", "POST");
@@ -19,7 +22,31 @@ export default async function handler(req, res) {
   const payment = await response.json();
 
   if (payment.status === "paid") {
-    console.log("Paid Loaded Bowls order:", JSON.stringify(payment.metadata || {}));
+    const order = payment.metadata || {};
+    console.log("Paid Loaded Bowls order:", JSON.stringify(order));
+
+    try {
+      await savePaidOrder({
+        paymentId: payment.id,
+        paidAt: new Date().toISOString(),
+        amount: payment.amount,
+        order
+      });
+    } catch (error) {
+      console.error("Could not save paid order:", error);
+    }
+
+    try {
+      await forwardToPrinter({
+        paymentId: payment.id,
+        paidAt: new Date().toISOString(),
+        paymentLabel: "Online betaald",
+        amount: payment.amount,
+        order
+      });
+    } catch (error) {
+      console.error("Could not forward order to printer app:", error);
+    }
   } else {
     console.log("Mollie payment update:", payment.id, payment.status);
   }
