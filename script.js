@@ -766,7 +766,7 @@ async function submitPayLaterOrder(order) {
       body: JSON.stringify(order)
     });
 
-    const data = await response.json();
+    const data = await response.json().catch(() => ({}));
     if (!response.ok) {
       throw new Error(data.error || "Bestelling kon niet worden doorgestuurd.");
     }
@@ -777,7 +777,7 @@ async function submitPayLaterOrder(order) {
     renderOrderTimeOptions();
     showToast("Bestelling ontvangen. Je betaalt bij afhaal of levering.");
   } catch (error) {
-    showToast(error.message);
+    showToast(`Bestelling niet doorgestuurd: ${error.message}`);
   }
 }
 
