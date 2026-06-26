@@ -216,6 +216,12 @@ const cartTotal = document.querySelector("#cartTotal");
 const orderForm = document.querySelector("#orderForm");
 const orderTime = document.querySelector("#orderTime");
 const hoursNote = document.querySelector("#hoursNote");
+const openBuilderModalButton = document.querySelector("#openBuilderModal");
+const builderModal = document.querySelector("#builderModal");
+const builderModalBody = document.querySelector("#builderModalBody");
+const signatureModal = document.querySelector("#signatureModal");
+const signatureModalTitle = document.querySelector("#signatureModalTitle");
+const signatureModalBody = document.querySelector("#signatureModalBody");
 const closedModal = document.querySelector("#closedModal");
 const closedMessage = document.querySelector("#closedMessage");
 const continueBrowsing = document.querySelector("#continueBrowsing");
@@ -322,6 +328,16 @@ function addLine(line) {
   showToast("Toegevoegd aan je order.");
 }
 
+function openModal(modal) {
+  modal.classList.remove("hidden");
+  document.body.classList.add("modal-open");
+}
+
+function closeModal(modal) {
+  modal.classList.add("hidden");
+  document.body.classList.remove("modal-open");
+}
+
 function renderSignatureExtraGroup(title, items) {
   return `
     <label class="signature-extra-select">
@@ -331,6 +347,49 @@ function renderSignatureExtraGroup(title, items) {
         ${items.map((extra) => `<option value="${extra.name}" data-price="${extra.price}">${extra.name.replace("Extra ", "")} +${money.format(extra.price)}</option>`).join("")}
       </select>
     </label>
+  `;
+}
+
+function renderSignatureModal(item) {
+  signatureModalTitle.textContent = item.name;
+  signatureModalBody.innerHTML = `
+    <form class="modal-form" id="signatureChoiceForm" data-signature-choice="${item.id}">
+      <div class="modal-summary">
+        <strong>${item.protein}</strong>
+        <span>${item.chips.join(" · ")}</span>
+        <span>Afwerking: ${item.finish}</span>
+      </div>
+      <div class="signature-options">
+        <label>
+          Maat
+          <select name="size" required>
+            <option value="Medium" data-price="${item.sizes.Medium}">Medium - ${money.format(item.sizes.Medium)}</option>
+            <option value="Large" data-price="${item.sizes.Large}">Large - ${money.format(item.sizes.Large)}</option>
+          </select>
+        </label>
+        <label>
+          Basis
+          <select name="base" required>
+            <option value="" selected disabled>Maak keuze</option>
+            ${bases.map((base) => `<option>${base}</option>`).join("")}
+          </select>
+        </label>
+        <label>
+          Saus
+          <select name="sauce" required>
+            <option value="" selected disabled>Maak keuze</option>
+            ${sauces.map((sauce) => `<option>${sauce}</option>`).join("")}
+          </select>
+        </label>
+      </div>
+      <div class="signature-extra-tabs" aria-label="Extra opties voor ${item.name}">
+        ${renderSignatureExtraGroup("Extra proteine", signatureExtras.protein)}
+        ${renderSignatureExtraGroup("Extra toppings", signatureExtras.toppings)}
+        ${renderSignatureExtraGroup("Extra sauzen", signatureExtras.sauces)}
+        ${renderSignatureExtraGroup("Extra afwerking", signatureExtras.finish)}
+      </div>
+      <button class="primary-btn builder-submit" type="submit">Toevoegen <span>→</span></button>
+    </form>
   `;
 }
 
@@ -349,32 +408,9 @@ function renderSignatures() {
         </div>
       </div>
       <div class="chips">${item.chips.map((chip) => `<span>${chip}</span>`).join("")}</div>
-      <p class="finish">Afwerking · <strong>${item.finish}</strong></p>
-      <div class="signature-options">
-        <label>
-          Basis
-          <select data-signature-base="${item.id}" required>
-            <option value="" selected disabled>Maak keuze</option>
-            ${bases.map((base) => `<option>${base}</option>`).join("")}
-          </select>
-        </label>
-        <label>
-          Saus
-          <select data-signature-sauce="${item.id}" required>
-            <option value="" selected disabled>Maak keuze</option>
-            ${sauces.map((sauce) => `<option>${sauce}</option>`).join("")}
-          </select>
-        </label>
-      </div>
-      <div class="signature-extra-tabs" aria-label="Extra opties voor ${item.name}">
-        ${renderSignatureExtraGroup("Extra proteine", signatureExtras.protein)}
-        ${renderSignatureExtraGroup("Extra toppings", signatureExtras.toppings)}
-        ${renderSignatureExtraGroup("Extra sauzen", signatureExtras.sauces)}
-        ${renderSignatureExtraGroup("Extra afwerking", signatureExtras.finish)}
-      </div>
+      <p class="finish">Afwerking: <strong>${item.finish}</strong></p>
       <div class="card-actions">
-        <button class="add-button" type="button" data-signature="${item.id}" data-size="Medium">Medium</button>
-        <button class="add-button" type="button" data-signature="${item.id}" data-size="Large">Large</button>
+        <button class="add-button" type="button" data-open-signature="${item.id}">Aanpassen</button>
       </div>
     </article>
   `).join("");
@@ -482,16 +518,38 @@ document.querySelector(".base-tabs").addEventListener("click", (event) => {
   document.querySelector("#baseBadge").textContent = content.badge;
 });
 
+if (builderModalBody && orderForm) {
+  builderModalBody.appendChild(document.querySelector("#builderForm"));
+}
+
+openBuilderModalButton.addEventListener("click", () => openModal(builderModal));
+
+document.querySelectorAll("[data-close-modal]").forEach((button) => {
+  button.addEventListener("click", () => closeModal(document.querySelector(`#${button.dataset.closeModal}`)));
+});
+
+[builderModal, signatureModal].forEach((modal) => {
+  modal.addEventListener("click", (event) => {
+    if (event.target === modal) closeModal(modal);
+  });
+});
+
 document.querySelector("#builderForm").addEventListener("submit", (event) => {
   event.preventDefault();
   const formData = new FormData(event.currentTarget);
   const sizeSelect = event.currentTarget.elements.size;
   const selected = sizeSelect.options[sizeSelect.selectedIndex];
   const size = formData.get("size");
-  const extras = [...event.currentTarget.querySelectorAll("input[name='extras']:checked")].map((input) => ({
-    name: input.value,
-    price: Number(input.dataset.price || 0)
-  }));
+  const extras = ["extraProtein", "extraTopping", "extraSauce", "extraFinish"]
+    .map((name) => {
+      const select = event.currentTarget.elements[name];
+      const option = select.options[select.selectedIndex];
+      return {
+        name: select.value,
+        price: Number(option.dataset.price || 0)
+      };
+    })
+    .filter((extra) => extra.name);
   const extraTotal = extras.reduce((sum, item) => sum + item.price, 0);
   const price = Number(selected.dataset.price) + extraTotal;
   const base = formData.get("base");
@@ -508,18 +566,31 @@ document.querySelector("#builderForm").addEventListener("submit", (event) => {
     details: `${base}, ${protein}, toppings: ${toppings.join(", ")}, sauzen: ${saucesChosen.join(", ")}, afwerking: ${finish}. ${extrasText}`,
     price
   });
+  closeModal(builderModal);
 });
 
 signatureGrid.addEventListener("click", (event) => {
-  const button = event.target.closest("[data-signature]");
+  const button = event.target.closest("[data-open-signature]");
   if (!button) return;
 
-  const item = signatures.find((signature) => signature.id === button.dataset.signature);
-  const size = button.dataset.size;
-  const card = button.closest(".signature-card");
-  const base = card.querySelector(`[data-signature-base="${item.id}"]`).value;
-  const sauce = card.querySelector(`[data-signature-sauce="${item.id}"]`).value;
-  const extras = [...card.querySelectorAll("[data-signature-extra-select]")]
+  const item = signatures.find((signature) => signature.id === button.dataset.openSignature);
+  renderSignatureModal(item);
+  openModal(signatureModal);
+});
+
+signatureModalBody.addEventListener("submit", (event) => {
+  event.preventDefault();
+  const form = event.target.closest("#signatureChoiceForm");
+  if (!form) return;
+
+  const item = signatures.find((signature) => signature.id === form.dataset.signatureChoice);
+  const formData = new FormData(form);
+  const size = formData.get("size");
+  const base = formData.get("base");
+  const sauce = formData.get("sauce");
+  const sizeSelect = form.elements.size;
+  const selectedSize = sizeSelect.options[sizeSelect.selectedIndex];
+  const extras = [...form.querySelectorAll("[data-signature-extra-select]")]
     .map((select) => {
       const selected = select.options[select.selectedIndex];
       return {
@@ -541,8 +612,9 @@ signatureGrid.addEventListener("click", (event) => {
     id: item.id,
     name: `${item.name} ${size}`,
     details: `Basis: ${base}, saus: ${sauce}, ${item.protein}, afwerking: ${item.finish}. ${extrasText}`,
-    price: item.sizes[size] + extraTotal
+    price: Number(selectedSize.dataset.price) + extraTotal
   });
+  closeModal(signatureModal);
 });
 
 document.querySelector("#sweet").addEventListener("click", (event) => {
