@@ -526,6 +526,7 @@ h3 {
 .builder label,
 .extras-field label,
 .signature-options label,
+.signature-extra-select,
 .checkout label {
   display: grid;
   gap: 8px;
@@ -539,6 +540,7 @@ h3 {
 .builder input,
 .builder select,
 .signature-options select,
+.signature-extra-select select,
 .checkout input,
 .checkout select,
 .checkout textarea {
@@ -834,7 +836,7 @@ h3 {
 .signature-extra-select {
   display: grid;
   gap: 8px;
-  color: var(--orange);
+  color: var(--muted);
   font-size: 0.76rem;
   font-weight: 900;
   letter-spacing: 0.22em;
