@@ -557,13 +557,20 @@ document.querySelector("#builderForm").addEventListener("submit", (event) => {
   const toppings = [formData.get("topping1"), formData.get("topping2"), formData.get("topping3")].filter(Boolean);
   const saucesChosen = [formData.get("sauce1"), formData.get("sauce2")].filter(Boolean);
   const finish = formData.get("finish");
+  if (!base || !protein || !finish) {
+    showToast("Kies minstens je basis, proteine en afwerking.");
+    return;
+  }
+
   const extrasText = extras.length ? `Extra's: ${extras.map((item) => `${item.name} ${money.format(item.price)}`).join(", ")}` : "Geen extra's";
+  const toppingsText = toppings.length ? toppings.join(", ") : "geen toppings gekozen";
+  const saucesText = saucesChosen.length ? saucesChosen.join(", ") : "geen saus gekozen";
 
   addLine({
     key: `custom-${size}-${base}-${protein}-${toppings.join("-")}-${saucesChosen.join("-")}-${finish}-${extras.map((item) => item.name).join("-")}`.toLowerCase().replaceAll(" ", "-"),
     id: "custom-bowl",
     name: `Make Your Own Bowl ${size}`,
-    details: `${base}, ${protein}, toppings: ${toppings.join(", ")}, sauzen: ${saucesChosen.join(", ")}, afwerking: ${finish}. ${extrasText}`,
+    details: `${base}, ${protein}, toppings: ${toppingsText}, sauzen: ${saucesText}, afwerking: ${finish}. ${extrasText}`,
     price
   });
   closeModal(builderModal);
