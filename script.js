@@ -60,6 +60,42 @@ const signatures = [
 
 const bases = ["Frieten", "Nachos", "Rijst"];
 const sauces = ["Looksaus", "Mayo", "Samurai", "Cocktail", "Andalouse", "Curry Sauce", "BBQ Sauce", "Cheddar Sauce", "Sriracha Mayo", "Sriracha Hot"];
+const signatureExtras = {
+  protein: [
+    { name: "Extra Crispy Chicken", price: 1.99 },
+    { name: "Extra Kebab", price: 1.99 },
+    { name: "Extra Chicken Kebab", price: 1.99 },
+    { name: "Extra Pulled Chicken", price: 1.29 },
+    { name: "Extra Falafel", price: 1.29 },
+    { name: "Extra Stoofvlees", price: 2.49 },
+    { name: "Extra Bacon", price: 1.99 }
+  ],
+  toppings: [
+    { name: "Extra geraspte wortel", price: 0.5 },
+    { name: "Extra rode ui", price: 0.5 },
+    { name: "Extra kerstomaten", price: 0.5 },
+    { name: "Extra mais", price: 0.5 },
+    { name: "Extra komkommer", price: 0.5 },
+    { name: "Extra jalapenos", price: 0.7 }
+  ],
+  sauces: [
+    { name: "Extra looksaus", price: 0.8 },
+    { name: "Extra mayo", price: 0.8 },
+    { name: "Extra samurai", price: 0.8 },
+    { name: "Extra cocktail", price: 0.8 },
+    { name: "Extra andalouse", price: 0.8 },
+    { name: "Extra curry sauce", price: 0.99 },
+    { name: "Extra BBQ sauce", price: 0.99 },
+    { name: "Extra cheddar sauce", price: 0.99 },
+    { name: "Extra sriracha mayo", price: 0.99 },
+    { name: "Extra sriracha hot", price: 0.99 }
+  ],
+  finish: [
+    { name: "Extra crispy onion", price: 0.5 },
+    { name: "Extra lente-ui", price: 0.5 },
+    { name: "Extra chili flakes", price: 0.5 }
+  ]
+};
 const openingHours = {
   label: "ma-vr 11:00 - 14:00 en 18:00 - 22:00, za 11:00 - 14:00 en 18:00 - 23:00, zondag gesloten",
   schedule: {
@@ -248,6 +284,23 @@ function addLine(line) {
   showToast("Toegevoegd aan je order.");
 }
 
+function renderSignatureExtraGroup(title, items) {
+  return `
+    <details class="signature-extra-group">
+      <summary>${title}</summary>
+      <div>
+        ${items.map((extra) => `
+          <label>
+            <input type="checkbox" data-signature-extra="${extra.name}" data-price="${extra.price}">
+            ${extra.name.replace("Extra ", "")}
+            <span>${money.format(extra.price)}</span>
+          </label>
+        `).join("")}
+      </div>
+    </details>
+  `;
+}
+
 function renderSignatures() {
   signatureGrid.innerHTML = signatures.map((item) => `
     <article class="signature-card ${item.badge ? "bestseller" : ""}">
@@ -279,6 +332,12 @@ function renderSignatures() {
             ${sauces.map((sauce) => `<option>${sauce}</option>`).join("")}
           </select>
         </label>
+      </div>
+      <div class="signature-extra-tabs">
+        ${renderSignatureExtraGroup("Extra proteine", signatureExtras.protein)}
+        ${renderSignatureExtraGroup("Extra toppings", signatureExtras.toppings)}
+        ${renderSignatureExtraGroup("Extra sauzen", signatureExtras.sauces)}
+        ${renderSignatureExtraGroup("Extra afwerking", signatureExtras.finish)}
       </div>
       <div class="card-actions">
         <button class="add-button" type="button" data-signature="${item.id}" data-size="Medium">Medium</button>
@@ -427,6 +486,12 @@ signatureGrid.addEventListener("click", (event) => {
   const card = button.closest(".signature-card");
   const base = card.querySelector(`[data-signature-base="${item.id}"]`).value;
   const sauce = card.querySelector(`[data-signature-sauce="${item.id}"]`).value;
+  const extras = [...card.querySelectorAll("[data-signature-extra]:checked")].map((input) => ({
+    name: input.dataset.signatureExtra,
+    price: Number(input.dataset.price || 0)
+  }));
+  const extraTotal = extras.reduce((sum, extra) => sum + extra.price, 0);
+  const extrasText = extras.length ? `Extra's: ${extras.map((extra) => `${extra.name} ${money.format(extra.price)}`).join(", ")}` : "Geen extra's";
 
   if (!base || !sauce) {
     showToast("Kies eerst basis en saus voor deze signature bowl.");
@@ -434,11 +499,11 @@ signatureGrid.addEventListener("click", (event) => {
   }
 
   addLine({
-    key: `${item.id}-${size}-${base}-${sauce}`,
+    key: `${item.id}-${size}-${base}-${sauce}-${extras.map((extra) => extra.name).join("-")}`.toLowerCase().replaceAll(" ", "-"),
     id: item.id,
     name: `${item.name} ${size}`,
-    details: `Basis: ${base}, saus: ${sauce}, ${item.protein}, afwerking: ${item.finish}`,
-    price: item.sizes[size]
+    details: `Basis: ${base}, saus: ${sauce}, ${item.protein}, afwerking: ${item.finish}. ${extrasText}`,
+    price: item.sizes[size] + extraTotal
   });
 });
 
