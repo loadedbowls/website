@@ -291,6 +291,16 @@
             </select>
           </label>
           <label>
+            Gewenst uur
+            <select name="orderTime" id="orderTime" required>
+              <option value="">Kies een uur</option>
+            </select>
+          </label>
+          <div class="hours-note" id="hoursNote">
+            <strong>Openingsuren volgende week</strong>
+            <span>Elke dag van 11:00 tot 17:30. Buiten deze uren nemen we geen online bestellingen aan.</span>
+          </div>
+          <label>
             Adres of opmerking
             <textarea name="note" rows="4" placeholder="Adres, tijdstip, allergie of extra info"></textarea>
           </label>
@@ -299,6 +309,15 @@
         </form>
       </section>
     </main>
+
+    <div class="closed-modal hidden" id="closedModal" role="dialog" aria-modal="true" aria-labelledby="closedTitle">
+      <div class="closed-card">
+        <p class="section-kicker">Momenteel gesloten</p>
+        <h2 id="closedTitle">We zijn nu gesloten.</h2>
+        <p id="closedMessage">Online bestellen kan opnieuw vanaf 11:00.</p>
+        <button class="primary-btn" type="button" id="continueBrowsing">Toch verder kijken <span>→</span></button>
+      </div>
+    </div>
 
     <div class="toast" id="toast" role="status" aria-live="polite"></div>
     <script src="script.js"></script>
