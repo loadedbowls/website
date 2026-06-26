@@ -514,6 +514,11 @@ h3 {
   font-size: 2rem;
 }
 
+.included-action {
+  width: fit-content;
+  margin-top: 20px;
+}
+
 .builder {
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
