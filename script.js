@@ -60,6 +60,12 @@ const signatures = [
 
 const bases = ["Frieten", "Nachos", "Rijst"];
 const sauces = ["Looksaus", "Mayo", "Samurai", "Cocktail", "Andalouse", "Curry Sauce", "BBQ Sauce", "Cheddar Sauce", "Sriracha Mayo", "Sriracha Hot"];
+const openingHours = {
+  open: "11:00",
+  close: "17:30",
+  openMinutes: 11 * 60,
+  closeMinutes: 17 * 60 + 30
+};
 
 const desserts = [
   { id: "tiramisu-classic", name: "Tiramisu Classic", price: 5.5 },
@@ -120,6 +126,10 @@ const navCartTotal = document.querySelector("#navCartTotal");
 const cartItems = document.querySelector("#cartItems");
 const cartTotal = document.querySelector("#cartTotal");
 const orderForm = document.querySelector("#orderForm");
+const orderTime = document.querySelector("#orderTime");
+const closedModal = document.querySelector("#closedModal");
+const closedMessage = document.querySelector("#closedMessage");
+const continueBrowsing = document.querySelector("#continueBrowsing");
 const toast = document.querySelector("#toast");
 
 function showToast(message) {
@@ -127,6 +137,48 @@ function showToast(message) {
   toast.classList.add("show");
   window.clearTimeout(showToast.timer);
   showToast.timer = window.setTimeout(() => toast.classList.remove("show"), 2600);
+}
+
+function minutesFromTime(time) {
+  const [hours, minutes] = time.split(":").map(Number);
+  return hours * 60 + minutes;
+}
+
+function formatTime(minutes) {
+  const hours = String(Math.floor(minutes / 60)).padStart(2, "0");
+  const mins = String(minutes % 60).padStart(2, "0");
+  return `${hours}:${mins}`;
+}
+
+function getNowMinutes() {
+  const now = new Date();
+  return now.getHours() * 60 + now.getMinutes();
+}
+
+function isOpenNow() {
+  const nowMinutes = getNowMinutes();
+  return nowMinutes >= openingHours.openMinutes && nowMinutes <= openingHours.closeMinutes;
+}
+
+function renderOrderTimeOptions() {
+  const slots = [];
+  for (let minutes = openingHours.openMinutes; minutes <= openingHours.closeMinutes; minutes += 15) {
+    slots.push(formatTime(minutes));
+  }
+
+  orderTime.innerHTML = `<option value="">Kies een uur</option>${slots.map((slot) => `<option value="${slot}">${slot}</option>`).join("")}`;
+}
+
+function showClosedModalIfNeeded() {
+  if (isOpenNow()) return;
+
+  const nowMinutes = getNowMinutes();
+  const message = nowMinutes < openingHours.openMinutes
+    ? `Online bestellen kan opnieuw vanaf ${openingHours.open}. Je kunt het menu wel al bekijken.`
+    : `We nemen vandaag geen online bestellingen meer aan. Online bestellen kan opnieuw vanaf ${openingHours.open}.`;
+
+  closedMessage.textContent = message;
+  closedModal.classList.remove("hidden");
 }
 
 function addLine(line) {
@@ -365,7 +417,21 @@ orderForm.addEventListener("submit", (event) => {
     return;
   }
 
+  if (!isOpenNow()) {
+    showToast(`We zijn momenteel gesloten. Online bestellen kan tussen ${openingHours.open} en ${openingHours.close}.`);
+    showClosedModalIfNeeded();
+    return;
+  }
+
   const formData = new FormData(orderForm);
+  const selectedTime = formData.get("orderTime");
+  const selectedMinutes = selectedTime ? minutesFromTime(selectedTime) : 0;
+
+  if (!selectedTime || selectedMinutes < openingHours.openMinutes || selectedMinutes > openingHours.closeMinutes) {
+    showToast(`Kies een geldig uur tussen ${openingHours.open} en ${openingHours.close}.`);
+    return;
+  }
+
   const total = lines.reduce((sum, item) => sum + item.price * item.quantity, 0);
   const order = {
     id: crypto.randomUUID(),
@@ -374,6 +440,7 @@ orderForm.addEventListener("submit", (event) => {
       name: formData.get("name"),
       phone: formData.get("phone"),
       method: formData.get("method"),
+      orderTime: selectedTime,
       note: formData.get("note")
     },
     items: lines,
@@ -381,6 +448,10 @@ orderForm.addEventListener("submit", (event) => {
   };
 
   startPayment(order);
+});
+
+continueBrowsing.addEventListener("click", () => {
+  closedModal.classList.add("hidden");
 });
 
 async function startPayment(order) {
@@ -414,5 +485,7 @@ async function startPayment(order) {
 renderSignatures();
 renderSimpleList(dessertList, desserts);
 renderSimpleList(drinkList, drinks);
+renderOrderTimeOptions();
+showClosedModalIfNeeded();
 renderCart();
 renderOrders();
