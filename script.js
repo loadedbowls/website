@@ -61,10 +61,11 @@ const signatures = [
 const bases = ["Frieten", "Nachos", "Rijst"];
 const sauces = ["Looksaus", "Mayo", "Samurai", "Cocktail", "Andalouse", "Curry Sauce", "BBQ Sauce", "Cheddar Sauce", "Sriracha Mayo", "Sriracha Hot"];
 const openingHours = {
-  open: "11:00",
-  close: "17:30",
-  openMinutes: 11 * 60,
-  closeMinutes: 17 * 60 + 30
+  label: "11:00 - 14:00 en 18:00 - 22:00",
+  periods: [
+    { open: "11:00", close: "14:00", openMinutes: 11 * 60, closeMinutes: 14 * 60 },
+    { open: "18:00", close: "22:00", openMinutes: 18 * 60, closeMinutes: 22 * 60 }
+  ]
 };
 
 const desserts = [
@@ -157,14 +158,25 @@ function getNowMinutes() {
 
 function isOpenNow() {
   const nowMinutes = getNowMinutes();
-  return nowMinutes >= openingHours.openMinutes && nowMinutes <= openingHours.closeMinutes;
+  return openingHours.periods.some((period) => nowMinutes >= period.openMinutes && nowMinutes <= period.closeMinutes);
+}
+
+function isWithinOpeningHours(minutes) {
+  return openingHours.periods.some((period) => minutes >= period.openMinutes && minutes <= period.closeMinutes);
+}
+
+function getNextOpeningText(nowMinutes) {
+  const nextPeriod = openingHours.periods.find((period) => nowMinutes < period.openMinutes);
+  return nextPeriod ? nextPeriod.open : openingHours.periods[0].open;
 }
 
 function renderOrderTimeOptions() {
   const slots = [];
-  for (let minutes = openingHours.openMinutes; minutes <= openingHours.closeMinutes; minutes += 15) {
-    slots.push(formatTime(minutes));
-  }
+  openingHours.periods.forEach((period) => {
+    for (let minutes = period.openMinutes; minutes <= period.closeMinutes; minutes += 15) {
+      slots.push(formatTime(minutes));
+    }
+  });
 
   orderTime.innerHTML = `<option value="">Kies een uur</option>${slots.map((slot) => `<option value="${slot}">${slot}</option>`).join("")}`;
 }
@@ -173,9 +185,7 @@ function showClosedModalIfNeeded() {
   if (isOpenNow()) return;
 
   const nowMinutes = getNowMinutes();
-  const message = nowMinutes < openingHours.openMinutes
-    ? `Online bestellen kan opnieuw vanaf ${openingHours.open}. Je kunt het menu wel al bekijken.`
-    : `We nemen vandaag geen online bestellingen meer aan. Online bestellen kan opnieuw vanaf ${openingHours.open}.`;
+  const message = `Online bestellen kan opnieuw vanaf ${getNextOpeningText(nowMinutes)}. Je kunt het menu wel al bekijken.`;
 
   closedMessage.textContent = message;
   closedModal.classList.remove("hidden");
@@ -418,7 +428,7 @@ orderForm.addEventListener("submit", (event) => {
   }
 
   if (!isOpenNow()) {
-    showToast(`We zijn momenteel gesloten. Online bestellen kan tussen ${openingHours.open} en ${openingHours.close}.`);
+    showToast(`We zijn momenteel gesloten. Online bestellen kan tijdens onze openingsuren: ${openingHours.label}.`);
     showClosedModalIfNeeded();
     return;
   }
@@ -427,8 +437,8 @@ orderForm.addEventListener("submit", (event) => {
   const selectedTime = formData.get("orderTime");
   const selectedMinutes = selectedTime ? minutesFromTime(selectedTime) : 0;
 
-  if (!selectedTime || selectedMinutes < openingHours.openMinutes || selectedMinutes > openingHours.closeMinutes) {
-    showToast(`Kies een geldig uur tussen ${openingHours.open} en ${openingHours.close}.`);
+  if (!selectedTime || !isWithinOpeningHours(selectedMinutes)) {
+    showToast(`Kies een geldig uur tijdens onze openingsuren: ${openingHours.label}.`);
     return;
   }
 
