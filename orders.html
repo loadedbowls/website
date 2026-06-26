@@ -299,6 +299,7 @@
           <div class="actions">
             <button class="btn" id="enableSoundButton" type="button">Geluid aanzetten</button>
             <button class="btn secondary" id="refreshButton" type="button">Vernieuwen</button>
+            <button class="btn secondary" id="testOrderButton" type="button">Testorder maken</button>
             <button class="btn secondary" id="logoutButton" type="button">Code wissen</button>
           </div>
           <div class="daybar">
@@ -319,6 +320,7 @@
       const saveSecretButton = document.querySelector("#saveSecretButton");
       const enableSoundButton = document.querySelector("#enableSoundButton");
       const refreshButton = document.querySelector("#refreshButton");
+      const testOrderButton = document.querySelector("#testOrderButton");
       const logoutButton = document.querySelector("#logoutButton");
       const previousDayButton = document.querySelector("#previousDayButton");
       const nextDayButton = document.querySelector("#nextDayButton");
@@ -504,6 +506,24 @@
         await loadOrders();
       }
 
+      async function createTestOrder() {
+        try {
+          const response = await fetch("/api/test-order", {
+            method: "POST",
+            headers: {
+              "X-Admin-Secret": getSecret()
+            }
+          });
+          const data = await response.json();
+          if (!response.ok) throw new Error(data.error || "Testorder maken mislukt.");
+          knownIds.delete(data.order?.id);
+          selectedDay = new Date();
+          await loadOrders();
+        } catch (error) {
+          alert(error.message);
+        }
+      }
+
       function textFrom(article, selector) {
         return article.querySelector(selector)?.textContent.trim() || "";
       }
@@ -610,6 +630,7 @@
       });
 
       refreshButton.addEventListener("click", loadOrders);
+      testOrderButton.addEventListener("click", createTestOrder);
       previousDayButton.addEventListener("click", () => {
         selectedDay = addDays(selectedDay, -1);
         loadOrders();
