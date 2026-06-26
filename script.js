@@ -97,8 +97,36 @@ const signatureExtras = {
   ]
 };
 const openingHours = {
-  label: "online bestellen: ma-vr 11:30 - 13:45 en 18:30 - 21:45, za 11:30 - 13:45 en 18:30 - 22:45, zondag gesloten",
-  schedule: {
+  label: "ma-vr 11:00 - 14:00 en 18:00 - 22:00, za 11:00 - 14:00 en 18:00 - 23:00, zondag gesloten",
+  orderLabel: "eerste tijdstip: 11:30 en 18:30",
+  paymentSchedule: {
+    0: [],
+    1: [
+      { open: "11:00", close: "14:00", openMinutes: 11 * 60, closeMinutes: 14 * 60 },
+      { open: "18:00", close: "22:00", openMinutes: 18 * 60, closeMinutes: 22 * 60 }
+    ],
+    2: [
+      { open: "11:00", close: "14:00", openMinutes: 11 * 60, closeMinutes: 14 * 60 },
+      { open: "18:00", close: "22:00", openMinutes: 18 * 60, closeMinutes: 22 * 60 }
+    ],
+    3: [
+      { open: "11:00", close: "14:00", openMinutes: 11 * 60, closeMinutes: 14 * 60 },
+      { open: "18:00", close: "22:00", openMinutes: 18 * 60, closeMinutes: 22 * 60 }
+    ],
+    4: [
+      { open: "11:00", close: "14:00", openMinutes: 11 * 60, closeMinutes: 14 * 60 },
+      { open: "18:00", close: "22:00", openMinutes: 18 * 60, closeMinutes: 22 * 60 }
+    ],
+    5: [
+      { open: "11:00", close: "14:00", openMinutes: 11 * 60, closeMinutes: 14 * 60 },
+      { open: "18:00", close: "22:00", openMinutes: 18 * 60, closeMinutes: 22 * 60 }
+    ],
+    6: [
+      { open: "11:00", close: "14:00", openMinutes: 11 * 60, closeMinutes: 14 * 60 },
+      { open: "18:00", close: "23:00", openMinutes: 18 * 60, closeMinutes: 23 * 60 }
+    ]
+  },
+  slotSchedule: {
     0: [],
     1: [
       { open: "11:30", close: "13:45", openMinutes: 11 * 60 + 30, closeMinutes: 13 * 60 + 45 },
@@ -217,7 +245,11 @@ function getNowMinutes() {
 }
 
 function getTodayPeriods() {
-  return openingHours.schedule[new Date().getDay()] || [];
+  return openingHours.paymentSchedule[new Date().getDay()] || [];
+}
+
+function getTodaySlotPeriods() {
+  return openingHours.slotSchedule[new Date().getDay()] || [];
 }
 
 function isOpenNow() {
@@ -226,7 +258,7 @@ function isOpenNow() {
 }
 
 function isWithinOpeningHours(minutes) {
-  return getTodayPeriods().some((period) => minutes >= period.openMinutes && minutes <= period.closeMinutes);
+  return getTodaySlotPeriods().some((period) => minutes >= period.openMinutes && minutes <= period.closeMinutes);
 }
 
 function getNextOpeningText(nowMinutes) {
@@ -237,7 +269,7 @@ function getNextOpeningText(nowMinutes) {
   const today = new Date().getDay();
   for (let offset = 1; offset <= 7; offset += 1) {
     const day = (today + offset) % 7;
-    const periods = openingHours.schedule[day] || [];
+    const periods = openingHours.paymentSchedule[day] || [];
     if (periods.length) return `${dayNames[day]} om ${periods[0].open}`;
   }
 
@@ -246,7 +278,7 @@ function getNextOpeningText(nowMinutes) {
 
 function renderOrderTimeOptions() {
   const slots = [];
-  const periods = getTodayPeriods();
+  const periods = getTodaySlotPeriods();
   periods.forEach((period) => {
     for (let minutes = period.openMinutes; minutes <= period.closeMinutes; minutes += 15) {
       slots.push(formatTime(minutes));
@@ -547,6 +579,7 @@ orderForm.addEventListener("submit", async (event) => {
   const selectedTime = formData.get("orderTime");
   const selectedMinutes = selectedTime ? minutesFromTime(selectedTime) : 0;
   const method = formData.get("method");
+  const address = String(formData.get("address") || "").trim();
   const note = String(formData.get("note") || "").trim();
 
   if (!selectedTime || !isWithinOpeningHours(selectedMinutes)) {
@@ -555,7 +588,7 @@ orderForm.addEventListener("submit", async (event) => {
   }
 
   if (method === "Levering") {
-    const deliveryAllowed = await checkDeliveryAddress(note);
+    const deliveryAllowed = await checkDeliveryAddress(address);
     if (!deliveryAllowed) return;
   }
 
@@ -568,6 +601,7 @@ orderForm.addEventListener("submit", async (event) => {
       phone: formData.get("phone"),
       method,
       orderTime: selectedTime,
+      address,
       note
     },
     items: lines,
