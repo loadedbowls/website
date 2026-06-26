@@ -29,7 +29,7 @@
           <h1>Build it.<br><span>Load</span> it.<br>Devour it.</h1>
           <p>Kies je basis: frieten, rijst of nachos. Stapel je proteine, toppings, sauzen en afwerking. Of ga direct voor een Signature Bowl in Gent. Vanaf <strong>€12,99.</strong></p>
           <div class="hero-actions">
-            <a class="primary-btn" href="#build">Build your bowl <span>→</span></a>
+            <a class="primary-btn" href="#bases">Build your bowl <span>→</span></a>
             <a class="ghost-btn" href="#signatures">See signatures</a>
           </div>
           <div class="base-line">Frieten <span>•</span> Nachos <span>•</span> Rijst <span>•</span></div>
@@ -58,6 +58,14 @@
           <p>Drie fundamenten, allemaal gebouwd om een berg topping te dragen. Make Your Own vanaf €12,99 medium / €15,99 large.</p>
         </div>
 
+        <div class="build-launch">
+          <div>
+            <strong>Make Your Own Bowl</strong>
+            <span>Kies je basis en bouw verder in de pop-up.</span>
+          </div>
+          <button class="primary-btn" type="button" id="openBuilderModal">Build je bowl <span>→</span></button>
+        </div>
+
         <div class="base-tabs" aria-label="Basis keuzes">
           <button class="base-tab active" type="button" data-base-tab="frieten">Frieten</button>
           <button class="base-tab" type="button" data-base-tab="nachos">Nachos</button>
@@ -84,21 +92,13 @@
         </div>
       </section>
 
-      <section id="build" class="build section-shell">
+      <section id="build" class="build section-shell hidden">
         <div class="split-heading">
           <div>
             <p class="section-kicker">/02 — Make your own</p>
             <h2>Build je <span>bowl.</span></h2>
           </div>
           <p>Vijf stappen. Alles inbegrepen tot je extra wil. Open de builder, kies je opties en voeg meteen toe aan je order.</p>
-        </div>
-
-        <div class="build-launch">
-          <div>
-            <strong>Make Your Own Bowl</strong>
-            <span>Vanaf €12,99 medium / €15,99 large</span>
-          </div>
-          <button class="primary-btn" type="button" id="openBuilderModal">Build je bowl <span>→</span></button>
         </div>
 
         <form class="builder builder-detailed" id="builderForm">
@@ -112,6 +112,7 @@
           <label>
             Basis
             <select name="base">
+              <option value="">Maak je keuze</option>
               <option>Frieten</option>
               <option>Nachos</option>
               <option>Rijst</option>
@@ -120,6 +121,7 @@
           <label>
             Proteïne
             <select name="protein">
+              <option value="">Maak je keuze</option>
               <option>Crispy Chicken</option>
               <option>Kebab</option>
               <option>Chicken Kebab</option>
@@ -132,6 +134,7 @@
           <label>
             Topping 1
             <select name="topping1">
+              <option value="">Maak je keuze</option>
               <option>Geraspte wortel</option>
               <option>Rode ui</option>
               <option>Kerstomaten</option>
@@ -143,6 +146,7 @@
           <label>
             Topping 2
             <select name="topping2">
+              <option value="">Maak je keuze</option>
               <option>Rode ui</option>
               <option>Geraspte wortel</option>
               <option>Kerstomaten</option>
@@ -154,6 +158,7 @@
           <label>
             Topping 3
             <select name="topping3">
+              <option value="">Maak je keuze</option>
               <option>Maïs</option>
               <option>Geraspte wortel</option>
               <option>Rode ui</option>
@@ -165,6 +170,7 @@
           <label>
             Saus 1
             <select name="sauce1">
+              <option value="">Maak je keuze</option>
               <option>Looksaus</option>
               <option>Mayo</option>
               <option>Samurai</option>
@@ -180,6 +186,7 @@
           <label>
             Saus 2
             <select name="sauce2">
+              <option value="">Maak je keuze</option>
               <option>Samurai</option>
               <option>Looksaus</option>
               <option>Mayo</option>
@@ -195,6 +202,7 @@
           <label>
             Afwerking
             <select name="finish">
+              <option value="">Maak je keuze</option>
               <option>Crispy Onion</option>
               <option>Lente-ui</option>
               <option>Chili Flakes</option>
