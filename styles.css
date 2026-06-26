@@ -1012,6 +1012,16 @@ h3 {
   margin-bottom: 28px;
 }
 
+.find-copy {
+  align-self: start;
+  grid-row: 1 / span 4;
+}
+
+.find-section > .location-card,
+.find-section > .social-card {
+  grid-column: 2;
+}
+
 .find-copy p:not(.section-kicker) {
   max-width: 600px;
   color: var(--muted);
@@ -1034,6 +1044,16 @@ h3 {
   padding: clamp(24px, 4vw, 44px);
 }
 
+.location-card:not(.hours-card) .location-list div:nth-child(2),
+.location-card:not(.hours-card) .location-list div:nth-child(3),
+.location-card:not(.hours-card) .location-list div:nth-child(4) {
+  display: none;
+}
+
+.hours-card {
+  background: linear-gradient(115deg, rgba(249,187,33,0.09), rgba(255,255,255,0.018)), var(--panel);
+}
+
 .location-head {
   display: flex;
   justify-content: space-between;
@@ -1041,6 +1061,10 @@ h3 {
   gap: 18px;
   padding-bottom: 28px;
   border-bottom: 1px solid var(--line);
+}
+
+.location-head.compact {
+  padding-bottom: 22px;
 }
 
 .location-head small,
@@ -1091,6 +1115,44 @@ h3 {
   color: var(--text);
   font-weight: 900;
   text-align: right;
+}
+
+.social-card {
+  display: grid;
+  gap: 22px;
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  background: linear-gradient(115deg, rgba(241,159,12,0.06), rgba(255,255,255,0.018)), var(--panel-dark);
+  box-shadow: var(--shadow);
+  padding: clamp(22px, 3vw, 34px);
+}
+
+.social-card h3 {
+  margin: 8px 0 10px;
+  color: var(--text);
+  font-family: var(--chunk);
+  font-size: clamp(1.55rem, 2.5vw, 2.15rem);
+  text-transform: uppercase;
+}
+
+.social-card p:not(.section-kicker) {
+  margin: 0;
+  color: var(--muted);
+  line-height: 1.5;
+}
+
+.instagram-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.instagram-grid img {
+  width: 100%;
+  aspect-ratio: 1;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  object-fit: cover;
 }
 
 .closed-modal {
@@ -1285,6 +1347,13 @@ h3 {
 
   .extras-field {
     grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .find-copy,
+  .find-section > .location-card,
+  .find-section > .social-card {
+    grid-column: auto;
+    grid-row: auto;
   }
 
   .orders-toolbar {
