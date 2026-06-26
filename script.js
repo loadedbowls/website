@@ -251,6 +251,14 @@ function getNowMinutes() {
   return now.getHours() * 60 + now.getMinutes();
 }
 
+function roundUpToQuarter(minutes) {
+  return Math.ceil(minutes / 15) * 15;
+}
+
+function getMinimumSelectableMinutes() {
+  return roundUpToQuarter(getNowMinutes() + 30);
+}
+
 function getTodayPeriods() {
   return openingHours.paymentSchedule[new Date().getDay()] || [];
 }
@@ -266,6 +274,10 @@ function isOpenNow() {
 
 function isWithinOpeningHours(minutes) {
   return getTodaySlotPeriods().some((period) => minutes >= period.openMinutes && minutes <= period.closeMinutes);
+}
+
+function isSelectableOrderTime(minutes) {
+  return minutes >= getMinimumSelectableMinutes() && isWithinOpeningHours(minutes);
 }
 
 function getNextOpeningText(nowMinutes) {
@@ -284,16 +296,22 @@ function getNextOpeningText(nowMinutes) {
 }
 
 function renderOrderTimeOptions() {
+  const currentValue = orderTime.value;
   const slots = [];
   const periods = getTodaySlotPeriods();
+  const minimumMinutes = getMinimumSelectableMinutes();
   periods.forEach((period) => {
-    for (let minutes = period.openMinutes; minutes <= period.closeMinutes; minutes += 15) {
+    const startMinutes = Math.max(period.openMinutes, minimumMinutes);
+    for (let minutes = roundUpToQuarter(startMinutes); minutes <= period.closeMinutes; minutes += 15) {
       slots.push(formatTime(minutes));
     }
   });
 
-  const placeholder = periods.length ? "Kies een uur" : "Vandaag gesloten";
+  const placeholder = periods.length && slots.length ? "Kies een uur" : "Vandaag geen tijdsloten meer";
   orderTime.innerHTML = `<option value="">${placeholder}</option>${slots.map((slot) => `<option value="${slot}">${slot}</option>`).join("")}`;
+  if (slots.includes(currentValue)) {
+    orderTime.value = currentValue;
+  }
 }
 
 function showClosedModalIfNeeded() {
@@ -667,8 +685,9 @@ orderForm.addEventListener("submit", async (event) => {
   const address = String(formData.get("address") || "").trim();
   const note = String(formData.get("note") || "").trim();
 
-  if (!selectedTime || !isWithinOpeningHours(selectedMinutes)) {
-    showToast(`Kies een geldig uur tijdens onze openingsuren: ${openingHours.label}.`);
+  if (!selectedTime || !isSelectableOrderTime(selectedMinutes)) {
+    renderOrderTimeOptions();
+    showToast("Kies een geldig uur dat nog mogelijk is vanaf nu.");
     return;
   }
 
@@ -762,6 +781,7 @@ renderSignatures();
 renderSimpleList(dessertList, desserts);
 renderSimpleList(drinkList, drinks);
 renderOrderTimeOptions();
+window.setInterval(renderOrderTimeOptions, 60000);
 updateLocationStatus();
 updateHoursNote();
 showClosedModalIfNeeded();
