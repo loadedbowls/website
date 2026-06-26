@@ -299,11 +299,15 @@
           </label>
           <div class="hours-note" id="hoursNote">
             <strong>Openingsuren</strong>
-            <span>Maandag - vrijdag: 11:00 - 14:00 en 18:00 - 22:00. Zaterdag: 11:00 - 14:00 en 18:00 - 23:00. Zondag gesloten. Besteluren starten vanaf 11:30 en 18:30.</span>
+            <span>Maandag - vrijdag: 11:00 - 14:00 en 18:00 - 22:00. Zaterdag: 11:00 - 14:00 en 18:00 - 23:00. Zondag gesloten. Eerste tijdstip voor bestelling: 11:30 en 18:30.</span>
           </div>
           <label>
-            Adres of opmerking
-            <textarea name="note" rows="4" placeholder="Voor levering: straat, nummer en gemeente. Afhalen: extra info of allergie"></textarea>
+            Leveradres
+            <input name="address" autocomplete="street-address" placeholder="Straat, nummer en gemeente">
+          </label>
+          <label>
+            Opmerking
+            <textarea name="note" rows="4" placeholder="Allergie, extra info of opmerking"></textarea>
           </label>
           <button class="primary-btn builder-submit" type="submit">Verder naar betaling <span>→</span></button>
           <p class="form-note">Levering kan binnen 5 km van Loaded Bowls in Gent. Bereiding en levering duren gemiddeld 25-30 minuten.</p>
