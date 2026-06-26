@@ -528,7 +528,7 @@ cartItems.addEventListener("click", (event) => {
   if (minus) changeQuantity(minus.dataset.minus, -1);
 });
 
-orderForm.addEventListener("submit", (event) => {
+orderForm.addEventListener("submit", async (event) => {
   event.preventDefault();
   const lines = getCartLines();
 
@@ -546,10 +546,17 @@ orderForm.addEventListener("submit", (event) => {
   const formData = new FormData(orderForm);
   const selectedTime = formData.get("orderTime");
   const selectedMinutes = selectedTime ? minutesFromTime(selectedTime) : 0;
+  const method = formData.get("method");
+  const note = String(formData.get("note") || "").trim();
 
   if (!selectedTime || !isWithinOpeningHours(selectedMinutes)) {
     showToast(`Kies een geldig uur tijdens onze openingsuren: ${openingHours.label}.`);
     return;
+  }
+
+  if (method === "Levering") {
+    const deliveryAllowed = await checkDeliveryAddress(note);
+    if (!deliveryAllowed) return;
   }
 
   const total = lines.reduce((sum, item) => sum + item.price * item.quantity, 0);
@@ -559,9 +566,9 @@ orderForm.addEventListener("submit", (event) => {
     customer: {
       name: formData.get("name"),
       phone: formData.get("phone"),
-      method: formData.get("method"),
+      method,
       orderTime: selectedTime,
-      note: formData.get("note")
+      note
     },
     items: lines,
     total
@@ -599,6 +606,36 @@ async function startPayment(order) {
     window.location.href = data.checkoutUrl;
   } catch (error) {
     showToast(error.message);
+  }
+}
+
+async function checkDeliveryAddress(address) {
+  if (address.length < 6) {
+    showToast("Vul een volledig leveradres in. Afhalen kan altijd.");
+    return false;
+  }
+
+  try {
+    showToast("We controleren of je binnen onze leverzone van 5 km ligt...");
+    const response = await fetch("/api/check-delivery", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({ address })
+    });
+    const data = await response.json();
+
+    if (!response.ok || !data.ok) {
+      showToast(data.error || "Levering kan enkel binnen 5 km van Loaded Bowls in Gent.");
+      return false;
+    }
+
+    showToast(`Levering mogelijk: ongeveer ${data.distanceKm} km van Loaded Bowls.`);
+    return true;
+  } catch (error) {
+    showToast("Adrescontrole is tijdelijk niet beschikbaar. Probeer opnieuw of kies afhalen.");
+    return false;
   }
 }
 
