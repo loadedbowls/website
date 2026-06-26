@@ -1,15 +1,15 @@
 :root {
-  --bg: #100d0a;
-  --panel: #211d1a;
-  --panel-dark: #15100d;
-  --line: #3b332e;
-  --line-hot: #8f4e25;
-  --text: #f7f0e8;
-  --muted: #c0b5aa;
-  --dim: #8b8178;
-  --orange: #f5822b;
-  --gold: #f6bd38;
-  --danger: #c94b30;
+  --bg: #0f1014;
+  --panel: #181920;
+  --panel-dark: #0b0c10;
+  --line: #30313a;
+  --line-hot: #8f6518;
+  --text: #fff6e6;
+  --muted: #c8c0b2;
+  --dim: #8f8b84;
+  --orange: #f19f0c;
+  --gold: #f9bb21;
+  --danger: #c64b2c;
   --shadow: 0 26px 80px rgba(0, 0, 0, 0.45);
   --chunk: Impact, Haettenschweiler, "Arial Black", sans-serif;
   --body: Arial, Helvetica, sans-serif;
@@ -27,8 +27,8 @@ body {
   margin: 0;
   color: var(--text);
   background:
-    radial-gradient(circle at 84% 12%, rgba(134, 74, 29, 0.32), transparent 34rem),
-    linear-gradient(90deg, rgba(255,255,255,0.025) 1px, transparent 1px),
+    radial-gradient(circle at 84% 12%, rgba(249, 187, 33, 0.18), transparent 34rem),
+    linear-gradient(90deg, rgba(249,187,33,0.025) 1px, transparent 1px),
     var(--bg);
   background-size: auto, 74px 74px, auto;
   font-family: var(--body);
@@ -41,7 +41,7 @@ body::before {
   z-index: -1;
   pointer-events: none;
   opacity: 0.18;
-  background-image: radial-gradient(rgba(255,255,255,0.35) 0.7px, transparent 0.7px);
+  background-image: radial-gradient(rgba(249,187,33,0.32) 0.7px, transparent 0.7px);
   background-size: 18px 18px;
 }
 
@@ -72,7 +72,7 @@ button {
   min-height: 66px;
   padding: 7px clamp(18px, 8vw, 170px);
   border-bottom: 1px solid rgba(255,255,255,0.08);
-  background: rgba(18, 13, 9, 0.93);
+  background: rgba(11, 12, 16, 0.94);
   backdrop-filter: blur(14px);
 }
 
@@ -130,7 +130,7 @@ button {
 .order-now,
 .primary-btn {
   border: 0;
-  color: #120d09;
+  color: var(--panel-dark);
   background: var(--orange);
   box-shadow: inset 0 -2px 0 rgba(0,0,0,0.18);
 }
@@ -148,7 +148,7 @@ button {
   padding: 0 8px;
   border-radius: 999px;
   color: var(--text);
-  background: rgba(18, 13, 9, 0.9);
+  background: rgba(11, 12, 16, 0.9);
   font-family: var(--body);
   font-size: 0.75rem;
   font-weight: 900;
@@ -185,7 +185,7 @@ button {
 
 .primary-btn:hover,
 .order-now:hover {
-  background: #ff9a43;
+  background: var(--gold);
 }
 
 .ghost-btn:hover {
@@ -330,7 +330,7 @@ h3 {
 .hero-price {
   right: 18px;
   background: var(--orange);
-  color: #120d09;
+  color: var(--panel-dark);
 }
 
 .hero-label small,
@@ -345,7 +345,7 @@ h3 {
 }
 
 .hero-price small {
-  color: rgba(18,13,9,0.72);
+  color: rgba(11,12,16,0.72);
 }
 
 .hero-label strong,
@@ -405,7 +405,7 @@ h3 {
 }
 
 .base-tab.active {
-  color: #110d09;
+  color: var(--panel-dark);
   background: var(--orange);
 }
 
@@ -439,7 +439,7 @@ h3 {
   border: 1px solid var(--line);
   border-radius: 7px;
   color: var(--orange);
-  background: rgba(18,13,9,0.8);
+  background: rgba(11,12,16,0.82);
   font-size: 0.78rem;
   font-weight: 900;
   letter-spacing: 0.3em;
@@ -651,7 +651,7 @@ h3 {
 }
 
 .price-card header span {
-  color: rgba(245,130,43,0.58);
+  color: rgba(249,187,33,0.58);
   font-family: var(--chunk);
   font-size: 3rem;
 }
@@ -740,7 +740,7 @@ h3 {
   min-height: 32px;
   padding: 0 14px;
   border-radius: 999px;
-  color: #120d09;
+  color: var(--panel-dark);
   background: var(--orange);
   font-size: 0.78rem;
   font-weight: 900;
@@ -835,7 +835,7 @@ h3 {
   min-height: 40px;
   border: 0;
   border-radius: 7px;
-  color: #120d09;
+  color: var(--panel-dark);
   background: var(--orange);
   padding: 0 15px;
   font-family: var(--chunk);
@@ -844,7 +844,7 @@ h3 {
 }
 
 .add-button:hover {
-  background: #ff9a43;
+  background: var(--gold);
 }
 
 .sweet h2 {
@@ -977,10 +977,64 @@ h3 {
   line-height: 1.45;
 }
 
+.hours-note {
+  display: grid;
+  gap: 6px;
+  padding: 14px;
+  border: 1px solid var(--line-hot);
+  border-radius: 10px;
+  background: rgba(249, 187, 33, 0.08);
+}
+
+.hours-note strong {
+  color: var(--orange);
+  font-size: 0.78rem;
+  font-weight: 900;
+  letter-spacing: 0.24em;
+  text-transform: uppercase;
+}
+
+.hours-note span {
+  color: var(--muted);
+  line-height: 1.45;
+}
+
+.closed-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+  display: grid;
+  place-items: center;
+  padding: 22px;
+  background: rgba(6, 4, 3, 0.72);
+  backdrop-filter: blur(10px);
+}
+
+.closed-card {
+  width: min(620px, 100%);
+  border: 1px solid var(--line-hot);
+  border-radius: 17px;
+  background: linear-gradient(115deg, rgba(249,187,33,0.11), rgba(255,255,255,0.025)), var(--panel);
+  box-shadow: var(--shadow);
+  padding: clamp(24px, 5vw, 42px);
+}
+
+.closed-card h2 {
+  margin-bottom: 16px;
+  font-size: clamp(2.5rem, 8vw, 4.8rem);
+}
+
+.closed-card p:not(.section-kicker) {
+  margin: 0 0 24px;
+  color: var(--muted);
+  font-size: 1.1rem;
+  line-height: 1.5;
+}
+
 .payment-card {
   border: 1px solid var(--line-hot);
   border-radius: 17px;
-  background: linear-gradient(115deg, rgba(245,130,43,0.09), rgba(255,255,255,0.018)), var(--panel);
+  background: linear-gradient(115deg, rgba(249,187,33,0.09), rgba(255,255,255,0.018)), var(--panel);
   padding: clamp(24px, 4vw, 42px);
   box-shadow: var(--shadow);
 }
@@ -1040,7 +1094,7 @@ h3 {
   min-height: 52px;
   border: 0;
   border-radius: 7px;
-  color: #120d09;
+  color: var(--panel-dark);
   background: var(--orange);
   font-family: var(--chunk);
   font-size: 1.05rem;
@@ -1049,7 +1103,7 @@ h3 {
 }
 
 .payment-method:hover {
-  background: #ff9a43;
+  background: var(--gold);
 }
 
 .orders-toolbar {
