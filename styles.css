@@ -824,6 +824,53 @@ h3 {
   margin-top: 24px;
 }
 
+.signature-extra-tabs {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+  margin-top: 16px;
+}
+
+.signature-extra-group {
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: rgba(255,255,255,0.035);
+  overflow: hidden;
+}
+
+.signature-extra-group summary {
+  min-height: 42px;
+  padding: 12px 14px;
+  color: var(--orange);
+  font-family: var(--chunk);
+  text-transform: uppercase;
+  cursor: pointer;
+}
+
+.signature-extra-group > div {
+  display: grid;
+  gap: 8px;
+  padding: 0 14px 14px;
+}
+
+.signature-extra-group label {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: center;
+  gap: 9px;
+  color: var(--muted);
+  font-size: 0.93rem;
+}
+
+.signature-extra-group input {
+  accent-color: var(--orange);
+}
+
+.signature-extra-group span {
+  color: var(--orange);
+  font-weight: 900;
+}
+
 .card-actions {
   display: flex;
   flex-wrap: wrap;
@@ -1014,11 +1061,13 @@ h3 {
 
 .find-copy {
   align-self: start;
-  grid-row: 1 / span 4;
+  grid-column: 1;
+  grid-row: 1;
 }
 
 .find-section > .location-card {
   grid-column: 2;
+  grid-row: 1;
 }
 
 .find-section > .social-card {
@@ -1159,10 +1208,12 @@ h3 {
 
 .review-card {
   grid-column: 1;
+  grid-row: 2;
 }
 
 .instagram-card {
   grid-column: 2;
+  grid-row: 2;
 }
 
 .closed-modal {
@@ -1421,6 +1472,7 @@ h3 {
   .drink-columns,
   .extras-field,
   .signature-options,
+  .signature-extra-tabs,
   .location-list div {
     grid-template-columns: 1fr;
   }
