@@ -90,7 +90,15 @@
             <p class="section-kicker">/02 — Make your own</p>
             <h2>Build je <span>bowl.</span></h2>
           </div>
-          <p>Vijf stappen. Alles inbegrepen tot je extra wil. Selecteer je keuzes en voeg meteen toe aan je order.</p>
+          <p>Vijf stappen. Alles inbegrepen tot je extra wil. Open de builder, kies je opties en voeg meteen toe aan je order.</p>
+        </div>
+
+        <div class="build-launch">
+          <div>
+            <strong>Make Your Own Bowl</strong>
+            <span>Vanaf €12,99 medium / €15,99 large</span>
+          </div>
+          <button class="primary-btn" type="button" id="openBuilderModal">Build je bowl <span>→</span></button>
         </div>
 
         <form class="builder builder-detailed" id="builderForm">
@@ -194,44 +202,56 @@
           </label>
           <fieldset class="extras-field">
             <legend>Extra's tegen meerprijs</legend>
-            <div class="extra-group">
-              <strong>Proteïne</strong>
-              <label><input type="checkbox" name="extras" value="Extra Crispy Chicken" data-price="1.99"> Crispy Chicken <span>+€1,99</span></label>
-              <label><input type="checkbox" name="extras" value="Extra Kebab" data-price="1.99"> Kebab <span>+€1,99</span></label>
-              <label><input type="checkbox" name="extras" value="Extra Chicken Kebab" data-price="1.99"> Chicken Kebab <span>+€1,99</span></label>
-              <label><input type="checkbox" name="extras" value="Extra Pulled Chicken" data-price="1.29"> Pulled Chicken <span>+€1,29</span></label>
-              <label><input type="checkbox" name="extras" value="Extra Falafel" data-price="1.29"> Falafel <span>+€1,29</span></label>
-              <label><input type="checkbox" name="extras" value="Extra Stoofvlees" data-price="2.49"> Stoofvlees <span>+€2,49</span></label>
-              <label><input type="checkbox" name="extras" value="Extra Bacon" data-price="1.99"> Bacon <span>+€1,99</span></label>
-            </div>
-            <div class="extra-group">
-              <strong>Toppings</strong>
-              <label><input type="checkbox" name="extras" value="Extra geraspte wortel" data-price="0.50"> Geraspte wortel <span>+€0,50</span></label>
-              <label><input type="checkbox" name="extras" value="Extra rode ui" data-price="0.50"> Rode ui <span>+€0,50</span></label>
-              <label><input type="checkbox" name="extras" value="Extra kerstomaten" data-price="0.50"> Kerstomaten <span>+€0,50</span></label>
-              <label><input type="checkbox" name="extras" value="Extra maïs" data-price="0.50"> Maïs <span>+€0,50</span></label>
-              <label><input type="checkbox" name="extras" value="Extra komkommer" data-price="0.50"> Komkommer <span>+€0,50</span></label>
-              <label><input type="checkbox" name="extras" value="Extra jalapeños" data-price="0.70"> Jalapeños <span>+€0,70</span></label>
-            </div>
-            <div class="extra-group">
-              <strong>Sauzen</strong>
-              <label><input type="checkbox" name="extras" value="Extra looksaus" data-price="0.80"> Looksaus <span>+€0,80</span></label>
-              <label><input type="checkbox" name="extras" value="Extra mayo" data-price="0.80"> Mayo <span>+€0,80</span></label>
-              <label><input type="checkbox" name="extras" value="Extra samurai" data-price="0.80"> Samurai <span>+€0,80</span></label>
-              <label><input type="checkbox" name="extras" value="Extra cocktail" data-price="0.80"> Cocktail <span>+€0,80</span></label>
-              <label><input type="checkbox" name="extras" value="Extra andalouse" data-price="0.80"> Andalouse <span>+€0,80</span></label>
-              <label><input type="checkbox" name="extras" value="Extra curry sauce" data-price="0.99"> Curry Sauce <span>+€0,99</span></label>
-              <label><input type="checkbox" name="extras" value="Extra BBQ sauce" data-price="0.99"> BBQ Sauce <span>+€0,99</span></label>
-              <label><input type="checkbox" name="extras" value="Extra cheddar sauce" data-price="0.99"> Cheddar Sauce <span>+€0,99</span></label>
-              <label><input type="checkbox" name="extras" value="Extra sriracha mayo" data-price="0.99"> Sriracha Mayo <span>+€0,99</span></label>
-              <label><input type="checkbox" name="extras" value="Extra sriracha hot" data-price="0.99"> Sriracha Hot <span>+€0,99</span></label>
-            </div>
-            <div class="extra-group">
-              <strong>Afwerking</strong>
-              <label><input type="checkbox" name="extras" value="Extra crispy onion" data-price="0.50"> Crispy Onion <span>+€0,50</span></label>
-              <label><input type="checkbox" name="extras" value="Extra lente-ui" data-price="0.50"> Lente-ui <span>+€0,50</span></label>
-              <label><input type="checkbox" name="extras" value="Extra chili flakes" data-price="0.50"> Chili Flakes <span>+€0,50</span></label>
-            </div>
+            <label class="extra-tab-select">
+              Extra proteïne
+              <select name="extraProtein">
+                <option value="" data-price="0">Geen extra</option>
+                <option value="Extra Crispy Chicken" data-price="1.99">Crispy Chicken +€1,99</option>
+                <option value="Extra Kebab" data-price="1.99">Kebab +€1,99</option>
+                <option value="Extra Chicken Kebab" data-price="1.99">Chicken Kebab +€1,99</option>
+                <option value="Extra Pulled Chicken" data-price="1.29">Pulled Chicken +€1,29</option>
+                <option value="Extra Falafel" data-price="1.29">Falafel +€1,29</option>
+                <option value="Extra Stoofvlees" data-price="2.49">Stoofvlees +€2,49</option>
+                <option value="Extra Bacon" data-price="1.99">Bacon +€1,99</option>
+              </select>
+            </label>
+            <label class="extra-tab-select">
+              Extra toppings
+              <select name="extraTopping">
+                <option value="" data-price="0">Geen extra</option>
+                <option value="Extra geraspte wortel" data-price="0.50">Geraspte wortel +€0,50</option>
+                <option value="Extra rode ui" data-price="0.50">Rode ui +€0,50</option>
+                <option value="Extra kerstomaten" data-price="0.50">Kerstomaten +€0,50</option>
+                <option value="Extra maïs" data-price="0.50">Maïs +€0,50</option>
+                <option value="Extra komkommer" data-price="0.50">Komkommer +€0,50</option>
+                <option value="Extra jalapeños" data-price="0.70">Jalapeños +€0,70</option>
+              </select>
+            </label>
+            <label class="extra-tab-select">
+              Extra sauzen
+              <select name="extraSauce">
+                <option value="" data-price="0">Geen extra</option>
+                <option value="Extra looksaus" data-price="0.80">Looksaus +€0,80</option>
+                <option value="Extra mayo" data-price="0.80">Mayo +€0,80</option>
+                <option value="Extra samurai" data-price="0.80">Samurai +€0,80</option>
+                <option value="Extra cocktail" data-price="0.80">Cocktail +€0,80</option>
+                <option value="Extra andalouse" data-price="0.80">Andalouse +€0,80</option>
+                <option value="Extra curry sauce" data-price="0.99">Curry Sauce +€0,99</option>
+                <option value="Extra BBQ sauce" data-price="0.99">BBQ Sauce +€0,99</option>
+                <option value="Extra cheddar sauce" data-price="0.99">Cheddar Sauce +€0,99</option>
+                <option value="Extra sriracha mayo" data-price="0.99">Sriracha Mayo +€0,99</option>
+                <option value="Extra sriracha hot" data-price="0.99">Sriracha Hot +€0,99</option>
+              </select>
+            </label>
+            <label class="extra-tab-select">
+              Extra afwerking
+              <select name="extraFinish">
+                <option value="" data-price="0">Geen extra</option>
+                <option value="Extra crispy onion" data-price="0.50">Crispy Onion +€0,50</option>
+                <option value="Extra lente-ui" data-price="0.50">Lente-ui +€0,50</option>
+                <option value="Extra chili flakes" data-price="0.50">Chili Flakes +€0,50</option>
+              </select>
+            </label>
           </fieldset>
           <button class="primary-btn builder-submit" type="submit">Toevoegen <span>→</span></button>
         </form>
@@ -411,6 +431,24 @@
         <h2 id="closedTitle">We zijn nu gesloten.</h2>
         <p id="closedMessage">Online bestellen kan opnieuw tijdens onze openingsuren.</p>
         <button class="primary-btn" type="button" id="continueBrowsing">Toch verder kijken <span>→</span></button>
+      </div>
+    </div>
+
+    <div class="choice-modal hidden" id="builderModal" role="dialog" aria-modal="true" aria-labelledby="builderModalTitle">
+      <div class="choice-card">
+        <button class="modal-close" type="button" data-close-modal="builderModal" aria-label="Sluiten">×</button>
+        <p class="section-kicker">Make your own</p>
+        <h2 id="builderModalTitle">Build je <span>bowl.</span></h2>
+        <div id="builderModalBody"></div>
+      </div>
+    </div>
+
+    <div class="choice-modal hidden" id="signatureModal" role="dialog" aria-modal="true" aria-labelledby="signatureModalTitle">
+      <div class="choice-card">
+        <button class="modal-close" type="button" data-close-modal="signatureModal" aria-label="Sluiten">×</button>
+        <p class="section-kicker">Signature bowl</p>
+        <h2 id="signatureModalTitle">Aanpassen</h2>
+        <div id="signatureModalBody"></div>
       </div>
     </div>
 
