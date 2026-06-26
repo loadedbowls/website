@@ -329,7 +329,14 @@
             Opmerking
             <textarea name="note" rows="4" placeholder="Allergie, extra info of opmerking"></textarea>
           </label>
-          <button class="primary-btn builder-submit" type="submit">Verder naar betaling <span>→</span></button>
+          <label>
+            Betaling
+            <select name="paymentChoice" id="paymentChoice" required>
+              <option value="online">Online betalen</option>
+              <option value="later">Betalen bij afhaal/levering</option>
+            </select>
+          </label>
+          <button class="primary-btn builder-submit" type="submit" id="checkoutSubmit">Verder naar betaling <span>→</span></button>
           <p class="form-note">Levering kan binnen 6 km van Loaded Bowls in Gent. Bereiding en levering duren gemiddeld 25-30 minuten.</p>
         </form>
       </section>
@@ -424,6 +431,16 @@
         </article>
       </section>
     </main>
+
+    <footer class="site-footer">
+      <div>
+        <strong>Loaded Bowls</strong>
+        <span>© 2026 Loaded Bowls. Alle rechten voorbehouden.</span>
+      </div>
+      <p>
+        Online bestellingen zijn pas definitief na betaling. Levering is mogelijk binnen 6 km van Sint-Amandstraat 24, 9000 Gent. Bereiding en levering duren gemiddeld 25-30 minuten, afhankelijk van drukte en bereikbaarheid. Afhalen kan tijdens de openingsuren. Prijzen en beschikbaarheid kunnen wijzigen.
+      </p>
+    </footer>
 
     <div class="closed-modal hidden" id="closedModal" role="dialog" aria-modal="true" aria-labelledby="closedTitle">
       <div class="closed-card">
