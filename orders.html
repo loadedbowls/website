@@ -254,6 +254,95 @@
         display: none !important;
       }
 
+      .print-ticket {
+        display: none;
+      }
+
+      @media print {
+        @page {
+          size: 80mm auto;
+          margin: 4mm;
+        }
+
+        body {
+          background: #fff;
+        }
+
+        .app {
+          display: none;
+        }
+
+        .print-ticket {
+          display: block;
+          width: 72mm;
+          margin: 0;
+          color: #000;
+          background: #fff;
+          font-family: Arial, sans-serif;
+          font-size: 12px;
+        }
+
+        .print-ticket h1 {
+          margin: 0 0 6px;
+          color: #000;
+          text-align: center;
+          font-size: 22px;
+          font-weight: 900;
+          letter-spacing: 0.04em;
+        }
+
+        .print-ticket h2 {
+          margin: 8px 0;
+          color: #000;
+          font-size: 18px;
+          font-weight: 900;
+          text-transform: uppercase;
+        }
+
+        .print-center {
+          text-align: center;
+        }
+
+        .print-muted {
+          color: #222;
+          font-size: 11px;
+          line-height: 1.35;
+        }
+
+        .print-line {
+          border-top: 1px dashed #000;
+          margin: 9px 0;
+        }
+
+        .print-field,
+        .print-item {
+          border-bottom: 1px dashed #999;
+          padding: 7px 0;
+          line-height: 1.35;
+          word-break: break-word;
+        }
+
+        .print-field strong,
+        .print-item strong {
+          display: block;
+          font-size: 13px;
+          text-transform: uppercase;
+        }
+
+        .print-details {
+          display: block;
+          margin-top: 4px;
+          font-size: 11px;
+        }
+
+        .print-total {
+          margin: 12px 0 4px;
+          text-align: right;
+          font-size: 22px;
+          font-weight: 900;
+        }
+      }
+
       @media (max-width: 720px) {
         .top,
         .order-head,
@@ -312,6 +401,7 @@
         <div class="orders" id="orders"></div>
       </section>
     </main>
+    <section class="print-ticket" id="printTicket" aria-hidden="true"></section>
 
     <script>
       const loginPanel = document.querySelector("#loginPanel");
@@ -326,6 +416,7 @@
       const nextDayButton = document.querySelector("#nextDayButton");
       const selectedDayLabel = document.querySelector("#selectedDayLabel");
       const ordersEl = document.querySelector("#orders");
+      const printTicket = document.querySelector("#printTicket");
       const connectionStatus = document.querySelector("#connectionStatus");
       const orderCount = document.querySelector("#orderCount");
       const lastUpdated = document.querySelector("#lastUpdated");
@@ -524,93 +615,29 @@
         }
       }
 
-      function textFrom(article, selector) {
-        return article.querySelector(selector)?.textContent.trim() || "";
-      }
-
       function printOrder(article) {
-        const title = textFrom(article, "h2");
-        const meta = textFrom(article, ".muted");
-        const total = textFrom(article, ".total");
+        const title = article.querySelector("h2")?.textContent.trim() || "Order";
+        const meta = article.querySelector(".muted")?.textContent.trim() || "";
+        const total = article.querySelector(".total")?.textContent.trim() || "";
         const fields = [...article.querySelectorAll(".field")].map((field) => field.innerHTML);
-        const items = [...article.querySelectorAll(".item")].map((item) => item.innerHTML);
-        const html = `
-          <html>
-            <head>
-              <title>Loaded Bowls ticket</title>
-              <style>
-                @page { size: 80mm auto; margin: 4mm; }
-                * { box-sizing: border-box; }
-                body {
-                  width: 72mm;
-                  margin: 0;
-                  padding: 0;
-                  color: #000;
-                  background: #fff;
-                  font-family: Arial, sans-serif;
-                  font-size: 12px;
-                }
-                h1 {
-                  margin: 0 0 6px;
-                  text-align: center;
-                  font-size: 22px;
-                  font-weight: 900;
-                  letter-spacing: 0.04em;
-                }
-                h2 {
-                  margin: 8px 0;
-                  font-size: 18px;
-                  font-weight: 900;
-                  text-transform: uppercase;
-                }
-                .center { text-align: center; }
-                .muted { color: #222; font-size: 11px; line-height: 1.35; }
-                .line { border-top: 1px dashed #000; margin: 9px 0; }
-                .field, .item {
-                  border-bottom: 1px dashed #999;
-                  padding: 7px 0;
-                  line-height: 1.35;
-                  word-break: break-word;
-                }
-                .field strong,
-                .item strong {
-                  display: block;
-                  font-size: 13px;
-                  text-transform: uppercase;
-                }
-                .details {
-                  display: block;
-                  margin-top: 4px;
-                  font-size: 11px;
-                }
-                .total {
-                  margin: 12px 0 4px;
-                  text-align: right;
-                  font-size: 22px;
-                  font-weight: 900;
-                }
-              </style>
-            </head>
-            <body>
-              <h1>LOADED BOWLS</h1>
-              <div class="center muted">Sint-Amandstraat 24, Gent</div>
-              <div class="line"></div>
-              <h2>${title}</h2>
-              <div class="muted">${meta}</div>
-              <div class="line"></div>
-              ${fields.map((field) => `<div class="field">${field}</div>`).join("")}
-              <div class="line"></div>
-              ${items.map((item) => `<div class="item">${item}</div>`).join("")}
-              <div class="total">${total}</div>
-              <div class="line"></div>
-              <div class="center">Dank u!</div>
-              <script>window.onload = () => window.print();<\/script>
-            </body>
-          </html>
+        const items = [...article.querySelectorAll(".item")].map((item) => item.innerHTML.replaceAll("details", "print-details"));
+
+        printTicket.innerHTML = `
+          <h1>LOADED BOWLS</h1>
+          <div class="print-center print-muted">Sint-Amandstraat 24, Gent</div>
+          <div class="print-line"></div>
+          <h2>${title}</h2>
+          <div class="print-muted">${meta}</div>
+          <div class="print-line"></div>
+          ${fields.map((field) => `<div class="print-field">${field}</div>`).join("")}
+          <div class="print-line"></div>
+          ${items.map((item) => `<div class="print-item">${item}</div>`).join("")}
+          <div class="print-total">${total}</div>
+          <div class="print-line"></div>
+          <div class="print-center">Dank u!</div>
         `;
-        const printWindow = window.open("", "_blank");
-        printWindow.document.write(html);
-        printWindow.document.close();
+
+        window.print();
       }
 
       saveSecretButton.addEventListener("click", () => {
