@@ -61,11 +61,34 @@ const signatures = [
 const bases = ["Frieten", "Nachos", "Rijst"];
 const sauces = ["Looksaus", "Mayo", "Samurai", "Cocktail", "Andalouse", "Curry Sauce", "BBQ Sauce", "Cheddar Sauce", "Sriracha Mayo", "Sriracha Hot"];
 const openingHours = {
-  label: "11:00 - 14:00 en 18:00 - 22:00",
-  periods: [
-    { open: "11:00", close: "14:00", openMinutes: 11 * 60, closeMinutes: 14 * 60 },
-    { open: "18:00", close: "22:00", openMinutes: 18 * 60, closeMinutes: 22 * 60 }
-  ]
+  label: "ma-vr 11:00 - 14:00 en 18:00 - 22:00, za 11:00 - 14:00 en 18:00 - 23:00, zondag gesloten",
+  schedule: {
+    0: [],
+    1: [
+      { open: "11:00", close: "14:00", openMinutes: 11 * 60, closeMinutes: 14 * 60 },
+      { open: "18:00", close: "22:00", openMinutes: 18 * 60, closeMinutes: 22 * 60 }
+    ],
+    2: [
+      { open: "11:00", close: "14:00", openMinutes: 11 * 60, closeMinutes: 14 * 60 },
+      { open: "18:00", close: "22:00", openMinutes: 18 * 60, closeMinutes: 22 * 60 }
+    ],
+    3: [
+      { open: "11:00", close: "14:00", openMinutes: 11 * 60, closeMinutes: 14 * 60 },
+      { open: "18:00", close: "22:00", openMinutes: 18 * 60, closeMinutes: 22 * 60 }
+    ],
+    4: [
+      { open: "11:00", close: "14:00", openMinutes: 11 * 60, closeMinutes: 14 * 60 },
+      { open: "18:00", close: "22:00", openMinutes: 18 * 60, closeMinutes: 22 * 60 }
+    ],
+    5: [
+      { open: "11:00", close: "14:00", openMinutes: 11 * 60, closeMinutes: 14 * 60 },
+      { open: "18:00", close: "22:00", openMinutes: 18 * 60, closeMinutes: 22 * 60 }
+    ],
+    6: [
+      { open: "11:00", close: "14:00", openMinutes: 11 * 60, closeMinutes: 14 * 60 },
+      { open: "18:00", close: "23:00", openMinutes: 18 * 60, closeMinutes: 23 * 60 }
+    ]
+  }
 };
 
 const desserts = [
@@ -131,6 +154,7 @@ const orderTime = document.querySelector("#orderTime");
 const closedModal = document.querySelector("#closedModal");
 const closedMessage = document.querySelector("#closedMessage");
 const continueBrowsing = document.querySelector("#continueBrowsing");
+const locationStatus = document.querySelector("#locationStatus");
 const toast = document.querySelector("#toast");
 
 function showToast(message) {
@@ -156,29 +180,45 @@ function getNowMinutes() {
   return now.getHours() * 60 + now.getMinutes();
 }
 
+function getTodayPeriods() {
+  return openingHours.schedule[new Date().getDay()] || [];
+}
+
 function isOpenNow() {
   const nowMinutes = getNowMinutes();
-  return openingHours.periods.some((period) => nowMinutes >= period.openMinutes && nowMinutes <= period.closeMinutes);
+  return getTodayPeriods().some((period) => nowMinutes >= period.openMinutes && nowMinutes <= period.closeMinutes);
 }
 
 function isWithinOpeningHours(minutes) {
-  return openingHours.periods.some((period) => minutes >= period.openMinutes && minutes <= period.closeMinutes);
+  return getTodayPeriods().some((period) => minutes >= period.openMinutes && minutes <= period.closeMinutes);
 }
 
 function getNextOpeningText(nowMinutes) {
-  const nextPeriod = openingHours.periods.find((period) => nowMinutes < period.openMinutes);
-  return nextPeriod ? nextPeriod.open : openingHours.periods[0].open;
+  const todayNextPeriod = getTodayPeriods().find((period) => nowMinutes < period.openMinutes);
+  if (todayNextPeriod) return todayNextPeriod.open;
+
+  const dayNames = ["zondag", "maandag", "dinsdag", "woensdag", "donderdag", "vrijdag", "zaterdag"];
+  const today = new Date().getDay();
+  for (let offset = 1; offset <= 7; offset += 1) {
+    const day = (today + offset) % 7;
+    const periods = openingHours.schedule[day] || [];
+    if (periods.length) return `${dayNames[day]} om ${periods[0].open}`;
+  }
+
+  return "onze volgende openingsdag";
 }
 
 function renderOrderTimeOptions() {
   const slots = [];
-  openingHours.periods.forEach((period) => {
+  const periods = getTodayPeriods();
+  periods.forEach((period) => {
     for (let minutes = period.openMinutes; minutes <= period.closeMinutes; minutes += 15) {
       slots.push(formatTime(minutes));
     }
   });
 
-  orderTime.innerHTML = `<option value="">Kies een uur</option>${slots.map((slot) => `<option value="${slot}">${slot}</option>`).join("")}`;
+  const placeholder = periods.length ? "Kies een uur" : "Vandaag gesloten";
+  orderTime.innerHTML = `<option value="">${placeholder}</option>${slots.map((slot) => `<option value="${slot}">${slot}</option>`).join("")}`;
 }
 
 function showClosedModalIfNeeded() {
@@ -189,6 +229,11 @@ function showClosedModalIfNeeded() {
 
   closedMessage.textContent = message;
   closedModal.classList.remove("hidden");
+}
+
+function updateLocationStatus() {
+  if (!locationStatus) return;
+  locationStatus.textContent = isOpenNow() ? "Open vandaag" : "Momenteel gesloten";
 }
 
 function addLine(line) {
@@ -496,6 +541,7 @@ renderSignatures();
 renderSimpleList(dessertList, desserts);
 renderSimpleList(drinkList, drinks);
 renderOrderTimeOptions();
+updateLocationStatus();
 showClosedModalIfNeeded();
 renderCart();
 renderOrders();
