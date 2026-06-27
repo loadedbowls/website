@@ -36,8 +36,8 @@ const signatures = [
     finish: "Chili Flakes",
     sizes: { Medium: 14.99, Large: 17.99 },
     images: {
-      Medium: "assets/signature-kebab-medium.png",
-      Large: "assets/signature-kebab-large.png"
+      Medium: "assets/signature-kebab-medium-new.png",
+      Large: "assets/signature-kebab-medium-new.png"
     }
   },
   {
@@ -72,8 +72,8 @@ const signatures = [
     finish: "Lente-ui",
     sizes: { Medium: 12.99, Large: 15.99 },
     images: {
-      Medium: "assets/signature-falafel-medium.png",
-      Large: "assets/signature-falafel-large.jpg"
+      Medium: "assets/signature-falafel-medium-new.png",
+      Large: "assets/signature-falafel-medium-new.png"
     }
   }
 ];
