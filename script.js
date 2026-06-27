@@ -706,6 +706,7 @@ orderForm.addEventListener("submit", async (event) => {
     customer: {
       name: formData.get("name"),
       phone: formData.get("phone"),
+      email: formData.get("email"),
       method,
       orderTime: selectedTime,
       address,
