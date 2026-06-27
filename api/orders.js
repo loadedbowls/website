@@ -1,6 +1,7 @@
 import { listOrders, requireAdmin, updateOrderStatus } from "./_order-store.js";
+import { sendOrderOnTheWayEmail, sendOrderPreparingEmail } from "./_email.js";
 
-const allowedStatuses = ["Nieuw", "In bereiding", "Klaar", "Afgehaald", "Geleverd", "Geannuleerd"];
+const allowedStatuses = ["Nieuw", "In bereiding", "Klaar", "Onderweg", "Afgehaald", "Geleverd", "Geannuleerd"];
 
 export default async function handler(req, res) {
   if (!requireAdmin(req, res)) return;
@@ -23,6 +24,14 @@ export default async function handler(req, res) {
     try {
       const order = await updateOrderStatus(id, status);
       if (!order) return res.status(404).json({ error: "Order niet gevonden." });
+
+      try {
+        if (status === "In bereiding") await sendOrderPreparingEmail(order);
+        if (status === "Onderweg") await sendOrderOnTheWayEmail(order);
+      } catch (error) {
+        console.error("Could not send status email:", error);
+      }
+
       return res.status(200).json({ order });
     } catch (error) {
       return res.status(500).json({ error: error.message });
