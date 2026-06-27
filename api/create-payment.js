@@ -24,6 +24,10 @@ export default async function handler(req, res) {
     return res.status(400).json({ error: "Ongeldige bestelling." });
   }
 
+  if (!order.customer?.name || !order.customer?.phone || !order.customer?.email || !order.customer?.method || !order.customer?.orderTime) {
+    return res.status(400).json({ error: "Klantgegevens ontbreken." });
+  }
+
   const baseUrl = getBaseUrl(req);
   const orderId = order.id || `LB-${Date.now()}`;
 
