@@ -776,7 +776,10 @@ async function submitPayLaterOrder(order) {
     renderCart();
     orderForm.reset();
     renderOrderTimeOptions();
-    showToast("Bestelling ontvangen. Je betaalt bij afhaal of levering.");
+    const mailMessage = order.customer.method === "Levering"
+      ? "Bestelling ontvangen. Je krijgt een bevestigingsmail. Controleer ook je spam. Zodra je bestelling onderweg is, krijg je opnieuw een mail."
+      : "Bestelling ontvangen. Je krijgt een bevestigingsmail. Controleer ook je spam.";
+    showToast(mailMessage);
   } catch (error) {
     showToast(`Bestelling niet doorgestuurd: ${error.message}`);
   }
