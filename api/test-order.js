@@ -26,6 +26,7 @@ export default async function handler(req, res) {
         customer: {
           name: "Test klant",
           phone: "000000000",
+          email: "test@example.com",
           method: "Afhalen",
           orderTime: "12:30",
           address: "",
