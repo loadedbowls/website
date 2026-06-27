@@ -6,7 +6,11 @@ const signatures = [
     badge: "★ Bestseller",
     chips: ["Sriracha Mayo + Sriracha Hot", "Jalapeños", "Maïs", "Verse ui", "Kerstomaten"],
     finish: "Crispy Onion + Chili Flakes",
-    sizes: { Medium: 16.5, Large: 18.5 }
+    sizes: { Medium: 16.5, Large: 18.5 },
+    images: {
+      Medium: "assets/signature-fire-chicken-medium.png",
+      Large: "assets/signature-fire-chicken-medium.png"
+    }
   },
   {
     id: "loaded-crispy-chicken",
@@ -202,7 +206,7 @@ const drinks = [
 const baseContent = {
   frieten: {
     title: "Frieten",
-    image: "assets/base-fries.jpg",
+    image: "assets/make-your-own-bowls.png",
     badge: "The OG",
     copy: "Knapperig gefrituurd, perfect zout, sterk genoeg om de zwaarste topping te dragen zonder zacht te worden."
   },
