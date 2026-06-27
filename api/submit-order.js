@@ -1,5 +1,6 @@
 import { saveOrder } from "./_order-store.js";
 import { forwardToPrinter } from "./_print-forward.js";
+import { sendOrderReceivedEmail } from "./_email.js";
 
 export default async function handler(req, res) {
   if (req.method !== "POST") {
@@ -13,7 +14,7 @@ export default async function handler(req, res) {
     return res.status(400).json({ error: "Ongeldige bestelling." });
   }
 
-  if (!order.customer?.name || !order.customer?.phone || !order.customer?.method || !order.customer?.orderTime) {
+  if (!order.customer?.name || !order.customer?.phone || !order.customer?.email || !order.customer?.method || !order.customer?.orderTime) {
     return res.status(400).json({ error: "Klantgegevens ontbreken." });
   }
 
@@ -35,6 +36,12 @@ export default async function handler(req, res) {
     };
 
     const record = await saveOrder(payload);
+
+    try {
+      await sendOrderReceivedEmail(record);
+    } catch (error) {
+      console.error("Could not send received email:", error);
+    }
 
     try {
       await forwardToPrinter(payload);
