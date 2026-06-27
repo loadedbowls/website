@@ -3,6 +3,7 @@ import { createClient } from "redis";
 
 const ORDER_LIST_KEY = "loaded-bowls:orders";
 const ORDER_KEY_PREFIX = "loaded-bowls:order:";
+const ORDER_COUNTER_PREFIX = "loaded-bowls:counter:";
 let redisClient;
 
 async function getRedisClient() {
@@ -61,6 +62,12 @@ async function storeMGet(keys) {
   return kv.mget(...keys);
 }
 
+async function storeIncr(key) {
+  const redis = await getRedisClient();
+  if (redis) return redis.incr(key);
+  return kv.incr(key);
+}
+
 function parseOrder(value) {
   if (!value) return null;
   if (typeof value === "object") return value;
@@ -97,8 +104,19 @@ export async function saveOrder(payload) {
   const existing = await storeGet(key);
   if (existing) return parseOrder(existing);
 
+  const orderDate = new Date(payload.createdAt || payload.paidAt || Date.now());
+  const dayKey = orderDate.toLocaleDateString("nl-BE", {
+    timeZone: "Europe/Brussels",
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit"
+  });
+  const dailyNumber = await storeIncr(`${ORDER_COUNTER_PREFIX}${dayKey}`);
+  const displayOrderNumber = `#${String(dailyNumber).padStart(3, "0")}`;
+
   const record = {
     id,
+    displayOrderNumber,
     paymentId: payload.paymentId,
     paidAt: payload.paidAt || null,
     createdAt: payload.createdAt || payload.paidAt || new Date().toISOString(),
