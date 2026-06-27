@@ -421,7 +421,7 @@
       const orderCount = document.querySelector("#orderCount");
       const lastUpdated = document.querySelector("#lastUpdated");
 
-      const statuses = ["Nieuw", "In bereiding", "Klaar", "Afgehaald", "Geleverd", "Geannuleerd"];
+      const statuses = ["Nieuw", "In bereiding", "Klaar", "Onderweg", "Afgehaald", "Geleverd", "Geannuleerd"];
       const money = new Intl.NumberFormat("nl-BE", { style: "currency", currency: "EUR" });
       let audioContext = null;
       let knownIds = new Set(JSON.parse(localStorage.getItem("loadedKnownOrderIds") || "[]"));
@@ -538,6 +538,7 @@
               <div class="customer">
                 <div class="field"><strong>Naam</strong><br>${customer.name || "-"}</div>
                 <div class="field"><strong>Telefoon</strong><br>${customer.phone || "-"}</div>
+                <div class="field"><strong>E-mail</strong><br>${customer.email || "-"}</div>
                 <div class="field"><strong>Keuze</strong><br>${customer.method || "-"}</div>
                 <div class="field"><strong>Uur</strong><br>${customer.orderTime || "-"}</div>
                 ${customer.address ? `<div class="field"><strong>Adres</strong><br>${customer.address}</div>` : ""}
