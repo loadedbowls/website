@@ -730,8 +730,9 @@ h3 {
 
 .signature-card-photo {
   width: 100%;
-  aspect-ratio: 16 / 9;
-  margin-bottom: 24px;
+  max-height: 170px;
+  aspect-ratio: 16 / 7;
+  margin-bottom: 18px;
   border: 1px solid var(--line);
   border-radius: 8px;
   object-fit: cover;
@@ -1568,8 +1569,9 @@ body.modal-open {
   }
 
   .signature-card-photo {
-    aspect-ratio: 4 / 3;
-    margin-bottom: 18px;
+    max-height: 125px;
+    aspect-ratio: 16 / 7;
+    margin-bottom: 14px;
   }
 
   .signature-head {
