@@ -1,5 +1,6 @@
 import { savePaidOrder } from "./_order-store.js";
 import { forwardToPrinter } from "./_print-forward.js";
+import { sendOrderReceivedEmail } from "./_email.js";
 
 export default async function handler(req, res) {
   if (req.method !== "POST") {
@@ -26,12 +27,18 @@ export default async function handler(req, res) {
     console.log("Paid Loaded Bowls order:", JSON.stringify(order));
 
     try {
-      await savePaidOrder({
+      const record = await savePaidOrder({
         paymentId: payment.id,
         paidAt: new Date().toISOString(),
         amount: payment.amount,
         order
       });
+
+      try {
+        await sendOrderReceivedEmail(record);
+      } catch (error) {
+        console.error("Could not send received email:", error);
+      }
     } catch (error) {
       console.error("Could not save paid order:", error);
     }
