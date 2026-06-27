@@ -4,6 +4,14 @@ import { sendOrderOnTheWayEmail, sendOrderPreparingEmail } from "./_email.js";
 const allowedStatuses = ["Nieuw", "In bereiding", "Klaar", "Onderweg", "Afgehaald", "Geleverd", "Geannuleerd"];
 
 export default async function handler(req, res) {
+  res.setHeader("Access-Control-Allow-Origin", "*");
+  res.setHeader("Access-Control-Allow-Methods", "GET, PATCH, OPTIONS");
+  res.setHeader("Access-Control-Allow-Headers", "Content-Type, x-admin-secret");
+
+  if (req.method === "OPTIONS") {
+    return res.status(204).end();
+  }
+
   if (!requireAdmin(req, res)) return;
 
   if (req.method === "GET") {
