@@ -390,9 +390,9 @@ function renderSignatureExtraGroup(title, items) {
   `;
 }
 
-function getSignatureImage(item, size = "Large") {
+function getSignatureImage(item) {
   if (!item.images) return "";
-  return item.images[size] || item.images.Large || item.images.Medium || "";
+  return item.images.Medium || item.images.Large || "";
 }
 
 function renderSignatureModal(item) {
