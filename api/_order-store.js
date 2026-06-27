@@ -105,6 +105,7 @@ export async function saveOrder(payload) {
     paymentStatus: payload.paymentStatus || "paid",
     paymentLabel: payload.paymentLabel || "Online betaald",
     status: "Nieuw",
+    emailEvents: {},
     amount: payload.amount,
     order: metadata
   };
@@ -140,6 +141,23 @@ export async function updateOrderStatus(id, status) {
     ...existing,
     status,
     updatedAt: new Date().toISOString()
+  };
+
+  await storeSet(key, updated);
+  return updated;
+}
+
+export async function markOrderEmailSent(id, eventName) {
+  const key = `${ORDER_KEY_PREFIX}${id}`;
+  const existing = parseOrder(await storeGet(key));
+  if (!existing) return null;
+
+  const updated = {
+    ...existing,
+    emailEvents: {
+      ...(existing.emailEvents || {}),
+      [eventName]: new Date().toISOString()
+    }
   };
 
   await storeSet(key, updated);
