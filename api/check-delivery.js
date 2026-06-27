@@ -1,7 +1,9 @@
+const DELIVERY_RADIUS_KM = 6;
+
 const SHOP = {
   lat: 51.0472,
   lon: 3.7274,
-  radiusKm: 5
+  radiusKm: DELIVERY_RADIUS_KM
 };
 
 function distanceKm(a, b) {
