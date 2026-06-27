@@ -555,21 +555,6 @@ function renderOrders() {
   `).join("");
 }
 
-document.querySelector(".base-tabs").addEventListener("click", (event) => {
-  const button = event.target.closest("[data-base-tab]");
-  if (!button) return;
-
-  document.querySelectorAll(".base-tab").forEach((tab) => tab.classList.remove("active"));
-  button.classList.add("active");
-
-  const content = baseContent[button.dataset.baseTab];
-  document.querySelector("#baseTitle").textContent = content.title;
-  document.querySelector("#baseCopy").textContent = content.copy;
-  document.querySelector("#baseImage").src = content.image;
-  document.querySelector("#baseImage").alt = `${content.title} loaded bowl`;
-  document.querySelector("#baseBadge").textContent = content.badge;
-});
-
 if (builderModalBody && orderForm) {
   builderModalBody.appendChild(document.querySelector("#builderForm"));
 }
