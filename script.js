@@ -14,7 +14,11 @@ const signatures = [
     protein: "Crispy Chicken",
     chips: ["Saus naar keuze", "Verse ui", "Maïs", "Jalapeños", "Komkommer"],
     finish: "Crispy Onion",
-    sizes: { Medium: 14.99, Large: 17.99 }
+    sizes: { Medium: 14.99, Large: 17.99 },
+    images: {
+      Medium: "assets/signature-crispy-chicken-medium.png",
+      Large: "assets/signature-crispy-chicken-large.png"
+    }
   },
   {
     id: "loaded-stoofvlees",
@@ -30,7 +34,11 @@ const signatures = [
     protein: "Kebab",
     chips: ["Saus naar keuze", "Verse ui", "Jalapeños", "Maïs", "Komkommer"],
     finish: "Chili Flakes",
-    sizes: { Medium: 14.99, Large: 17.99 }
+    sizes: { Medium: 14.99, Large: 17.99 },
+    images: {
+      Medium: "assets/signature-kebab-medium.png",
+      Large: "assets/signature-kebab-large.png"
+    }
   },
   {
     id: "loaded-chicken-kebab",
@@ -38,7 +46,11 @@ const signatures = [
     protein: "Chicken Kebab",
     chips: ["Saus naar keuze", "Verse ui", "Maïs", "Jalapeños", "Kerstomaten"],
     finish: "Crispy Onion",
-    sizes: { Medium: 14.99, Large: 17.99 }
+    sizes: { Medium: 14.99, Large: 17.99 },
+    images: {
+      Medium: "assets/signature-chicken-kebab-medium.png",
+      Large: "assets/signature-chicken-kebab-large.png"
+    }
   },
   {
     id: "loaded-pulled-chicken",
@@ -46,7 +58,11 @@ const signatures = [
     protein: "Pulled Chicken",
     chips: ["BBQ Sauce", "Maïs", "Rode ui", "Kerstomaten", "Komkommer"],
     finish: "Crispy Onion",
-    sizes: { Medium: 13.99, Large: 16.99 }
+    sizes: { Medium: 13.99, Large: 16.99 },
+    images: {
+      Medium: "assets/signature-pulled-chicken-medium.png",
+      Large: "assets/signature-pulled-chicken-large.png"
+    }
   },
   {
     id: "loaded-falafel",
@@ -54,7 +70,11 @@ const signatures = [
     protein: "Falafel",
     chips: ["Saus naar keuze", "Komkommer", "Kerstomaten", "Rode ui", "Maïs"],
     finish: "Lente-ui",
-    sizes: { Medium: 12.99, Large: 15.99 }
+    sizes: { Medium: 12.99, Large: 15.99 },
+    images: {
+      Medium: "assets/signature-falafel-medium.png",
+      Large: "assets/signature-falafel-large.jpg"
+    }
   }
 ];
 
@@ -370,10 +390,17 @@ function renderSignatureExtraGroup(title, items) {
   `;
 }
 
+function getSignatureImage(item, size = "Large") {
+  if (!item.images) return "";
+  return item.images[size] || item.images.Large || item.images.Medium || "";
+}
+
 function renderSignatureModal(item) {
   signatureModalTitle.textContent = item.name;
+  const image = getSignatureImage(item, "Large");
   signatureModalBody.innerHTML = `
     <form class="modal-form" id="signatureChoiceForm" data-signature-choice="${item.id}">
+      ${image ? `<img class="signature-modal-photo" src="${image}" alt="${item.name}">` : ""}
       <div class="modal-summary">
         <strong>${item.protein}</strong>
         <span>${item.chips.join(" · ")}</span>
@@ -417,6 +444,7 @@ function renderSignatures() {
   signatureGrid.innerHTML = signatures.map((item) => `
     <article class="signature-card ${item.badge ? "bestseller" : ""}">
       ${item.badge ? `<span class="badge">${item.badge}</span>` : ""}
+      ${getSignatureImage(item, "Large") ? `<img class="signature-card-photo" src="${getSignatureImage(item, "Large")}" alt="${item.name}">` : ""}
       <div class="signature-head">
         <div>
           <h3>${item.name}</h3>
