@@ -6,7 +6,7 @@ const signatures = [
     badge: "★ Bestseller",
     chips: ["Sriracha Mayo + Sriracha Hot", "Jalapeños", "Maïs", "Verse ui", "Kerstomaten"],
     finish: "Crispy Onion + Chili Flakes",
-    sizes: { Medium: 16.5, Large: 18.5 },
+    sizes: { Medium: 14.99, Large: 16.99 },
     images: {
       Medium: "assets/signature-fire-chicken-medium.png",
       Large: "assets/signature-fire-chicken-medium.png"
@@ -18,7 +18,7 @@ const signatures = [
     protein: "Crispy Chicken",
     chips: ["Saus naar keuze", "Verse ui", "Maïs", "Jalapeños", "Komkommer"],
     finish: "Crispy Onion",
-    sizes: { Medium: 14.99, Large: 17.99 },
+    sizes: { Medium: 13.5, Large: 16.5 },
     images: {
       Medium: "assets/signature-crispy-chicken-medium.png",
       Large: "assets/signature-crispy-chicken-large.png"
@@ -30,7 +30,7 @@ const signatures = [
     protein: "Stoofvlees",
     chips: ["Saus naar keuze", "Maïs", "Rode ui", "Komkommer", "Kerstomaten"],
     finish: "Lente-ui",
-    sizes: { Medium: 15.99, Large: 18.99 }
+    sizes: { Medium: 14.5, Large: 17.5 }
   },
   {
     id: "loaded-kebab",
@@ -38,7 +38,7 @@ const signatures = [
     protein: "Kebab",
     chips: ["Saus naar keuze", "Verse ui", "Jalapeños", "Maïs", "Komkommer"],
     finish: "Chili Flakes",
-    sizes: { Medium: 14.99, Large: 17.99 },
+    sizes: { Medium: 13.5, Large: 16.5 },
     images: {
       Medium: "assets/signature-kebab-medium-new.png",
       Large: "assets/signature-kebab-medium-new.png"
@@ -50,7 +50,7 @@ const signatures = [
     protein: "Chicken Kebab",
     chips: ["Saus naar keuze", "Verse ui", "Maïs", "Jalapeños", "Kerstomaten"],
     finish: "Crispy Onion",
-    sizes: { Medium: 14.99, Large: 17.99 },
+    sizes: { Medium: 13.5, Large: 16.5 },
     images: {
       Medium: "assets/signature-chicken-kebab-medium.png",
       Large: "assets/signature-chicken-kebab-large.png"
@@ -62,7 +62,7 @@ const signatures = [
     protein: "Pulled Chicken",
     chips: ["BBQ Sauce", "Maïs", "Rode ui", "Kerstomaten", "Komkommer"],
     finish: "Crispy Onion",
-    sizes: { Medium: 13.99, Large: 16.99 },
+    sizes: { Medium: 12.5, Large: 15.5 },
     images: {
       Medium: "assets/signature-pulled-chicken-medium.png",
       Large: "assets/signature-pulled-chicken-large.png"
@@ -74,7 +74,7 @@ const signatures = [
     protein: "Falafel",
     chips: ["Saus naar keuze", "Komkommer", "Kerstomaten", "Rode ui", "Maïs"],
     finish: "Lente-ui",
-    sizes: { Medium: 12.99, Large: 15.99 },
+    sizes: { Medium: 11.5, Large: 14.5 },
     images: {
       Medium: "assets/signature-falafel-medium-new.png",
       Large: "assets/signature-falafel-medium-new.png"
@@ -305,6 +305,16 @@ function isOpenNow() {
   return getTodayPeriods().some((period) => nowMinutes >= period.openMinutes && nowMinutes <= period.closeMinutes);
 }
 
+function canAcceptOrdersNow() {
+  const periods = getTodayPeriods();
+  if (!periods.length) return false;
+
+  const nowMinutes = getNowMinutes();
+  const firstOpen = periods[0].openMinutes;
+  const lastClose = periods[periods.length - 1].closeMinutes;
+  return nowMinutes >= firstOpen && nowMinutes <= lastClose;
+}
+
 function isWithinOpeningHours(minutes) {
   return getTodaySlotPeriods().some((period) => minutes >= period.openMinutes && minutes <= period.closeMinutes);
 }
@@ -348,7 +358,7 @@ function renderOrderTimeOptions() {
 }
 
 function showClosedModalIfNeeded() {
-  if (isOpenNow()) return;
+  if (canAcceptOrdersNow()) return;
 
   const nowMinutes = getNowMinutes();
   const message = `Online bestellen kan opnieuw vanaf ${getNextOpeningText(nowMinutes)}. Je kunt het menu wel al bekijken.`;
@@ -359,12 +369,12 @@ function showClosedModalIfNeeded() {
 
 function updateLocationStatus() {
   if (!locationStatus) return;
-  locationStatus.textContent = isOpenNow() ? "Open vandaag" : "Momenteel gesloten";
+  locationStatus.textContent = canAcceptOrdersNow() ? "Online bestellen open" : "Momenteel gesloten";
 }
 
 function updateHoursNote() {
   if (!hoursNote) return;
-  hoursNote.classList.toggle("hidden", isOpenNow());
+  hoursNote.classList.toggle("hidden", canAcceptOrdersNow());
 }
 
 function addLine(line) {
@@ -762,8 +772,8 @@ orderForm.addEventListener("submit", async (event) => {
     return;
   }
 
-  if (!isOpenNow()) {
-    showToast(`We zijn momenteel gesloten. Online bestellen kan tijdens onze openingsuren: ${openingHours.label}.`);
+  if (!canAcceptOrdersNow()) {
+    showToast(`We nemen momenteel geen online bestellingen aan. Online bestellen kan vanaf 11:00 tijdens onze openingsdagen.`);
     showClosedModalIfNeeded();
     return;
   }
