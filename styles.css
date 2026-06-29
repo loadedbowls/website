@@ -197,6 +197,47 @@ button {
   margin: 0 auto;
 }
 
+.promo-banner {
+  margin-top: 22px;
+  display: grid;
+  grid-template-columns: minmax(0, auto) 1fr;
+  gap: 18px;
+  align-items: center;
+  padding: 18px 22px;
+  border: 1px solid rgba(243, 179, 50, 0.55);
+  border-radius: 12px;
+  background:
+    linear-gradient(135deg, rgba(243, 179, 50, 0.18), rgba(242, 138, 45, 0.08)),
+    rgba(7, 17, 29, 0.94);
+  box-shadow: 0 14px 40px rgba(0,0,0,0.25);
+}
+
+.promo-banner small,
+.cart-promo small {
+  display: block;
+  margin-bottom: 4px;
+  color: var(--orange);
+  font-size: 0.72rem;
+  font-weight: 950;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+}
+
+.promo-banner strong {
+  color: var(--gold);
+  font-family: var(--chunk);
+  font-size: clamp(1.65rem, 3vw, 2.5rem);
+  line-height: 0.95;
+  text-transform: uppercase;
+}
+
+.promo-banner p {
+  margin: 0;
+  color: var(--muted);
+  font-weight: 800;
+  line-height: 1.45;
+}
+
 .hero {
   display: grid;
   grid-template-columns: minmax(0, 0.95fr) minmax(380px, 0.88fr);
@@ -995,6 +1036,33 @@ h3 {
   color: var(--muted);
 }
 
+.cart-promo {
+  display: grid;
+  gap: 8px;
+  margin-top: 18px;
+  padding: 14px;
+  border: 1px solid rgba(243, 179, 50, 0.42);
+  border-radius: 10px;
+  background: rgba(243, 179, 50, 0.08);
+}
+
+.cart-promo p {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  margin: 0;
+  color: var(--muted);
+  font-weight: 850;
+}
+
+.cart-promo strong {
+  color: var(--gold);
+}
+
+.cart-promo .discount {
+  color: var(--orange);
+}
+
 .cart-total {
   display: flex;
   justify-content: space-between;
@@ -1483,6 +1551,7 @@ body.modal-open {
     padding-bottom: 7px;
   }
 
+  .promo-banner,
   .hero,
   .base-feature,
   .order-section,
