@@ -44,6 +44,9 @@ export default async function handler(req, res) {
       orderId,
       customer: order.customer,
       items: order.items,
+      subtotal: order.subtotal,
+      discount: order.discount,
+      promotion: order.promotion,
       total: order.total,
       paymentMethod: order.paymentMethod
     }
