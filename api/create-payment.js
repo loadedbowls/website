@@ -1,3 +1,5 @@
+import { savePendingOrder } from "./_order-store.js";
+
 function getBaseUrl(req) {
   if (process.env.SITE_URL) return process.env.SITE_URL.replace(/\/$/, "");
   const host = req.headers["x-forwarded-host"] || req.headers.host;
@@ -30,6 +32,12 @@ export default async function handler(req, res) {
 
   const baseUrl = getBaseUrl(req);
   const orderId = order.id || `LB-${Date.now()}`;
+  const fullOrder = {
+    ...order,
+    orderId
+  };
+
+  await savePendingOrder(fullOrder);
 
   const payload = {
     amount: {
@@ -41,14 +49,7 @@ export default async function handler(req, res) {
     webhookUrl: `${baseUrl}/api/mollie-webhook`,
     locale: "nl_BE",
     metadata: {
-      orderId,
-      customer: order.customer,
-      items: order.items,
-      subtotal: order.subtotal,
-      discount: order.discount,
-      promotion: order.promotion,
-      total: order.total,
-      paymentMethod: order.paymentMethod
+      orderId
     }
   };
 
