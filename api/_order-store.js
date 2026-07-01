@@ -3,6 +3,7 @@ import { createClient } from "redis";
 
 const ORDER_LIST_KEY = "loaded-bowls:orders";
 const ORDER_KEY_PREFIX = "loaded-bowls:order:";
+const PENDING_ORDER_KEY_PREFIX = "loaded-bowls:pending-order:";
 const ORDER_COUNTER_PREFIX = "loaded-bowls:counter:";
 let redisClient;
 
@@ -105,14 +106,14 @@ export async function saveOrder(payload) {
   if (existing) return parseOrder(existing);
 
   const orderDate = new Date(payload.createdAt || payload.paidAt || Date.now());
-  const dayKey = orderDate.toLocaleDateString("nl-BE", {
+  const year = orderDate.toLocaleDateString("nl-BE", {
     timeZone: "Europe/Brussels",
-    year: "numeric",
-    month: "2-digit",
-    day: "2-digit"
+    year: "2-digit"
   });
-  const dailyNumber = await storeIncr(`${ORDER_COUNTER_PREFIX}${dayKey}`);
-  const displayOrderNumber = `#${String(dailyNumber).padStart(3, "0")}`;
+  const source = String(metadata.source || "").toLowerCase();
+  const prefix = source === "kassa" || source === "pos" ? "KLB" : "WLB";
+  const sequence = await storeIncr(`${ORDER_COUNTER_PREFIX}${prefix}:${year}`);
+  const displayOrderNumber = `${prefix}${year}${String(sequence).padStart(4, "0")}`;
 
   const record = {
     id,
@@ -132,6 +133,25 @@ export async function saveOrder(payload) {
   await storeLPush(ORDER_LIST_KEY, id);
   await storeLTrim(ORDER_LIST_KEY, 0, 199);
   return record;
+}
+
+export async function savePendingOrder(order) {
+  const id = order?.orderId || order?.id;
+  if (!id) return null;
+
+  const pending = {
+    ...order,
+    orderId: id,
+    savedAt: new Date().toISOString()
+  };
+
+  await storeSet(`${PENDING_ORDER_KEY_PREFIX}${id}`, pending);
+  return pending;
+}
+
+export async function getPendingOrder(id) {
+  if (!id) return null;
+  return parseOrder(await storeGet(`${PENDING_ORDER_KEY_PREFIX}${id}`));
 }
 
 export async function savePaidOrder(payload) {
