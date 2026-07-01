@@ -1,4 +1,4 @@
-import { savePaidOrder } from "./_order-store.js";
+import { getPendingOrder, savePaidOrder } from "./_order-store.js";
 import { forwardToPrinter } from "./_print-forward.js";
 import { sendOrderReceivedEmail } from "./_email.js";
 
@@ -23,7 +23,9 @@ export default async function handler(req, res) {
   const payment = await response.json();
 
   if (payment.status === "paid") {
-    const order = payment.metadata || {};
+    const metadata = payment.metadata || {};
+    const pendingOrder = await getPendingOrder(metadata.orderId);
+    const order = pendingOrder || metadata;
     console.log("Paid Loaded Bowls order:", JSON.stringify(order));
 
     try {
