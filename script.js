@@ -225,6 +225,7 @@ const baseContent = {
 };
 
 let cart = [];
+let editingCartKey = "";
 
 const openingDeal = {
   starts: "2026-07-06",
@@ -389,6 +390,28 @@ function addLine(line) {
   showToast("Toegevoegd aan je order.");
 }
 
+function saveCartLine(line) {
+  if (!editingCartKey) {
+    addLine(line);
+    return;
+  }
+
+  const current = cart.find((item) => item.key === editingCartKey);
+  const quantity = current?.quantity || 1;
+  cart = cart.filter((item) => item.key !== editingCartKey);
+
+  const existing = cart.find((item) => item.key === line.key);
+  if (existing) {
+    existing.quantity += quantity;
+  } else {
+    cart.push({ ...line, quantity });
+  }
+
+  editingCartKey = "";
+  renderCart();
+  showToast("Je wijziging is opgeslagen.");
+}
+
 function openModal(modal) {
   modal.classList.remove("hidden");
   document.body.classList.add("modal-open");
@@ -397,15 +420,17 @@ function openModal(modal) {
 function closeModal(modal) {
   modal.classList.add("hidden");
   document.body.classList.remove("modal-open");
+  editingCartKey = "";
 }
 
 function renderSignatureExtraGroup(title, items) {
+  const selectedValue = renderSignatureExtraGroup.selected?.shift() || "";
   return `
     <label class="signature-extra-select">
       ${title}
       <select data-signature-extra-select>
-        <option value="" data-price="0">Geen extra</option>
-        ${items.map((extra) => `<option value="${extra.name}" data-price="${extra.price}">${extra.name.replace("Extra ", "")} +${money.format(extra.price)}</option>`).join("")}
+        <option value="" data-price="0"${selectedValue ? "" : " selected"}>Geen extra</option>
+        ${items.map((extra) => `<option value="${extra.name}" data-price="${extra.price}"${extra.name === selectedValue ? " selected" : ""}>${extra.name.replace("Extra ", "")} +${money.format(extra.price)}</option>`).join("")}
       </select>
     </label>
   `;
@@ -416,9 +441,14 @@ function getSignatureImage(item) {
   return item.images.Medium || item.images.Large || "";
 }
 
-function renderSignatureModal(item) {
+function optionSelected(value, selected) {
+  return value === selected ? " selected" : "";
+}
+
+function renderSignatureModal(item, config = {}) {
   signatureModalTitle.textContent = item.name;
   const image = getSignatureImage(item, "Large");
+  renderSignatureExtraGroup.selected = [...(config.extras || [])];
   signatureModalBody.innerHTML = `
     <form class="modal-form" id="signatureChoiceForm" data-signature-choice="${item.id}">
       ${image ? `<img class="signature-modal-photo" src="${image}" alt="${item.name}">` : ""}
@@ -431,22 +461,22 @@ function renderSignatureModal(item) {
         <label>
           Maat
           <select name="size" required>
-            <option value="Medium" data-price="${item.sizes.Medium}">Medium - ${money.format(item.sizes.Medium)}</option>
-            <option value="Large" data-price="${item.sizes.Large}">Large - ${money.format(item.sizes.Large)}</option>
+            <option value="Medium" data-price="${item.sizes.Medium}"${optionSelected("Medium", config.size || "Medium")}>Medium - ${money.format(item.sizes.Medium)}</option>
+            <option value="Large" data-price="${item.sizes.Large}"${optionSelected("Large", config.size)}>Large - ${money.format(item.sizes.Large)}</option>
           </select>
         </label>
         <label>
           Basis
           <select name="base" required>
-            <option value="" selected disabled>Maak keuze</option>
-            ${bases.map((base) => `<option>${base}</option>`).join("")}
+            <option value=""${config.base ? "" : " selected"} disabled>Maak keuze</option>
+            ${bases.map((base) => `<option${optionSelected(base, config.base)}>${base}</option>`).join("")}
           </select>
         </label>
         <label>
           Saus
           <select name="sauce" required>
-            <option value="" selected disabled>Maak keuze</option>
-            ${sauces.map((sauce) => `<option>${sauce}</option>`).join("")}
+            <option value=""${config.sauce ? "" : " selected"} disabled>Maak keuze</option>
+            ${sauces.map((sauce) => `<option${optionSelected(sauce, config.sauce)}>${sauce}</option>`).join("")}
           </select>
         </label>
       </div>
@@ -456,9 +486,10 @@ function renderSignatureModal(item) {
         ${renderSignatureExtraGroup("Extra sauzen", signatureExtras.sauces)}
         ${renderSignatureExtraGroup("Extra afwerking", signatureExtras.finish)}
       </div>
-      <button class="primary-btn builder-submit" type="submit">Toevoegen <span>→</span></button>
+      <button class="primary-btn builder-submit" type="submit">${editingCartKey ? "Wijziging opslaan" : "Toevoegen"} <span>→</span></button>
     </form>
   `;
+  renderSignatureExtraGroup.selected = [];
 }
 
 function renderSignatures() {
@@ -555,6 +586,7 @@ function renderCart() {
         <div>
           <strong>${item.name}</strong>
           <p>${item.details ? `${item.details} · ` : ""}${money.format(item.price)} per stuk</p>
+          ${item.config ? `<button class="cart-edit" type="button" data-edit="${item.key}">Wijzig</button>` : ""}
         </div>
         <div class="qty" aria-label="Aantal ${item.name}">
           <button class="qty-button" type="button" data-minus="${item.key}" aria-label="Verminder">-</button>
@@ -638,7 +670,35 @@ if (builderModalBody && orderForm) {
   builderModalBody.appendChild(document.querySelector("#builderForm"));
 }
 
-openBuilderModalButton.addEventListener("click", () => openModal(builderModal));
+function setSelectValue(form, name, value) {
+  const field = form.elements[name];
+  if (field) field.value = value || "";
+}
+
+function openBuilderForEdit(config = {}) {
+  const form = document.querySelector("#builderForm");
+  form.reset();
+  setSelectValue(form, "size", config.size || "Medium");
+  setSelectValue(form, "base", config.base);
+  setSelectValue(form, "protein", config.protein);
+  setSelectValue(form, "topping1", config.toppings?.[0]);
+  setSelectValue(form, "topping2", config.toppings?.[1]);
+  setSelectValue(form, "topping3", config.toppings?.[2]);
+  setSelectValue(form, "sauce1", config.sauces?.[0]);
+  setSelectValue(form, "sauce2", config.sauces?.[1]);
+  setSelectValue(form, "finish", config.finish);
+  setSelectValue(form, "extraProtein", config.extras?.[0]);
+  setSelectValue(form, "extraTopping", config.extras?.[1]);
+  setSelectValue(form, "extraSauce", config.extras?.[2]);
+  setSelectValue(form, "extraFinish", config.extras?.[3]);
+  form.querySelector(".builder-submit").innerHTML = `${editingCartKey ? "Wijziging opslaan" : "Toevoegen"} <span>→</span>`;
+  openModal(builderModal);
+}
+
+openBuilderModalButton.addEventListener("click", () => {
+  editingCartKey = "";
+  openBuilderForEdit();
+});
 
 document.querySelectorAll("[data-close-modal]").forEach((button) => {
   button.addEventListener("click", () => closeModal(document.querySelector(`#${button.dataset.closeModal}`)));
@@ -682,13 +742,28 @@ document.querySelector("#builderForm").addEventListener("submit", (event) => {
   const toppingsText = toppings.length ? toppings.join(", ") : "geen toppings gekozen";
   const saucesText = saucesChosen.length ? saucesChosen.join(", ") : "geen saus gekozen";
 
-  addLine({
+  saveCartLine({
     key: `custom-${size}-${base}-${protein}-${toppings.join("-")}-${saucesChosen.join("-")}-${finish}-${extras.map((item) => item.name).join("-")}`.toLowerCase().replaceAll(" ", "-"),
     id: "custom-bowl",
     category: "bowl",
     name: `Make Your Own Bowl ${size}`,
     details: `${base}, ${protein}, toppings: ${toppingsText}, sauzen: ${saucesText}, afwerking: ${finish}. ${extrasText}`,
-    price
+    price,
+    config: {
+      type: "custom",
+      size,
+      base,
+      protein,
+      toppings,
+      sauces: saucesChosen,
+      finish,
+      extras: [
+        formData.get("extraProtein") || "",
+        formData.get("extraTopping") || "",
+        formData.get("extraSauce") || "",
+        formData.get("extraFinish") || ""
+      ]
+    }
   });
   closeModal(builderModal);
 });
@@ -698,6 +773,7 @@ signatureGrid.addEventListener("click", (event) => {
   if (!button) return;
 
   const item = signatures.find((signature) => signature.id === button.dataset.openSignature);
+  editingCartKey = "";
   renderSignatureModal(item);
   openModal(signatureModal);
 });
@@ -731,13 +807,21 @@ signatureModalBody.addEventListener("submit", (event) => {
     return;
   }
 
-  addLine({
+  saveCartLine({
     key: `${item.id}-${size}-${base}-${sauce}-${extras.map((extra) => extra.name).join("-")}`.toLowerCase().replaceAll(" ", "-"),
     id: item.id,
     category: "bowl",
     name: `${item.name} ${size}`,
-    details: `Basis: ${base}, saus: ${sauce}, ${item.protein}, afwerking: ${item.finish}. ${extrasText}`,
-    price: Number(selectedSize.dataset.price) + extraTotal
+    details: `Basis: ${base}, saus: ${sauce}, proteine: ${item.protein}, standaard toppings: ${item.chips.join(", ")}, afwerking: ${item.finish}. ${extrasText}`,
+    price: Number(selectedSize.dataset.price) + extraTotal,
+    config: {
+      type: "signature",
+      signatureId: item.id,
+      size,
+      base,
+      sauce,
+      extras: extras.map((extra) => extra.name)
+    }
   });
   closeModal(signatureModal);
 });
@@ -757,8 +841,24 @@ document.querySelector("#sweet").addEventListener("click", (event) => {
 });
 
 cartItems.addEventListener("click", (event) => {
+  const edit = event.target.closest("[data-edit]");
   const plus = event.target.closest("[data-plus]");
   const minus = event.target.closest("[data-minus]");
+  if (edit) {
+    const line = cart.find((item) => item.key === edit.dataset.edit);
+    if (!line?.config) return;
+
+    editingCartKey = line.key;
+    if (line.config.type === "signature") {
+      const item = signatures.find((signature) => signature.id === line.config.signatureId);
+      if (!item) return;
+      renderSignatureModal(item, line.config);
+      openModal(signatureModal);
+    } else if (line.config.type === "custom") {
+      openBuilderForEdit(line.config);
+    }
+    return;
+  }
   if (plus) changeQuantity(plus.dataset.plus, 1);
   if (minus) changeQuantity(minus.dataset.minus, -1);
 });
