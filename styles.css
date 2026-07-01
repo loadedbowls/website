@@ -1005,6 +1005,22 @@ h3 {
   color: var(--muted);
 }
 
+.cart-edit {
+  margin-top: 10px;
+  border: 1px solid var(--line);
+  border-radius: 7px;
+  padding: 7px 11px;
+  color: var(--orange);
+  background: rgba(255,255,255,0.025);
+  font-weight: 900;
+  cursor: pointer;
+}
+
+.cart-edit:hover {
+  border-color: var(--orange);
+  color: var(--gold);
+}
+
 .qty {
   display: inline-grid;
   grid-template-columns: 34px 36px 34px;
