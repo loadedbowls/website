@@ -60,7 +60,7 @@ const signatures = [
     id: "loaded-pulled-chicken",
     name: "Loaded Pulled Chicken",
     protein: "Pulled Chicken",
-    chips: ["BBQ Sauce", "Maïs", "Rode ui", "Kerstomaten", "Komkommer"],
+    chips: ["Saus naar keuze", "Maïs", "Rode ui", "Kerstomaten", "Komkommer"],
     finish: "Crispy Onion",
     sizes: { Medium: 12.5, Large: 15.5 },
     images: {
@@ -733,8 +733,8 @@ document.querySelector("#builderForm").addEventListener("submit", (event) => {
   const toppings = [formData.get("topping1"), formData.get("topping2"), formData.get("topping3")].filter(Boolean);
   const saucesChosen = [formData.get("sauce1"), formData.get("sauce2")].filter(Boolean);
   const finish = formData.get("finish");
-  if (!base || !protein || !finish) {
-    showToast("Kies minstens je basis, proteine en afwerking.");
+  if (!base || !protein) {
+    showToast("Kies minstens je basis en proteine.");
     return;
   }
 
@@ -743,11 +743,11 @@ document.querySelector("#builderForm").addEventListener("submit", (event) => {
   const saucesText = saucesChosen.length ? saucesChosen.join(", ") : "geen saus gekozen";
 
   saveCartLine({
-    key: `custom-${size}-${base}-${protein}-${toppings.join("-")}-${saucesChosen.join("-")}-${finish}-${extras.map((item) => item.name).join("-")}`.toLowerCase().replaceAll(" ", "-"),
+    key: `custom-${size}-${base}-${protein}-${toppings.join("-")}-${saucesChosen.join("-")}-${finish || "geen-afwerking"}-${extras.map((item) => item.name).join("-")}`.toLowerCase().replaceAll(" ", "-"),
     id: "custom-bowl",
     category: "bowl",
     name: `Make Your Own Bowl ${size}`,
-    details: `${base}, ${protein}, toppings: ${toppingsText}, sauzen: ${saucesText}, afwerking: ${finish}. ${extrasText}`,
+    details: `${base}, ${protein}, toppings: ${toppingsText}, sauzen: ${saucesText}, afwerking: ${finish || "geen afwerking gekozen"}. ${extrasText}`,
     price,
     config: {
       type: "custom",
