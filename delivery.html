@@ -1,0 +1,551 @@
+<!doctype html>
+<html lang="nl">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="theme-color" content="#07111d">
+    <title>Loaded Bowls Delivery</title>
+    <style>
+      :root {
+        --bg: #07111d;
+        --panel: #101923;
+        --panel-2: #172231;
+        --text: #fff6e2;
+        --muted: #cdbf9f;
+        --gold: #f2b231;
+        --orange: #f28a2d;
+        --line: rgba(242, 178, 49, 0.28);
+        --danger: #e8664e;
+        --ok: #65d98b;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        font-family: Arial, Helvetica, sans-serif;
+        background:
+          radial-gradient(circle at 85% -10%, rgba(242, 138, 45, 0.15), transparent 34%),
+          linear-gradient(180deg, #08131f, #050b12);
+        color: var(--text);
+      }
+
+      button,
+      input {
+        font: inherit;
+      }
+
+      .app {
+        width: min(720px, 100%);
+        margin: 0 auto;
+        padding: 16px;
+      }
+
+      .top {
+        position: sticky;
+        top: 0;
+        z-index: 5;
+        margin: -16px -16px 16px;
+        padding: 16px;
+        background: rgba(7, 17, 29, 0.94);
+        backdrop-filter: blur(12px);
+        border-bottom: 1px solid var(--line);
+      }
+
+      .brand {
+        display: flex;
+        justify-content: space-between;
+        gap: 12px;
+        align-items: center;
+      }
+
+      h1,
+      h2,
+      h3,
+      p {
+        margin: 0;
+      }
+
+      h1 {
+        font-family: Impact, Haettenschweiler, "Arial Narrow Bold", sans-serif;
+        font-size: clamp(32px, 10vw, 52px);
+        line-height: 0.9;
+        text-transform: uppercase;
+      }
+
+      h1 span,
+      .accent {
+        color: var(--gold);
+      }
+
+      .muted {
+        color: var(--muted);
+      }
+
+      .pill {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-height: 32px;
+        padding: 7px 11px;
+        border-radius: 999px;
+        background: rgba(242, 178, 49, 0.13);
+        color: var(--gold);
+        font-weight: 800;
+        font-size: 13px;
+        white-space: nowrap;
+      }
+
+      .pill.ok {
+        background: rgba(101, 217, 139, 0.16);
+        color: var(--ok);
+      }
+
+      .tabs {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 8px;
+        margin-top: 14px;
+      }
+
+      .tab {
+        border: 1px solid var(--line);
+        border-radius: 10px;
+        background: rgba(255, 255, 255, 0.04);
+        color: var(--text);
+        padding: 12px;
+        font-weight: 900;
+      }
+
+      .tab.active {
+        background: var(--gold);
+        color: #100b05;
+        border-color: var(--gold);
+      }
+
+      .login,
+      .empty,
+      .order {
+        background: rgba(16, 25, 35, 0.94);
+        border: 1px solid var(--line);
+        border-radius: 18px;
+        padding: 16px;
+      }
+
+      .login {
+        display: grid;
+        gap: 12px;
+      }
+
+      .login input {
+        width: 100%;
+        border: 1px solid var(--line);
+        border-radius: 12px;
+        padding: 14px;
+        background: #07111d;
+        color: var(--text);
+      }
+
+      .btn {
+        border: 0;
+        border-radius: 12px;
+        padding: 13px 14px;
+        background: var(--gold);
+        color: #100b05;
+        font-weight: 950;
+        text-decoration: none;
+        text-align: center;
+        cursor: pointer;
+      }
+
+      .btn.secondary {
+        background: var(--panel-2);
+        color: var(--text);
+        border: 1px solid var(--line);
+      }
+
+      .btn.call {
+        background: #65d98b;
+      }
+
+      .btn.waze {
+        background: #32ccfe;
+      }
+
+      .hidden {
+        display: none !important;
+      }
+
+      .toolbar {
+        display: grid;
+        gap: 10px;
+        margin-bottom: 14px;
+      }
+
+      .toolbar-row {
+        display: flex;
+        gap: 8px;
+        align-items: center;
+        justify-content: space-between;
+      }
+
+      .orders {
+        display: grid;
+        gap: 14px;
+      }
+
+      .order {
+        display: grid;
+        gap: 14px;
+      }
+
+      .order-head {
+        display: flex;
+        justify-content: space-between;
+        gap: 12px;
+        align-items: flex-start;
+        border-bottom: 1px solid rgba(242, 178, 49, 0.2);
+        padding-bottom: 12px;
+      }
+
+      .time {
+        color: var(--gold);
+        font-family: Impact, Haettenschweiler, "Arial Narrow Bold", sans-serif;
+        font-size: 42px;
+        line-height: 0.9;
+      }
+
+      .total {
+        color: var(--orange);
+        font-weight: 950;
+        font-size: 24px;
+        white-space: nowrap;
+      }
+
+      .customer-grid {
+        display: grid;
+        gap: 8px;
+      }
+
+      .field {
+        background: rgba(255, 255, 255, 0.035);
+        border: 1px solid rgba(255, 255, 255, 0.06);
+        border-radius: 12px;
+        padding: 11px;
+        overflow-wrap: anywhere;
+      }
+
+      .label {
+        display: block;
+        color: var(--muted);
+        font-size: 12px;
+        font-weight: 900;
+        letter-spacing: 0.08em;
+        margin-bottom: 5px;
+        text-transform: uppercase;
+      }
+
+      .address {
+        font-size: 20px;
+        font-weight: 900;
+      }
+
+      .quick-actions {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 8px;
+      }
+
+      .quick-actions .wide {
+        grid-column: 1 / -1;
+      }
+
+      .items {
+        display: grid;
+        gap: 8px;
+      }
+
+      .item {
+        border-top: 1px solid rgba(242, 178, 49, 0.14);
+        padding-top: 8px;
+      }
+
+      .item-line {
+        display: flex;
+        justify-content: space-between;
+        gap: 12px;
+        font-weight: 900;
+      }
+
+      .details {
+        margin-top: 5px;
+        color: var(--muted);
+        font-size: 13px;
+        line-height: 1.35;
+      }
+
+      .empty {
+        color: var(--muted);
+        text-align: center;
+      }
+
+      @media (max-width: 430px) {
+        .app {
+          padding: 12px;
+        }
+
+        .top {
+          margin: -12px -12px 12px;
+          padding: 12px;
+        }
+
+        .brand {
+          align-items: flex-start;
+        }
+
+        .quick-actions {
+          grid-template-columns: 1fr;
+        }
+
+        .quick-actions .wide {
+          grid-column: auto;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <main class="app">
+      <header class="top">
+        <div class="brand">
+          <div>
+            <h1>Loaded <span>Delivery</span></h1>
+            <p class="muted">Mobiel overzicht voor leveringen.</p>
+          </div>
+          <span class="pill" id="connectionStatus">Niet verbonden</span>
+        </div>
+        <div class="tabs">
+          <button class="tab active" data-filter="today" type="button">Vandaag</button>
+          <button class="tab" data-filter="all" type="button">Alle leveringen</button>
+        </div>
+      </header>
+
+      <section class="login" id="loginPanel">
+        <h2>Toegangscode</h2>
+        <p class="muted">Gebruik dezelfde geheime ordercode als op de laptop.</p>
+        <input id="secretInput" type="password" autocomplete="current-password" placeholder="Ordercode">
+        <button class="btn" id="saveSecretButton" type="button">Leveringen openen</button>
+      </section>
+
+      <section class="hidden" id="deliveryPanel">
+        <div class="toolbar">
+          <div class="toolbar-row">
+            <span class="pill" id="deliveryCount">0 leveringen</span>
+            <button class="btn secondary" id="refreshButton" type="button">Vernieuwen</button>
+          </div>
+          <p class="muted" id="lastUpdated">Nog niet vernieuwd</p>
+        </div>
+        <div class="orders" id="orders"></div>
+      </section>
+    </main>
+
+    <script>
+      const loginPanel = document.querySelector("#loginPanel");
+      const deliveryPanel = document.querySelector("#deliveryPanel");
+      const secretInput = document.querySelector("#secretInput");
+      const saveSecretButton = document.querySelector("#saveSecretButton");
+      const refreshButton = document.querySelector("#refreshButton");
+      const ordersEl = document.querySelector("#orders");
+      const connectionStatus = document.querySelector("#connectionStatus");
+      const deliveryCount = document.querySelector("#deliveryCount");
+      const lastUpdated = document.querySelector("#lastUpdated");
+      const tabs = [...document.querySelectorAll("[data-filter]")];
+
+      const money = new Intl.NumberFormat("nl-BE", { style: "currency", currency: "EUR" });
+      let currentFilter = "today";
+
+      function escapeHtml(value = "") {
+        return String(value)
+          .replaceAll("&", "&amp;")
+          .replaceAll("<", "&lt;")
+          .replaceAll(">", "&gt;")
+          .replaceAll('"', "&quot;")
+          .replaceAll("'", "&#039;");
+      }
+
+      function dateKey(date) {
+        const year = date.getFullYear();
+        const month = String(date.getMonth() + 1).padStart(2, "0");
+        const day = String(date.getDate()).padStart(2, "0");
+        return `${year}-${month}-${day}`;
+      }
+
+      function getSecret() {
+        return localStorage.getItem("loadedOrdersSecret") || "";
+      }
+
+      function setConnected(ok, text) {
+        connectionStatus.textContent = text;
+        connectionStatus.classList.toggle("ok", ok);
+      }
+
+      function getOrderDate(record) {
+        return new Date(record.createdAt || record.paidAt || Date.now());
+      }
+
+      function itemTotal(item) {
+        return Number(item.price || 0) * Number(item.quantity || 1);
+      }
+
+      function cleanPhone(phone = "") {
+        return String(phone).replace(/[^\d+]/g, "");
+      }
+
+      function routeAddress(address = "") {
+        return encodeURIComponent(`${address}, Gent, Belgium`);
+      }
+
+      function orderNumber(record) {
+        return record.displayOrderNumber || record.order?.orderNumber || record.order?.orderId || record.id || "Order";
+      }
+
+      function paymentLabel(record) {
+        if (record.paymentStatus === "paid") return "Online betaald";
+        return record.paymentLabel || "Betalen bij levering";
+      }
+
+      function renderOrders(orders) {
+        const today = dateKey(new Date());
+        const deliveryOrders = orders
+          .filter((record) => String(record.order?.customer?.method || "").toLowerCase() === "levering")
+          .filter((record) => currentFilter === "all" || dateKey(getOrderDate(record)) === today)
+          .sort((a, b) => {
+            const timeA = a.order?.customer?.orderTime || "";
+            const timeB = b.order?.customer?.orderTime || "";
+            return timeA.localeCompare(timeB) || getOrderDate(a) - getOrderDate(b);
+          });
+
+        deliveryCount.textContent = `${deliveryOrders.length} leveringen`;
+
+        if (!deliveryOrders.length) {
+          ordersEl.innerHTML = `<div class="empty">Geen leveringen gevonden.</div>`;
+          return;
+        }
+
+        ordersEl.innerHTML = deliveryOrders.map((record) => {
+          const order = record.order || {};
+          const customer = order.customer || {};
+          const items = Array.isArray(order.items) ? order.items : [];
+          const address = customer.address || "";
+          const phone = cleanPhone(customer.phone);
+          const total = Number(order.total || record.amount?.value || 0);
+          const mapsQuery = routeAddress(address);
+          const itemHtml = items.map((item) => `
+            <div class="item">
+              <div class="item-line">
+                <span>${escapeHtml(item.quantity || 1)}x ${escapeHtml(item.name || "Item")}</span>
+                <span>${money.format(itemTotal(item))}</span>
+              </div>
+              ${item.details ? `<div class="details">${escapeHtml(item.details)}</div>` : ""}
+            </div>
+          `).join("");
+
+          return `
+            <article class="order">
+              <div class="order-head">
+                <div>
+                  <div class="time">${escapeHtml(customer.orderTime || "--:--")}</div>
+                  <strong>${escapeHtml(orderNumber(record))}</strong>
+                </div>
+                <div class="total">${money.format(total)}</div>
+              </div>
+
+              <div class="customer-grid">
+                <div class="field">
+                  <span class="label">Klant</span>
+                  <strong>${escapeHtml(customer.name || "-")}</strong>
+                </div>
+                <div class="field">
+                  <span class="label">Adres</span>
+                  <div class="address">${escapeHtml(address || "-")}</div>
+                </div>
+                <div class="field">
+                  <span class="label">Telefoon</span>
+                  <strong>${escapeHtml(customer.phone || "-")}</strong>
+                </div>
+                <div class="field">
+                  <span class="label">Betaling</span>
+                  <strong>${escapeHtml(paymentLabel(record))}</strong>
+                </div>
+                ${customer.note ? `
+                  <div class="field">
+                    <span class="label">Opmerking</span>
+                    ${escapeHtml(customer.note)}
+                  </div>
+                ` : ""}
+              </div>
+
+              <div class="quick-actions">
+                <a class="btn call" href="tel:${encodeURIComponent(phone)}">Bel klant</a>
+                <a class="btn waze" href="https://waze.com/ul?q=${mapsQuery}&navigate=yes" target="_blank" rel="noopener">Open Waze</a>
+                <a class="btn secondary wide" href="https://www.google.com/maps/search/?api=1&query=${mapsQuery}" target="_blank" rel="noopener">Open Google Maps</a>
+              </div>
+
+              <div class="items">${itemHtml}</div>
+            </article>
+          `;
+        }).join("");
+      }
+
+      async function loadOrders() {
+        const secret = getSecret();
+        if (!secret) return;
+
+        try {
+          const response = await fetch("/api/orders", {
+            headers: {
+              "X-Admin-Secret": secret
+            }
+          });
+          const data = await response.json();
+          if (!response.ok) throw new Error(data.error || "Leveringen laden mislukt.");
+
+          renderOrders(data.orders || []);
+          setConnected(true, "Verbonden");
+          lastUpdated.textContent = `Laatst vernieuwd: ${new Date().toLocaleTimeString("nl-BE", { hour: "2-digit", minute: "2-digit", second: "2-digit" })}`;
+        } catch (error) {
+          setConnected(false, "Fout");
+          ordersEl.innerHTML = `<div class="empty">${escapeHtml(error.message)}</div>`;
+        }
+      }
+
+      saveSecretButton.addEventListener("click", () => {
+        const secret = secretInput.value.trim();
+        if (!secret) return;
+        localStorage.setItem("loadedOrdersSecret", secret);
+        loginPanel.classList.add("hidden");
+        deliveryPanel.classList.remove("hidden");
+        loadOrders();
+      });
+
+      refreshButton.addEventListener("click", loadOrders);
+
+      tabs.forEach((tab) => {
+        tab.addEventListener("click", () => {
+          currentFilter = tab.dataset.filter;
+          tabs.forEach((item) => item.classList.toggle("active", item === tab));
+          loadOrders();
+        });
+      });
+
+      if (getSecret()) {
+        loginPanel.classList.add("hidden");
+        deliveryPanel.classList.remove("hidden");
+        loadOrders();
+      }
+
+      window.setInterval(loadOrders, 10000);
+    </script>
+  </body>
+</html>
