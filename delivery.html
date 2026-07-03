@@ -191,6 +191,10 @@
         justify-content: space-between;
       }
 
+      .toolbar-row.wrap {
+        flex-wrap: wrap;
+      }
+
       .orders {
         display: grid;
         gap: 14px;
@@ -344,6 +348,9 @@
             <span class="pill" id="deliveryCount">0 leveringen</span>
             <button class="btn secondary" id="refreshButton" type="button">Vernieuwen</button>
           </div>
+          <div class="toolbar-row wrap">
+            <button class="btn secondary" id="changeCodeButton" type="button">Code wijzigen</button>
+          </div>
           <p class="muted" id="lastUpdated">Nog niet vernieuwd</p>
         </div>
         <div class="orders" id="orders"></div>
@@ -356,6 +363,7 @@
       const secretInput = document.querySelector("#secretInput");
       const saveSecretButton = document.querySelector("#saveSecretButton");
       const refreshButton = document.querySelector("#refreshButton");
+      const changeCodeButton = document.querySelector("#changeCodeButton");
       const ordersEl = document.querySelector("#orders");
       const connectionStatus = document.querySelector("#connectionStatus");
       const deliveryCount = document.querySelector("#deliveryCount");
@@ -389,6 +397,18 @@
       function setConnected(ok, text) {
         connectionStatus.textContent = text;
         connectionStatus.classList.toggle("ok", ok);
+      }
+
+      function showLogin(message = "") {
+        localStorage.removeItem("loadedOrdersSecret");
+        deliveryPanel.classList.add("hidden");
+        loginPanel.classList.remove("hidden");
+        secretInput.value = "";
+        secretInput.focus();
+        if (message) {
+          ordersEl.innerHTML = "";
+          lastUpdated.textContent = message;
+        }
       }
 
       function getOrderDate(record) {
@@ -517,6 +537,10 @@
           lastUpdated.textContent = `Laatst vernieuwd: ${new Date().toLocaleTimeString("nl-BE", { hour: "2-digit", minute: "2-digit", second: "2-digit" })}`;
         } catch (error) {
           setConnected(false, "Fout");
+          if (String(error.message || "").toLowerCase().includes("geen toegang")) {
+            showLogin("Code niet aanvaard. Vul de ordercode opnieuw in.");
+            return;
+          }
           const extra = location.protocol === "file:"
             ? "Open deze pagina liefst via https://loadedbowls.be/delivery.html zodra ze online staat."
             : "Controleer of delivery.html opnieuw gedeployed is en of de ordercode klopt.";
@@ -534,6 +558,7 @@
       });
 
       refreshButton.addEventListener("click", loadOrders);
+      changeCodeButton.addEventListener("click", () => showLogin("Vul de ordercode opnieuw in."));
 
       tabs.forEach((tab) => {
         tab.addEventListener("click", () => {
