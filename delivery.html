@@ -363,6 +363,7 @@
       const tabs = [...document.querySelectorAll("[data-filter]")];
 
       const money = new Intl.NumberFormat("nl-BE", { style: "currency", currency: "EUR" });
+      const apiBase = location.protocol === "file:" ? "https://loadedbowls.be" : "";
       let currentFilter = "today";
 
       function escapeHtml(value = "") {
@@ -503,7 +504,7 @@
         if (!secret) return;
 
         try {
-          const response = await fetch("/api/orders", {
+          const response = await fetch(`${apiBase}/api/orders`, {
             headers: {
               "X-Admin-Secret": secret
             }
@@ -516,7 +517,10 @@
           lastUpdated.textContent = `Laatst vernieuwd: ${new Date().toLocaleTimeString("nl-BE", { hour: "2-digit", minute: "2-digit", second: "2-digit" })}`;
         } catch (error) {
           setConnected(false, "Fout");
-          ordersEl.innerHTML = `<div class="empty">${escapeHtml(error.message)}</div>`;
+          const extra = location.protocol === "file:"
+            ? "Open deze pagina liefst via https://loadedbowls.be/delivery.html zodra ze online staat."
+            : "Controleer of delivery.html opnieuw gedeployed is en of de ordercode klopt.";
+          ordersEl.innerHTML = `<div class="empty">${escapeHtml(error.message)}<br><br>${escapeHtml(extra)}</div>`;
         }
       }
 
