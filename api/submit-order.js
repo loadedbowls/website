@@ -1,6 +1,7 @@
 import { saveOrder } from "./_order-store.js";
 import { forwardToPrinter } from "./_print-forward.js";
 import { sendOrderReceivedEmail } from "./_email.js";
+import { sendNewOrderPush } from "./_push.js";
 
 export default async function handler(req, res) {
   if (req.method !== "POST") {
@@ -41,6 +42,12 @@ export default async function handler(req, res) {
       await sendOrderReceivedEmail(record);
     } catch (error) {
       console.error("Could not send received email:", error);
+    }
+
+    try {
+      await sendNewOrderPush(record);
+    } catch (error) {
+      console.error("Could not send push notification:", error);
     }
 
     try {
