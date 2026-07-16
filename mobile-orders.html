@@ -123,6 +123,8 @@
       .tabs { display: flex; gap: 8px; overflow-x: auto; padding-bottom: 4px; }
       .tab { white-space: nowrap; background: #1b2837; color: var(--text); border: 1px solid var(--line); }
       .tab.active { background: var(--gold); color: #140d05; }
+      .view-actions { display: flex; gap: 8px; flex-wrap: wrap; }
+      .view-actions button.active { background: var(--gold); color: #140d05; }
 
       .orders { display: grid; gap: 12px; }
       .order { padding: 14px; display: grid; gap: 10px; }
@@ -175,6 +177,10 @@
       </section>
 
       <section class="panel hidden" id="ordersPanel">
+        <div class="view-actions">
+          <button class="active" id="activeView" type="button">Actieve orders</button>
+          <button class="secondary" id="historyView" type="button">Bestelgeschiedenis</button>
+        </div>
         <div class="tabs" id="tabs"></div>
         <div class="orders" id="orders"></div>
       </section>
@@ -183,7 +189,7 @@
     </main>
 
     <script>
-      const statuses = ["Nieuw", "In bereiding", "Klaar", "Onderweg", "Geschiedenis"];
+      const statuses = ["Nieuw", "In bereiding", "Klaar", "Onderweg"];
       const historyStatuses = ["Afgehaald", "Geleverd"];
       const secretInput = document.querySelector("#secretInput");
       const loginPanel = document.querySelector("#loginPanel");
@@ -194,7 +200,10 @@
       const tabsEl = document.querySelector("#tabs");
       const countEl = document.querySelector("#count");
       const errorEl = document.querySelector("#error");
+      const activeViewButton = document.querySelector("#activeView");
+      const historyViewButton = document.querySelector("#historyView");
       let activeStatus = "Nieuw";
+      let viewMode = "active";
       let orders = [];
 
       function escapeHtml(value) {
@@ -207,7 +216,26 @@
 
       function statusGroup(record) {
         const status = record.status || "Nieuw";
-        return historyStatuses.includes(status) ? "Geschiedenis" : status;
+        return historyStatuses.includes(status) ? "Bestelgeschiedenis" : status;
+      }
+
+      function isTestOrder(record) {
+        const order = record.order || {};
+        const customer = order.customer || {};
+        const haystack = [
+          record.id,
+          record.paymentLabel,
+          record.paymentStatus,
+          customer.name,
+          customer.email,
+          customer.phone,
+          customer.note
+        ].join(" ").toLowerCase();
+        return haystack.includes("test");
+      }
+
+      function isHistoryOrder(record) {
+        return historyStatuses.includes(record.status) || isTestOrder(record);
       }
 
       function getSecret() {
@@ -247,8 +275,13 @@
       }
 
       function renderTabs() {
+        tabsEl.classList.toggle("hidden", viewMode === "history");
+        activeViewButton.classList.toggle("active", viewMode === "active");
+        activeViewButton.classList.toggle("secondary", viewMode !== "active");
+        historyViewButton.classList.toggle("active", viewMode === "history");
+        historyViewButton.classList.toggle("secondary", viewMode !== "history");
         tabsEl.innerHTML = statuses.map(status => {
-          const total = orders.filter(order => statusGroup(order) === status).length;
+          const total = orders.filter(order => !isHistoryOrder(order) && statusGroup(order) === status).length;
           return `<button class="tab ${status === activeStatus ? "active" : ""}" type="button" data-tab="${escapeHtml(status)}">${escapeHtml(status)} (${total})</button>`;
         }).join("");
       }
@@ -288,10 +321,12 @@
 
       function renderOrders() {
         renderTabs();
-        const filtered = orders.filter(order => statusGroup(order) === activeStatus);
+        const filtered = viewMode === "history"
+          ? orders.filter(order => isHistoryOrder(order))
+          : orders.filter(order => !isHistoryOrder(order) && statusGroup(order) === activeStatus);
         countEl.textContent = orders.length;
         if (!filtered.length) {
-          ordersEl.innerHTML = `<article class="order"><p class="meta">Geen orders in ${escapeHtml(activeStatus)}.</p></article>`;
+          ordersEl.innerHTML = `<article class="order"><p class="meta">Geen orders in ${escapeHtml(viewMode === "history" ? "Bestelgeschiedenis" : activeStatus)}.</p></article>`;
           return;
         }
 
@@ -314,7 +349,7 @@
                   <h3>${escapeHtml(number)}</h3>
                   <p class="meta">${escapeHtml(customer.name || "Klant")} · ${escapeHtml(customer.method || "-")} · ${escapeHtml(customer.orderTime || "-")}</p>
                 </div>
-                <span class="pill">${escapeHtml(record.status || "Nieuw")}</span>
+                <span class="pill">${escapeHtml(isTestOrder(record) ? "Testorder" : (record.status || "Nieuw"))}</span>
               </div>
               <p class="meta">
                 Tel: <a href="tel:${escapeHtml(customer.phone || "")}" style="color:var(--gold)">${escapeHtml(customer.phone || "-")}</a><br>
@@ -397,6 +432,14 @@
 
       document.querySelector("#enablePush").addEventListener("click", registerPush);
       document.querySelector("#refresh").addEventListener("click", refreshOrders);
+      activeViewButton.addEventListener("click", () => {
+        viewMode = "active";
+        renderOrders();
+      });
+      historyViewButton.addEventListener("click", () => {
+        viewMode = "history";
+        renderOrders();
+      });
       tabsEl.addEventListener("click", event => {
         const button = event.target.closest("[data-tab]");
         if (!button) return;
@@ -410,7 +453,12 @@
         try {
           setError("");
           await updateStatus(button.dataset.id, button.dataset.status);
-          activeStatus = historyStatuses.includes(button.dataset.status) ? "Geschiedenis" : button.dataset.status;
+          if (historyStatuses.includes(button.dataset.status)) {
+            viewMode = "history";
+          } else {
+            viewMode = "active";
+            activeStatus = button.dataset.status;
+          }
           await refreshOrders();
         } catch (error) {
           setError(error.message);
