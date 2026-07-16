@@ -107,6 +107,14 @@
         border: 1px solid var(--line);
       }
 
+      button.green {
+        background: var(--ok);
+      }
+
+      button.blue {
+        background: #7ab7ff;
+      }
+
       .small { font-size: 12px; color: var(--muted); line-height: 1.45; }
       .error { color: var(--danger); }
       .ok { color: var(--ok); }
@@ -164,7 +172,6 @@
           <button id="enablePush" type="button">Meldingen activeren</button>
           <button class="secondary" id="refresh" type="button">Vernieuw</button>
         </div>
-        <p class="small">iPhone: open in Safari, druk op delen, kies <strong>Zet op beginscherm</strong>, open daarna de app vanaf je beginscherm.</p>
       </section>
 
       <section class="panel hidden" id="ordersPanel">
@@ -248,6 +255,31 @@
         return `https://waze.com/ul?q=${encodeURIComponent(address)}&navigate=yes`;
       }
 
+      function statusButtons(record) {
+        const status = record.status || "Nieuw";
+        const method = record.order?.customer?.method || "";
+        const buttons = [];
+
+        if (status === "Nieuw") {
+          buttons.push(`<button class="blue" type="button" data-status="In bereiding" data-id="${escapeHtml(record.id)}">In bereiding</button>`);
+        }
+
+        if (status === "In bereiding") {
+          const nextStatus = method === "Levering" ? "Onderweg" : "Klaar";
+          buttons.push(`<button class="green" type="button" data-status="${escapeHtml(nextStatus)}" data-id="${escapeHtml(record.id)}">${escapeHtml(nextStatus)}</button>`);
+        }
+
+        if (status === "Klaar") {
+          buttons.push(`<button class="secondary" type="button" data-status="Afgehaald" data-id="${escapeHtml(record.id)}">Afgehaald</button>`);
+        }
+
+        if (status === "Onderweg") {
+          buttons.push(`<button class="secondary" type="button" data-status="Geleverd" data-id="${escapeHtml(record.id)}">Geleverd</button>`);
+        }
+
+        return buttons.join("");
+      }
+
       function renderOrders() {
         renderTabs();
         const filtered = orders.filter(order => (order.status || "Nieuw") === activeStatus);
@@ -267,6 +299,7 @@
           const routeButtons = customer.method === "Levering" && address
             ? `<a class="button-link" href="${wazeLink(address)}" target="_blank" rel="noreferrer">Waze</a><a class="button-link secondary" href="${mapsLink(address)}" target="_blank" rel="noreferrer">Maps</a>`
             : "";
+          const actionButtons = [statusButtons(record), routeButtons].filter(Boolean).join("");
 
           return `
             <article class="order">
@@ -285,10 +318,18 @@
               </p>
               <div class="items">${items.map(item => `${escapeHtml(item.quantity || 1)}x ${escapeHtml(item.name || "Item")}\\n${escapeHtml(item.details || "")}`).join("\\n\\n")}</div>
               <p class="total">Totaal: ${money(total)}</p>
-              <div class="actions">${routeButtons}</div>
+              <div class="actions">${actionButtons}</div>
             </article>
           `;
         }).join("");
+      }
+
+      async function updateStatus(id, status) {
+        await api("/api/orders", {
+          method: "PATCH",
+          headers: { "content-type": "application/json" },
+          body: JSON.stringify({ id, status })
+        });
       }
 
       async function refreshOrders() {
@@ -355,6 +396,19 @@
         if (!button) return;
         activeStatus = button.dataset.tab;
         renderOrders();
+      });
+
+      ordersEl.addEventListener("click", async event => {
+        const button = event.target.closest("[data-status]");
+        if (!button) return;
+        try {
+          setError("");
+          await updateStatus(button.dataset.id, button.dataset.status);
+          activeStatus = button.dataset.status;
+          await refreshOrders();
+        } catch (error) {
+          setError(error.message);
+        }
       });
 
       secretInput.value = getSecret();
