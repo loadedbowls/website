@@ -59,10 +59,10 @@
       <section id="bases" class="bases section-shell">
         <div class="split-heading">
           <div>
-            <p class="section-kicker">/01 — De basis</p>
-            <h2>Make your <span>own bowl.</span></h2>
+            <p class="section-kicker" data-i18n="basesKicker">/01 — De basis</p>
+            <h2 data-i18n-html="basesTitle">Make your <span>own bowl.</span></h2>
           </div>
-          <p>Drie fundamenten, allemaal gebouwd om een berg topping te dragen. Make Your Own vanaf €11,50 medium / €14,50 large.</p>
+          <p data-i18n="basesIntro">Drie fundamenten, allemaal gebouwd om een berg topping te dragen. Make Your Own vanaf €11,50 medium / €14,50 large.</p>
         </div>
 
         <div class="base-feature">
@@ -71,15 +71,15 @@
             <span id="baseBadge">Make it yours</span>
           </div>
           <div>
-            <h3 id="baseTitle">Basis naar keuze</h3>
-            <p id="baseCopy">Kies frieten, nachos of rijst als fundament voor je bowl. Daarna kies je proteine, toppings, sauzen en afwerking.</p>
+            <h3 id="baseTitle" data-i18n="baseTitleDefault">Basis naar keuze</h3>
+            <p id="baseCopy" data-i18n="baseCopyDefault">Kies frieten, nachos of rijst als fundament voor je bowl. Daarna kies je proteine, toppings, sauzen en afwerking.</p>
             <div class="included-card">
-              <p>Make your own — inclusief</p>
-              <div><strong>1× Basis</strong><span>frieten, nachos of rijst</span></div>
-              <div><strong>1× Proteïne</strong><span>naar keuze</span></div>
-              <div><strong>3× Toppings</strong><span>naar keuze</span></div>
-              <div><strong>2× Sauzen</strong><span>naar keuze</span></div>
-              <div><strong>1× Afwerking</strong><span>naar keuze</span></div>
+              <p data-i18n="includedTitle">Make your own — inclusief</p>
+              <div><strong data-i18n="includedBase">1× Basis</strong><span data-i18n="includedBaseValue">frieten, nachos of rijst</span></div>
+              <div><strong data-i18n="includedProtein">1× Proteïne</strong><span data-i18n="choiceValue">naar keuze</span></div>
+              <div><strong data-i18n="includedToppings">3× Toppings</strong><span data-i18n="choiceValue">naar keuze</span></div>
+              <div><strong data-i18n="includedSauces">2× Sauzen</strong><span data-i18n="choiceValue">naar keuze</span></div>
+              <div><strong data-i18n="includedFinish">1× Afwerking</strong><span data-i18n="choiceValue">naar keuze</span></div>
               <footer><span>Medium / Large</span><strong>€11,50 / €14,50</strong></footer>
               <button class="primary-btn included-action" type="button" id="openBuilderModal">Build your bowl <span>→</span></button>
             </div>
@@ -264,17 +264,17 @@
       <section id="signatures" class="signatures section-shell">
         <div class="menu-heading">
           <div>
-            <p class="section-kicker">/03 — Signature bowls</p>
-            <h2>Signature <span>bowls.</span></h2>
+            <p class="section-kicker" data-i18n="signatureKicker">/03 — Signature bowls</p>
+            <h2 data-i18n-html="signatureTitle">Signature <span>bowls.</span></h2>
           </div>
-          <p>Basis naar keuze · Medium / Large</p>
+          <p data-i18n="signatureIntro">Basis naar keuze · Medium / Large</p>
         </div>
         <div class="signature-grid" id="signatureGrid"></div>
       </section>
 
       <section id="sweet" class="sweet section-shell">
-        <p class="section-kicker">/04 — Desserts & dranken</p>
-        <h2>Sweet <span>finish.</span></h2>
+        <p class="section-kicker" data-i18n="sweetKicker">/04 — Desserts & dranken</p>
+        <h2 data-i18n-html="sweetTitle">Sweet <span>finish.</span></h2>
         <div class="sweet-grid">
           <article class="list-card">
             <h3>Desserts</h3>
@@ -289,8 +289,8 @@
 
       <section id="order" class="order-section section-shell">
         <div class="order-panel">
-          <p class="section-kicker">/05 — Checkout</p>
-          <h2>Order <span>now.</span></h2>
+          <p class="section-kicker" data-i18n="checkoutKicker">/05 — Checkout</p>
+          <h2 data-i18n-html="checkoutTitle">Order <span>now.</span></h2>
           <div id="cartItems" class="cart-items"></div>
           <div class="cart-total">
             <span>Totaal</span>
@@ -326,8 +326,8 @@
             </select>
           </label>
           <div class="hours-note" id="hoursNote">
-            <strong>Openingsuren</strong>
-            <span>Maandag - vrijdag: 11:00 - 14:00 en 18:00 - 22:00. Zaterdag: 11:00 - 14:00 en 18:00 - 23:00. Zondag gesloten.</span>
+            <strong data-i18n="openingHoursTitle">Openingsuren</strong>
+            <span data-i18n="openingHoursText">Maandag - zaterdag: 11:00 - 15:00 en 17:00 - 22:00. Zondag gesloten.</span>
           </div>
           <label id="deliveryAddressLabel">
             <span data-i18n="labelAddress">Leveradres</span>
@@ -345,18 +345,18 @@
             </select>
           </label>
           <button class="primary-btn builder-submit" type="submit" id="checkoutSubmit">Verder naar betaling <span>→</span></button>
-          <p class="form-note">Levering kan binnen 6 km van Loaded Bowls in Gent. Bereiding en levering duren gemiddeld 25-30 minuten.</p>
+          <p class="form-note" data-i18n="formNote">Levering kan binnen 6 km van Loaded Bowls in Gent. Bereiding en levering duren gemiddeld 25-30 minuten.</p>
         </form>
       </section>
 
       <section id="find" class="find-section section-shell">
         <div class="find-copy">
-          <p class="section-kicker">/06 — Kom een bowl halen</p>
-          <h2>Find the <span>drip.</span></h2>
-          <p>Walk-in, take-away en delivery in Gent. Bestellen kan online, aan de counter of via je favoriete delivery app. Bereiding en levering duurt gemiddeld 25-30 minuten.</p>
+          <p class="section-kicker" data-i18n="findKicker">/06 — Kom een bowl halen</p>
+          <h2 data-i18n-html="findTitle">Find the <span>drip.</span></h2>
+          <p data-i18n="findCopy">Walk-in, take-away en delivery in Gent. Bestellen kan online, aan de counter of via je favoriete delivery app. Bereiding en levering duurt gemiddeld 25-30 minuten.</p>
           <div class="find-actions">
-            <a class="primary-btn" href="#order">Bestel afhaal <span>→</span></a>
-            <a class="ghost-btn" href="https://www.google.com/maps/search/?api=1&query=Sint-Amandstraat%2024%209000%20Gent" target="_blank" rel="noreferrer">Route</a>
+            <a class="primary-btn" href="#order"><span data-i18n="pickupOrder">Bestel afhaal</span> <span>→</span></a>
+            <a class="ghost-btn" href="https://www.google.com/maps/search/?api=1&query=Sint-Amandstraat%2024%209000%20Gent" target="_blank" rel="noreferrer" data-i18n="route">Route</a>
           </div>
         </div>
 
@@ -374,12 +374,8 @@
               <dd>Sint-Amandstraat 24<br>9000 Gent</dd>
             </div>
             <div>
-              <dt>Ma — Vr</dt>
-              <dd>11:00 — 14:00 / 18:00 — 22:00</dd>
-            </div>
-            <div>
-              <dt>Zaterdag</dt>
-              <dd>11:00 — 14:00 / 18:00 — 23:00</dd>
+              <dt>Ma — Za</dt>
+              <dd>11:00 — 15:00 / 17:00 — 22:00</dd>
             </div>
             <div>
               <dt>Zondag</dt>
@@ -395,18 +391,14 @@
         <article class="location-card hours-card">
           <div class="location-head compact">
             <div>
-              <small>Openingsuren</small>
-              <h3>Wanneer?</h3>
+              <small data-i18n="openingHoursTitle">Openingsuren</small>
+              <h3 data-i18n="whenTitle">Wanneer?</h3>
             </div>
           </div>
           <dl class="location-list">
             <div>
-              <dt>Ma - Vr</dt>
-              <dd>11:00 - 14:00 / 18:00 - 22:00</dd>
-            </div>
-            <div>
-              <dt>Zaterdag</dt>
-              <dd>11:00 - 14:00 / 18:00 - 23:00</dd>
+              <dt>Ma - Za</dt>
+              <dd>11:00 - 15:00 / 17:00 - 22:00</dd>
             </div>
             <div>
               <dt>Zondag</dt>
@@ -443,19 +435,19 @@
     <footer class="site-footer">
       <div>
         <strong>Loaded Bowls</strong>
-        <span>© 2026 Loaded Bowls. Alle rechten voorbehouden.</span>
+        <span data-i18n="copyright">© 2026 Loaded Bowls. Alle rechten voorbehouden.</span>
       </div>
-      <p>
+      <p data-i18n="termsText">
         Online bestellingen zijn pas definitief na betaling. Levering is mogelijk binnen 6 km van Sint-Amandstraat 24, 9000 Gent. Bereiding en levering duren gemiddeld 25-30 minuten, afhankelijk van drukte en bereikbaarheid. Afhalen kan tijdens de openingsuren. Prijzen en beschikbaarheid kunnen wijzigen.
       </p>
     </footer>
 
     <div class="closed-modal hidden" id="closedModal" role="dialog" aria-modal="true" aria-labelledby="closedTitle">
       <div class="closed-card">
-        <p class="section-kicker">Momenteel gesloten</p>
-        <h2 id="closedTitle">We zijn nu gesloten.</h2>
+        <p class="section-kicker" data-i18n="closedKicker">Momenteel gesloten</p>
+        <h2 id="closedTitle" data-i18n="closedTitle">We zijn nu gesloten.</h2>
         <p id="closedMessage">Online bestellen kan opnieuw tijdens onze openingsuren.</p>
-        <button class="primary-btn" type="button" id="continueBrowsing">Toch verder kijken <span>→</span></button>
+        <button class="primary-btn" type="button" id="continueBrowsing"><span data-i18n="continueBrowsing">Toch verder kijken</span> <span>→</span></button>
       </div>
     </div>
 
@@ -472,7 +464,7 @@
       <div class="choice-card">
         <button class="modal-close" type="button" data-close-modal="signatureModal" aria-label="Sluiten">×</button>
         <p class="section-kicker">Signature bowl</p>
-        <h2 id="signatureModalTitle">Aanpassen</h2>
+        <h2 id="signatureModalTitle" data-i18n="adjust">Aanpassen</h2>
         <div id="signatureModalBody"></div>
       </div>
     </div>
