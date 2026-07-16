@@ -113,6 +113,26 @@ button {
   color: var(--orange);
 }
 
+.top-actions {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.language-select {
+  min-height: 34px;
+  border: 1px solid var(--line);
+  border-radius: 7px;
+  padding: 0 8px;
+  background: rgba(255,255,255,0.04);
+  color: var(--paper);
+  font: 900 0.72rem/1 var(--body);
+}
+
+.language-select option {
+  color: #101014;
+}
+
 .order-now,
 .primary-btn,
 .ghost-btn {
@@ -1497,6 +1517,10 @@ body.modal-open {
     justify-content: space-between;
     overflow-x: auto;
     padding-bottom: 7px;
+  }
+
+  .top-actions {
+    justify-self: end;
   }
 
   .hero,
