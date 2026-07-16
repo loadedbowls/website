@@ -1,4 +1,4 @@
-import { listOrders, requireAdmin, updateOrderStatus } from "./_order-store.js";
+import { listOrders, requireAdmin, updateOrderDetails, updateOrderStatus } from "./_order-store.js";
 import { sendOrderOnTheWayEmail, sendOrderPreparingEmail } from "./_email.js";
 
 const allowedStatuses = ["Nieuw", "In bereiding", "Klaar", "Onderweg", "Afgehaald", "Geleverd", "Geannuleerd"];
@@ -24,8 +24,22 @@ export default async function handler(req, res) {
   }
 
   if (req.method === "PATCH") {
-    const { id, status } = req.body || {};
-    if (!id || !allowedStatuses.includes(status)) {
+    const { id, order, status } = req.body || {};
+    if (!id) {
+      return res.status(400).json({ error: "Order ontbreekt." });
+    }
+
+    if (order) {
+      try {
+        const updatedOrder = await updateOrderDetails(id, order);
+        if (!updatedOrder) return res.status(404).json({ error: "Order niet gevonden." });
+        return res.status(200).json({ order: updatedOrder });
+      } catch (error) {
+        return res.status(500).json({ error: error.message });
+      }
+    }
+
+    if (!allowedStatuses.includes(status)) {
       return res.status(400).json({ error: "Ongeldige status." });
     }
 
