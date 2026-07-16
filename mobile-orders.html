@@ -183,7 +183,8 @@
     </main>
 
     <script>
-      const statuses = ["Nieuw", "In bereiding", "Klaar", "Onderweg"];
+      const statuses = ["Nieuw", "In bereiding", "Klaar", "Onderweg", "Geschiedenis"];
+      const historyStatuses = ["Afgehaald", "Geleverd"];
       const secretInput = document.querySelector("#secretInput");
       const loginPanel = document.querySelector("#loginPanel");
       const pushPanel = document.querySelector("#pushPanel");
@@ -202,6 +203,11 @@
 
       function money(value) {
         return "€" + Number(value || 0).toFixed(2).replace(".", ",");
+      }
+
+      function statusGroup(record) {
+        const status = record.status || "Nieuw";
+        return historyStatuses.includes(status) ? "Geschiedenis" : status;
       }
 
       function getSecret() {
@@ -242,7 +248,7 @@
 
       function renderTabs() {
         tabsEl.innerHTML = statuses.map(status => {
-          const total = orders.filter(order => (order.status || "Nieuw") === status).length;
+          const total = orders.filter(order => statusGroup(order) === status).length;
           return `<button class="tab ${status === activeStatus ? "active" : ""}" type="button" data-tab="${escapeHtml(status)}">${escapeHtml(status)} (${total})</button>`;
         }).join("");
       }
@@ -282,7 +288,7 @@
 
       function renderOrders() {
         renderTabs();
-        const filtered = orders.filter(order => (order.status || "Nieuw") === activeStatus);
+        const filtered = orders.filter(order => statusGroup(order) === activeStatus);
         countEl.textContent = orders.length;
         if (!filtered.length) {
           ordersEl.innerHTML = `<article class="order"><p class="meta">Geen orders in ${escapeHtml(activeStatus)}.</p></article>`;
@@ -404,7 +410,7 @@
         try {
           setError("");
           await updateStatus(button.dataset.id, button.dataset.status);
-          activeStatus = button.dataset.status;
+          activeStatus = historyStatuses.includes(button.dataset.status) ? "Geschiedenis" : button.dataset.status;
           await refreshOrders();
         } catch (error) {
           setError(error.message);
