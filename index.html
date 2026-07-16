@@ -13,23 +13,31 @@
         <span>Loaded<span>.</span>Bowls</span>
       </a>
       <nav class="nav" aria-label="Hoofdnavigatie">
-        <a href="#bases">Build</a>
-        <a href="#signatures">Menu</a>
-        <a href="#sweet">Drinks</a>
-        <a href="#find">Find us</a>
-        <a href="#order">Checkout</a>
+        <a href="#bases" data-i18n="navBuild">Build</a>
+        <a href="#signatures" data-i18n="navMenu">Menu</a>
+        <a href="#sweet" data-i18n="navDrinks">Drinks</a>
+        <a href="#find" data-i18n="navFind">Find us</a>
+        <a href="#order" data-i18n="navCheckout">Checkout</a>
       </nav>
-      <a class="order-now" href="#order">Order now <small id="navCartTotal"></small></a>
+      <div class="top-actions">
+        <select class="language-select" id="languageSelect" aria-label="Taal kiezen">
+          <option value="nl" selected>NL</option>
+          <option value="en">EN</option>
+          <option value="fr">FR</option>
+          <option value="de">DE</option>
+        </select>
+        <a class="order-now" href="#order"><span data-i18n="orderNow">Order now</span> <small id="navCartTotal"></small></a>
+      </div>
     </header>
 
     <main id="home">
       <section class="hero section-shell">
         <div class="hero-copy">
-          <h1>Build it.<br><span>Load</span> it.<br>Devour it.</h1>
-          <p>Kies je basis: frieten, rijst of nachos. Stapel je proteine, toppings, sauzen en afwerking. Of ga direct voor een Signature Bowl in Gent. Vanaf <strong>€11,50.</strong></p>
+          <h1 data-i18n-html="heroTitle">Build it.<br><span>Load</span> it.<br>Devour it.</h1>
+          <p data-i18n-html="heroCopy">Kies je basis: frieten, rijst of nachos. Stapel je proteine, toppings, sauzen en afwerking. Of ga direct voor een Signature Bowl in Gent. Vanaf <strong>€11,50.</strong></p>
           <div class="hero-actions">
-            <a class="primary-btn" href="#bases">Build your bowl <span>→</span></a>
-            <a class="ghost-btn" href="#signatures">See signatures</a>
+            <a class="primary-btn" href="#bases"><span data-i18n="buildYourBowl">Build your bowl</span> <span>→</span></a>
+            <a class="ghost-btn" href="#signatures" data-i18n="seeSignatures">See signatures</a>
           </div>
           <div class="base-line">Frieten <span>•</span> Nachos <span>•</span> Rijst <span>•</span></div>
           <p class="micro">Gevestigd in Gent. Bereiding en levering duurt gemiddeld 25-30 minuten.</p>
@@ -292,26 +300,27 @@
 
         <form class="checkout" id="orderForm">
           <label>
-            Naam
+            <span data-i18n="labelName">Naam</span>
             <input name="name" autocomplete="name" required placeholder="Voornaam en achternaam">
           </label>
           <label>
-            Telefoon
+            <span data-i18n="labelPhone">Telefoon</span>
             <input name="phone" autocomplete="tel" required placeholder="+32 ...">
           </label>
           <label>
-            E-mail
+            <span data-i18n="labelEmail">E-mail</span>
             <input name="email" autocomplete="email" type="email" required placeholder="jouw@email.be">
           </label>
           <label>
-            Keuze
-            <select name="method" required>
+            <span data-i18n="labelMethod">Keuze</span>
+            <select name="method" id="orderMethod" required>
               <option value="Afhalen">Afhalen</option>
               <option value="Levering">Levering</option>
+              <option value="Ter plaatse eten">Ter plaatse eten</option>
             </select>
           </label>
           <label>
-            Gewenst uur
+            <span data-i18n="labelTime">Gewenst uur</span>
             <select name="orderTime" id="orderTime" required>
               <option value="">Kies een uur</option>
             </select>
@@ -320,16 +329,16 @@
             <strong>Openingsuren</strong>
             <span>Maandag - vrijdag: 11:00 - 14:00 en 18:00 - 22:00. Zaterdag: 11:00 - 14:00 en 18:00 - 23:00. Zondag gesloten.</span>
           </div>
-          <label>
-            Leveradres
+          <label id="deliveryAddressLabel">
+            <span data-i18n="labelAddress">Leveradres</span>
             <input name="address" autocomplete="street-address" placeholder="Straat, nummer en gemeente">
           </label>
           <label>
-            Opmerking
+            <span data-i18n="labelNote">Opmerking</span>
             <textarea name="note" rows="4" placeholder="Allergie, extra info of opmerking"></textarea>
           </label>
           <label>
-            Betaling
+            <span data-i18n="labelPayment">Betaling</span>
             <select name="paymentChoice" id="paymentChoice" required>
               <option value="online">Online betalen</option>
               <option value="later">Betalen bij afhaal/levering</option>
