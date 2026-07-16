@@ -1,4 +1,3 @@
-
 {
   "name": "loaded-bowls-website",
   "version": "1.0.0",
@@ -6,7 +5,8 @@
   "type": "module",
   "dependencies": {
     "@vercel/kv": "latest",
-    "redis": "latest"
+    "redis": "latest",
+    "web-push": "latest"
   },
   "scripts": {
     "start": "vercel dev"
