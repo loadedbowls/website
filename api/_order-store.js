@@ -185,6 +185,39 @@ export async function updateOrderStatus(id, status) {
   return updated;
 }
 
+export async function updateOrderDetails(id, orderPatch) {
+  const key = `${ORDER_KEY_PREFIX}${id}`;
+  const existing = parseOrder(await storeGet(key));
+  if (!existing) return null;
+
+  const currentOrder = existing.order || {};
+  const nextOrder = {
+    ...currentOrder,
+    ...orderPatch,
+    customer: {
+      ...(currentOrder.customer || {}),
+      ...(orderPatch.customer || {})
+    },
+    items: Array.isArray(orderPatch.items) ? orderPatch.items : (currentOrder.items || [])
+  };
+
+  const total = Number(nextOrder.total ?? 0);
+  const amount = Number.isFinite(total) && total > 0
+    ? { ...(existing.amount || { currency: "EUR" }), value: total.toFixed(2), currency: "EUR" }
+    : existing.amount;
+
+  const updated = {
+    ...existing,
+    amount,
+    order: nextOrder,
+    editedAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString()
+  };
+
+  await storeSet(key, updated);
+  return updated;
+}
+
 export async function markOrderEmailSent(id, eventName) {
   const key = `${ORDER_KEY_PREFIX}${id}`;
   const existing = parseOrder(await storeGet(key));
