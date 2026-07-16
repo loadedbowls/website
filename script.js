@@ -227,12 +227,6 @@ const baseContent = {
 let cart = [];
 let editingCartKey = "";
 
-const openingDeal = {
-  starts: "2026-07-06",
-  ends: "2026-07-12",
-  label: "Openingsactie: 2de bowl halve prijs"
-};
-
 const money = new Intl.NumberFormat("nl-BE", {
   style: "currency",
   currency: "EUR"
@@ -243,7 +237,6 @@ const dessertList = document.querySelector("#dessertList");
 const drinkList = document.querySelector("#drinkList");
 const navCartTotal = document.querySelector("#navCartTotal");
 const cartItems = document.querySelector("#cartItems");
-const cartPromo = document.querySelector("#cartPromo");
 const cartTotal = document.querySelector("#cartTotal");
 const orderForm = document.querySelector("#orderForm");
 const orderTime = document.querySelector("#orderTime");
@@ -533,45 +526,13 @@ function getCartLines() {
   return cart;
 }
 
-function getLocalDateKey(date = new Date()) {
-  const year = date.getFullYear();
-  const month = String(date.getMonth() + 1).padStart(2, "0");
-  const day = String(date.getDate()).padStart(2, "0");
-  return `${year}-${month}-${day}`;
-}
-
-function isOpeningDealActive(date = new Date()) {
-  const today = getLocalDateKey(date);
-  return today >= openingDeal.starts && today <= openingDeal.ends;
-}
-
-function isBowlLine(item) {
-  return item.category === "bowl" || item.id === "custom-bowl" || signatures.some((signature) => signature.id === item.id);
-}
-
 function getCartSummary(lines = getCartLines()) {
   const subtotal = lines.reduce((sum, item) => sum + item.price * item.quantity, 0);
-  const bowlPrices = [];
-
-  lines.forEach((item) => {
-    if (!isBowlLine(item)) return;
-    for (let count = 0; count < item.quantity; count += 1) {
-      bowlPrices.push(item.price);
-    }
-  });
-
-  let discount = 0;
-  if (isOpeningDealActive() && bowlPrices.length >= 2) {
-    const discountedBowls = bowlPrices.sort((a, b) => a - b).slice(0, Math.floor(bowlPrices.length / 2));
-    discount = discountedBowls.reduce((sum, price) => sum + price * 0.5, 0);
-  }
 
   return {
     subtotal,
-    discount,
-    total: Math.max(0, subtotal - discount),
-    bowlCount: bowlPrices.length,
-    promoActive: isOpeningDealActive()
+    discount: 0,
+    total: subtotal
   };
 }
 
@@ -598,26 +559,6 @@ function renderCart() {
   }
 
   const summary = getCartSummary(lines);
-  if (cartPromo) {
-    if (summary.promoActive && summary.discount > 0) {
-      cartPromo.classList.remove("hidden");
-      cartPromo.innerHTML = `
-        <small>${openingDeal.label}</small>
-        <p><span>Subtotaal</span><strong>${money.format(summary.subtotal)}</strong></p>
-        <p><span>Korting</span><strong class="discount">-${money.format(summary.discount)}</strong></p>
-      `;
-    } else if (summary.promoActive && summary.bowlCount === 1) {
-      cartPromo.classList.remove("hidden");
-      cartPromo.innerHTML = `
-        <small>${openingDeal.label}</small>
-        <p><span>Voeg nog 1 bowl toe om de korting te krijgen.</span></p>
-      `;
-    } else {
-      cartPromo.classList.add("hidden");
-      cartPromo.innerHTML = "";
-    }
-  }
-
   cartTotal.textContent = money.format(summary.total);
   navCartTotal.textContent = summary.total > 0 ? money.format(summary.total) : "";
 }
@@ -913,7 +854,7 @@ orderForm.addEventListener("submit", async (event) => {
     items: lines,
     subtotal: summary.subtotal,
     discount: summary.discount,
-    promotion: summary.discount > 0 ? openingDeal.label : "",
+    promotion: "",
     total: summary.total,
     paymentMethod: selectedPaymentChoice === "later" ? "Betalen bij afhaal/levering" : "Online betalen"
   };
