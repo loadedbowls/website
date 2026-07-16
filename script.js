@@ -240,9 +240,12 @@ const cartItems = document.querySelector("#cartItems");
 const cartTotal = document.querySelector("#cartTotal");
 const orderForm = document.querySelector("#orderForm");
 const orderTime = document.querySelector("#orderTime");
+const orderMethod = document.querySelector("#orderMethod");
 const paymentChoice = document.querySelector("#paymentChoice");
 const checkoutSubmit = document.querySelector("#checkoutSubmit");
 const hoursNote = document.querySelector("#hoursNote");
+const deliveryAddressLabel = document.querySelector("#deliveryAddressLabel");
+const languageSelect = document.querySelector("#languageSelect");
 const openBuilderModalButton = document.querySelector("#openBuilderModal");
 const builderModal = document.querySelector("#builderModal");
 const builderModalBody = document.querySelector("#builderModalBody");
@@ -260,6 +263,132 @@ function showToast(message) {
   toast.classList.add("show");
   window.clearTimeout(showToast.timer);
   showToast.timer = window.setTimeout(() => toast.classList.remove("show"), 2600);
+}
+
+const translations = {
+  nl: {
+    navBuild: "Build",
+    navMenu: "Menu",
+    navDrinks: "Drinks",
+    navFind: "Find us",
+    navCheckout: "Checkout",
+    orderNow: "Order now",
+    heroTitle: "Build it.<br><span>Load</span> it.<br>Devour it.",
+    heroCopy: "Kies je basis: frieten, rijst of nachos. Stapel je proteine, toppings, sauzen en afwerking. Of ga direct voor een Signature Bowl in Gent. Vanaf <strong>€11,50.</strong>",
+    buildYourBowl: "Build your bowl",
+    seeSignatures: "See signatures",
+    labelName: "Naam",
+    labelPhone: "Telefoon",
+    labelEmail: "E-mail",
+    labelMethod: "Keuze",
+    labelTime: "Gewenst uur",
+    labelAddress: "Leveradres",
+    labelNote: "Opmerking",
+    labelPayment: "Betaling",
+    methods: ["Afhalen", "Levering", "Ter plaatse eten"],
+    payment: ["Online betalen", "Betalen bij afhaal/levering"]
+  },
+  en: {
+    navBuild: "Build",
+    navMenu: "Menu",
+    navDrinks: "Drinks",
+    navFind: "Find us",
+    navCheckout: "Checkout",
+    orderNow: "Order now",
+    heroTitle: "Build it.<br><span>Load</span> it.<br>Devour it.",
+    heroCopy: "Choose fries, rice or nachos as your base. Stack your protein, toppings, sauces and finish. Or go straight for a Signature Bowl in Ghent. From <strong>€11,50.</strong>",
+    buildYourBowl: "Build your bowl",
+    seeSignatures: "See signatures",
+    labelName: "Name",
+    labelPhone: "Phone",
+    labelEmail: "E-mail",
+    labelMethod: "Choice",
+    labelTime: "Preferred time",
+    labelAddress: "Delivery address",
+    labelNote: "Note",
+    labelPayment: "Payment",
+    methods: ["Pickup", "Delivery", "Eat in"],
+    payment: ["Pay online", "Pay at pickup/delivery"]
+  },
+  fr: {
+    navBuild: "Composer",
+    navMenu: "Menu",
+    navDrinks: "Boissons",
+    navFind: "Adresse",
+    navCheckout: "Commande",
+    orderNow: "Commander",
+    heroTitle: "Compose.<br><span>Charge</span>.<br>Devore.",
+    heroCopy: "Choisissez votre base: frites, riz ou nachos. Ajoutez proteine, toppings, sauces et finition. Ou choisissez directement un Signature Bowl a Gand. A partir de <strong>€11,50.</strong>",
+    buildYourBowl: "Composer un bowl",
+    seeSignatures: "Voir signatures",
+    labelName: "Nom",
+    labelPhone: "Telephone",
+    labelEmail: "E-mail",
+    labelMethod: "Choix",
+    labelTime: "Heure souhaitee",
+    labelAddress: "Adresse de livraison",
+    labelNote: "Remarque",
+    labelPayment: "Paiement",
+    methods: ["A emporter", "Livraison", "Sur place"],
+    payment: ["Paiement en ligne", "Payer au retrait/livraison"]
+  },
+  de: {
+    navBuild: "Build",
+    navMenu: "Menu",
+    navDrinks: "Getranke",
+    navFind: "Standort",
+    navCheckout: "Bestellen",
+    orderNow: "Bestellen",
+    heroTitle: "Build it.<br><span>Load</span> it.<br>Devour it.",
+    heroCopy: "Wahle Pommes, Reis oder Nachos als Basis. Dazu Protein, Toppings, Saucen und Finish. Oder nimm direkt eine Signature Bowl in Gent. Ab <strong>€11,50.</strong>",
+    buildYourBowl: "Bowl erstellen",
+    seeSignatures: "Signatures ansehen",
+    labelName: "Name",
+    labelPhone: "Telefon",
+    labelEmail: "E-Mail",
+    labelMethod: "Auswahl",
+    labelTime: "Gewunschte Uhrzeit",
+    labelAddress: "Lieferadresse",
+    labelNote: "Bemerkung",
+    labelPayment: "Zahlung",
+    methods: ["Abholung", "Lieferung", "Vor Ort essen"],
+    payment: ["Online bezahlen", "Bei Abholung/Lieferung bezahlen"]
+  }
+};
+
+function applyLanguage(language) {
+  const copy = translations[language] || translations.nl;
+  document.documentElement.lang = language;
+  document.querySelectorAll("[data-i18n]").forEach((element) => {
+    const key = element.dataset.i18n;
+    if (copy[key]) element.textContent = copy[key];
+  });
+  document.querySelectorAll("[data-i18n-html]").forEach((element) => {
+    const key = element.dataset.i18nHtml;
+    if (copy[key]) element.innerHTML = copy[key];
+  });
+  if (orderMethod) {
+    [...orderMethod.options].forEach((option, index) => {
+      option.textContent = copy.methods[index] || option.textContent;
+    });
+  }
+  if (paymentChoice) {
+    [...paymentChoice.options].forEach((option, index) => {
+      option.textContent = copy.payment[index] || option.textContent;
+    });
+  }
+  localStorage.setItem("loadedBowlsLanguage", language);
+}
+
+function updateDeliveryAddressVisibility() {
+  if (!orderMethod || !deliveryAddressLabel) return;
+  const isDelivery = orderMethod.value === "Levering";
+  deliveryAddressLabel.classList.toggle("hidden", !isDelivery);
+  const addressInput = deliveryAddressLabel.querySelector("input");
+  if (addressInput) {
+    addressInput.required = isDelivery;
+    if (!isDelivery) addressInput.value = "";
+  }
 }
 
 function minutesFromTime(time) {
@@ -918,6 +1047,7 @@ async function submitPayLaterOrder(order) {
     renderCart();
     orderForm.reset();
     renderOrderTimeOptions();
+    updateDeliveryAddressVisibility();
     const mailMessage = order.customer.method === "Levering"
       ? "Bestelling ontvangen. Je krijgt een bevestigingsmail. Controleer ook je spam. Zodra je bestelling onderweg is, krijg je opnieuw een mail."
       : "Bestelling ontvangen. Je krijgt een bevestigingsmail. Controleer ook je spam.";
@@ -932,6 +1062,12 @@ paymentChoice?.addEventListener("change", () => {
   checkoutSubmit.innerHTML = paymentChoice.value === "later"
     ? "Bestelling plaatsen <span>→</span>"
     : "Verder naar betaling <span>→</span>";
+});
+
+orderMethod?.addEventListener("change", updateDeliveryAddressVisibility);
+
+languageSelect?.addEventListener("change", () => {
+  applyLanguage(languageSelect.value);
 });
 
 async function checkDeliveryAddress(address) {
@@ -971,6 +1107,10 @@ renderOrderTimeOptions();
 window.setInterval(renderOrderTimeOptions, 60000);
 updateLocationStatus();
 updateHoursNote();
+updateDeliveryAddressVisibility();
+const savedLanguage = localStorage.getItem("loadedBowlsLanguage") || "nl";
+if (languageSelect) languageSelect.value = savedLanguage;
+applyLanguage(savedLanguage);
 showClosedModalIfNeeded();
 renderCart();
 renderOrders();
