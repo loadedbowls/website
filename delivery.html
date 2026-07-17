@@ -359,17 +359,19 @@
     </main>
 
     <script>
-      const loginPanel = document.querySelector("#loginPanel");
-      const deliveryPanel = document.querySelector("#deliveryPanel");
-      const secretInput = document.querySelector("#secretInput");
-      const saveSecretButton = document.querySelector("#saveSecretButton");
-      const refreshButton = document.querySelector("#refreshButton");
-      const changeCodeButton = document.querySelector("#changeCodeButton");
-      const enablePushButton = document.querySelector("#enablePushButton");
-      const ordersEl = document.querySelector("#orders");
-      const connectionStatus = document.querySelector("#connectionStatus");
-      const deliveryCount = document.querySelector("#deliveryCount");
-      const lastUpdated = document.querySelector("#lastUpdated");
+      const $ = (selector) => document.querySelector(selector);
+      const on = (selector, eventName, handler) => {
+        const node = $(selector);
+        if (node) node.addEventListener(eventName, handler);
+      };
+      const loginPanel = $("#loginPanel");
+      const deliveryPanel = $("#deliveryPanel");
+      const secretInput = $("#secretInput");
+      const enablePushButton = $("#enablePushButton");
+      const ordersEl = $("#orders");
+      const connectionStatus = $("#connectionStatus");
+      const deliveryCount = $("#deliveryCount");
+      const lastUpdated = $("#lastUpdated");
       const tabs = [...document.querySelectorAll("[data-filter]")];
 
       const money = new Intl.NumberFormat("nl-BE", { style: "currency", currency: "EUR" });
@@ -405,6 +407,7 @@
       }
 
       function setConnected(ok, text) {
+        if (!connectionStatus) return;
         connectionStatus.textContent = text;
         connectionStatus.classList.toggle("ok", ok);
       }
@@ -413,13 +416,13 @@
         sessionStorage.removeItem("loadedDriverPin");
         sessionStorage.removeItem("loadedDriverName");
         sessionStorage.removeItem("loadedDriverId");
-        deliveryPanel.classList.add("hidden");
-        loginPanel.classList.remove("hidden");
-        secretInput.value = "";
-        secretInput.focus();
+        deliveryPanel?.classList.add("hidden");
+        loginPanel?.classList.remove("hidden");
+        if (secretInput) secretInput.value = "";
+        secretInput?.focus();
         if (message) {
-          ordersEl.innerHTML = "";
-          lastUpdated.textContent = message;
+          if (ordersEl) ordersEl.innerHTML = "";
+          if (lastUpdated) lastUpdated.textContent = message;
         }
       }
 
@@ -470,13 +473,14 @@
             return timeA.localeCompare(timeB) || getOrderDate(a) - getOrderDate(b);
           });
 
-        deliveryCount.textContent = `${deliveryOrders.length} leveringen`;
+        if (deliveryCount) deliveryCount.textContent = `${deliveryOrders.length} leveringen`;
 
         if (!deliveryOrders.length) {
-          ordersEl.innerHTML = `<div class="empty">Geen leveringen gevonden.</div>`;
+          if (ordersEl) ordersEl.innerHTML = `<div class="empty">Geen leveringen gevonden.</div>`;
           return;
         }
 
+        if (!ordersEl) return;
         ordersEl.innerHTML = deliveryOrders.map((record) => {
           const order = record.order || {};
           const customer = order.customer || {};
@@ -559,7 +563,8 @@
           currentDriver = data.driver || currentDriver;
           renderOrders(data.orders || []);
           setConnected(true, currentDriver?.name ? currentDriver.name : "Verbonden");
-          lastUpdated.textContent = `Laatst vernieuwd: ${new Date().toLocaleTimeString("nl-BE", { hour: "2-digit", minute: "2-digit", second: "2-digit" })}`;
+          if (lastUpdated) lastUpdated.textContent = `Laatst vernieuwd: ${new Date().toLocaleTimeString("nl-BE", { hour: "2-digit", minute: "2-digit", second: "2-digit" })}`;
+          syncExistingPush().catch(() => {});
         } catch (error) {
           setConnected(false, "Fout");
           if (String(error.message || "").toLowerCase().includes("geen toegang")) {
@@ -569,29 +574,29 @@
           const extra = location.protocol === "file:"
             ? "Open deze pagina liefst via https://loadedbowls.be/delivery.html zodra ze online staat."
             : "Controleer of delivery.html opnieuw gedeployed is en of je pincode klopt.";
-          ordersEl.innerHTML = `<div class="empty">${escapeHtml(error.message)}<br><br>${escapeHtml(extra)}</div>`;
+          if (ordersEl) ordersEl.innerHTML = `<div class="empty">${escapeHtml(error.message)}<br><br>${escapeHtml(extra)}</div>`;
         }
       }
 
-      saveSecretButton.addEventListener("click", () => {
-        const pin = secretInput.value.trim();
+      on("#saveSecretButton", "click", () => {
+        const pin = (secretInput?.value || "").trim();
         if (!pin) return;
         loginDriver(pin)
           .then(() => {
-            loginPanel.classList.add("hidden");
-            deliveryPanel.classList.remove("hidden");
+            loginPanel?.classList.add("hidden");
+            deliveryPanel?.classList.remove("hidden");
             loadOrders();
           })
           .catch((error) => {
             setConnected(false, "Fout");
-            lastUpdated.textContent = error.message;
+            if (lastUpdated) lastUpdated.textContent = error.message;
           });
       });
 
-      refreshButton.addEventListener("click", loadOrders);
-      changeCodeButton.addEventListener("click", () => showLogin("Vul de pincode van de chauffeur opnieuw in."));
+      on("#refreshButton", "click", loadOrders);
+      on("#changeCodeButton", "click", () => showLogin("Vul de pincode van de chauffeur opnieuw in."));
 
-      ordersEl.addEventListener("click", async (event) => {
+      on("#orders", "click", async (event) => {
         const button = event.target.closest("[data-delivered]");
         if (!button) return;
         try {
@@ -604,7 +609,7 @@
           if (!response.ok) throw new Error(data.error || "Status aanpassen mislukt.");
           await loadOrders();
         } catch (error) {
-          ordersEl.insertAdjacentHTML("afterbegin", `<div class="empty">${escapeHtml(error.message)}</div>`);
+          ordersEl?.insertAdjacentHTML("afterbegin", `<div class="empty">${escapeHtml(error.message)}</div>`);
         }
       });
 
@@ -617,12 +622,12 @@
 
       async function enableDriverPush() {
         if (!("Notification" in window) || !("serviceWorker" in navigator) || !("PushManager" in window)) {
-          lastUpdated.textContent = "Meldingen worden niet ondersteund op deze browser.";
+          if (lastUpdated) lastUpdated.textContent = "Meldingen worden niet ondersteund op deze browser.";
           return;
         }
         const permission = Notification.permission === "granted" ? "granted" : await Notification.requestPermission();
         if (permission !== "granted") {
-          lastUpdated.textContent = "Meldingen zijn niet toegestaan op deze gsm.";
+          if (lastUpdated) lastUpdated.textContent = "Meldingen zijn niet toegestaan op deze gsm.";
           return;
         }
         const keyResponse = await fetch(`${apiBase}/api/push-public-key`);
@@ -642,13 +647,26 @@
         });
         const data = await response.json().catch(() => ({}));
         if (!response.ok) throw new Error(data.error || "Meldingen activeren mislukt.");
-        enablePushButton.textContent = "Meldingen staan aan";
-        lastUpdated.textContent = "Meldingen staan aan voor deze chauffeur.";
+        if (enablePushButton) enablePushButton.textContent = "Meldingen staan aan";
+        if (lastUpdated) lastUpdated.textContent = "Meldingen staan aan voor deze chauffeur.";
       }
 
-      enablePushButton.addEventListener("click", () => {
+      async function syncExistingPush() {
+        if (!getSecret() || !("Notification" in window) || Notification.permission !== "granted" || !("serviceWorker" in navigator) || !("PushManager" in window)) return;
+        const registration = await navigator.serviceWorker.getRegistration("/service-worker.js") || await navigator.serviceWorker.register("/service-worker.js");
+        const subscription = await registration.pushManager.getSubscription();
+        if (!subscription) return;
+        const response = await fetch(`${apiBase}/api/drivers`, {
+          method: "POST",
+          headers: { "content-type": "application/json" },
+          body: JSON.stringify({ action: "subscribe", pin: getSecret(), subscription })
+        });
+        if (response.ok && enablePushButton) enablePushButton.textContent = "Meldingen staan aan";
+      }
+
+      on("#enablePushButton", "click", () => {
         enableDriverPush().catch((error) => {
-          lastUpdated.textContent = error.message;
+          if (lastUpdated) lastUpdated.textContent = error.message;
         });
       });
 
@@ -665,8 +683,8 @@
           id: sessionStorage.getItem("loadedDriverId") || "",
           name: sessionStorage.getItem("loadedDriverName") || ""
         };
-        loginPanel.classList.add("hidden");
-        deliveryPanel.classList.remove("hidden");
+        loginPanel?.classList.add("hidden");
+        deliveryPanel?.classList.remove("hidden");
         loadOrders();
       }
 
