@@ -1,5 +1,6 @@
 import { listOrders, requireAdmin, updateOrderDetails, updateOrderStatus } from "./_order-store.js";
 import { sendOrderOnTheWayEmail, sendOrderPreparingEmail } from "./_email.js";
+import { sendDriverOrderPush } from "./_push.js";
 
 const allowedStatuses = ["Nieuw", "In bereiding", "Klaar", "Onderweg", "Afgehaald", "Geleverd", "Geannuleerd"];
 
@@ -24,7 +25,7 @@ export default async function handler(req, res) {
   }
 
   if (req.method === "PATCH") {
-    const { id, order, status } = req.body || {};
+    const { id, order, status, driverId, driverName } = req.body || {};
     if (!id) {
       return res.status(400).json({ error: "Order ontbreekt." });
     }
@@ -44,12 +45,19 @@ export default async function handler(req, res) {
     }
 
     try {
-      const order = await updateOrderStatus(id, status);
+      const statusPatch = {};
+      if (driverId) statusPatch.driverId = String(driverId);
+      if (driverName) statusPatch.driverName = String(driverName);
+      if (status === "Onderweg" && driverId) statusPatch.assignedDriverAt = new Date().toISOString();
+      const order = await updateOrderStatus(id, status, statusPatch);
       if (!order) return res.status(404).json({ error: "Order niet gevonden." });
 
       try {
         if (status === "In bereiding") await sendOrderPreparingEmail(order);
-        if (status === "Onderweg") await sendOrderOnTheWayEmail(order);
+        if (status === "Onderweg") {
+          await sendOrderOnTheWayEmail(order);
+          await sendDriverOrderPush(order);
+        }
       } catch (error) {
         console.error("Could not send status email:", error);
       }
