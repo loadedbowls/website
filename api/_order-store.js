@@ -170,13 +170,19 @@ export async function listOrders() {
   return values.map(parseOrder).filter(Boolean);
 }
 
-export async function updateOrderStatus(id, status) {
+export async function getOrderById(id) {
+  if (!id) return null;
+  return parseOrder(await storeGet(`${ORDER_KEY_PREFIX}${id}`));
+}
+
+export async function updateOrderStatus(id, status, patch = {}) {
   const key = `${ORDER_KEY_PREFIX}${id}`;
   const existing = parseOrder(await storeGet(key));
   if (!existing) return null;
 
   const updated = {
     ...existing,
+    ...patch,
     status,
     updatedAt: new Date().toISOString()
   };
