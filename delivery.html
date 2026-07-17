@@ -325,7 +325,7 @@
         <div class="brand">
           <div>
             <h1>Loaded <span>Delivery</span></h1>
-            <p class="muted">Mobiel overzicht voor leveringen.</p>
+            <p class="muted">Alleen jouw toegewezen leveringen.</p>
           </div>
           <span class="pill" id="connectionStatus">Niet verbonden</span>
         </div>
@@ -336,10 +336,10 @@
       </header>
 
       <section class="login" id="loginPanel">
-        <h2>Toegangscode</h2>
-        <p class="muted">Gebruik dezelfde geheime ordercode als op de laptop.</p>
-        <input id="secretInput" type="password" autocomplete="current-password" placeholder="Ordercode">
-        <button class="btn" id="saveSecretButton" type="button">Leveringen openen</button>
+        <h2>Chauffeur login</h2>
+        <p class="muted">Gebruik je persoonlijke pincode van Loaded Bowls.</p>
+        <input id="secretInput" type="password" inputmode="numeric" autocomplete="current-password" placeholder="Pincode">
+        <button class="btn" id="saveSecretButton" type="button">Mijn leveringen openen</button>
       </section>
 
       <section class="hidden" id="deliveryPanel">
@@ -349,7 +349,8 @@
             <button class="btn secondary" id="refreshButton" type="button">Vernieuwen</button>
           </div>
           <div class="toolbar-row wrap">
-            <button class="btn secondary" id="changeCodeButton" type="button">Code wijzigen</button>
+            <button class="btn secondary" id="enablePushButton" type="button">Meldingen aanzetten</button>
+            <button class="btn secondary" id="changeCodeButton" type="button">Chauffeur wisselen</button>
           </div>
           <p class="muted" id="lastUpdated">Nog niet vernieuwd</p>
         </div>
@@ -364,6 +365,7 @@
       const saveSecretButton = document.querySelector("#saveSecretButton");
       const refreshButton = document.querySelector("#refreshButton");
       const changeCodeButton = document.querySelector("#changeCodeButton");
+      const enablePushButton = document.querySelector("#enablePushButton");
       const ordersEl = document.querySelector("#orders");
       const connectionStatus = document.querySelector("#connectionStatus");
       const deliveryCount = document.querySelector("#deliveryCount");
@@ -373,6 +375,7 @@
       const money = new Intl.NumberFormat("nl-BE", { style: "currency", currency: "EUR" });
       const apiBase = location.protocol === "file:" ? "https://loadedbowls.be" : "";
       let currentFilter = "today";
+      let currentDriver = null;
 
       function escapeHtml(value = "") {
         return String(value)
@@ -391,7 +394,14 @@
       }
 
       function getSecret() {
-        return localStorage.getItem("loadedOrdersSecret") || "";
+        return sessionStorage.getItem("loadedDriverPin") || "";
+      }
+
+      function setDriverSession(pin, driver) {
+        sessionStorage.setItem("loadedDriverPin", pin);
+        sessionStorage.setItem("loadedDriverName", driver.name || "");
+        sessionStorage.setItem("loadedDriverId", driver.id || "");
+        currentDriver = driver;
       }
 
       function setConnected(ok, text) {
@@ -400,7 +410,9 @@
       }
 
       function showLogin(message = "") {
-        localStorage.removeItem("loadedOrdersSecret");
+        sessionStorage.removeItem("loadedDriverPin");
+        sessionStorage.removeItem("loadedDriverName");
+        sessionStorage.removeItem("loadedDriverId");
         deliveryPanel.classList.add("hidden");
         loginPanel.classList.remove("hidden");
         secretInput.value = "";
@@ -436,10 +448,21 @@
         return record.paymentLabel || "Betalen bij levering";
       }
 
+      async function loginDriver(pin) {
+        const response = await fetch(`${apiBase}/api/driver-login`, {
+          method: "POST",
+          headers: { "content-type": "application/json" },
+          body: JSON.stringify({ pin })
+        });
+        const data = await response.json().catch(() => ({}));
+        if (!response.ok) throw new Error(data.error || "Login mislukt.");
+        setDriverSession(pin, data.driver);
+        return data.driver;
+      }
+
       function renderOrders(orders) {
         const today = dateKey(new Date());
         const deliveryOrders = orders
-          .filter((record) => String(record.order?.customer?.method || "").toLowerCase() === "levering")
           .filter((record) => currentFilter === "all" || dateKey(getOrderDate(record)) === today)
           .sort((a, b) => {
             const timeA = a.order?.customer?.orderTime || "";
@@ -511,6 +534,7 @@
                 <a class="btn call" href="tel:${encodeURIComponent(phone)}">Bel klant</a>
                 <a class="btn waze" href="https://waze.com/ul?q=${mapsQuery}&navigate=yes" target="_blank" rel="noopener">Open Waze</a>
                 <a class="btn secondary wide" href="https://www.google.com/maps/search/?api=1&query=${mapsQuery}" target="_blank" rel="noopener">Open Google Maps</a>
+                <button class="btn wide" type="button" data-delivered="${escapeHtml(record.id)}">Geleverd</button>
               </div>
 
               <div class="items">${itemHtml}</div>
@@ -520,45 +544,113 @@
       }
 
       async function loadOrders() {
-        const secret = getSecret();
-        if (!secret) return;
+        const pin = getSecret();
+        if (!pin) return;
 
         try {
-          const response = await fetch(`${apiBase}/api/orders`, {
-            headers: {
-              "X-Admin-Secret": secret
-            }
+          const response = await fetch(`${apiBase}/api/driver-orders`, {
+            method: "POST",
+            headers: { "content-type": "application/json" },
+            body: JSON.stringify({ pin })
           });
           const data = await response.json();
           if (!response.ok) throw new Error(data.error || "Leveringen laden mislukt.");
 
+          currentDriver = data.driver || currentDriver;
           renderOrders(data.orders || []);
-          setConnected(true, "Verbonden");
+          setConnected(true, currentDriver?.name ? currentDriver.name : "Verbonden");
           lastUpdated.textContent = `Laatst vernieuwd: ${new Date().toLocaleTimeString("nl-BE", { hour: "2-digit", minute: "2-digit", second: "2-digit" })}`;
         } catch (error) {
           setConnected(false, "Fout");
           if (String(error.message || "").toLowerCase().includes("geen toegang")) {
-            showLogin("Code niet aanvaard. Vul de ordercode opnieuw in.");
+            showLogin("Pincode niet aanvaard. Vul opnieuw in.");
             return;
           }
           const extra = location.protocol === "file:"
             ? "Open deze pagina liefst via https://loadedbowls.be/delivery.html zodra ze online staat."
-            : "Controleer of delivery.html opnieuw gedeployed is en of de ordercode klopt.";
+            : "Controleer of delivery.html opnieuw gedeployed is en of je pincode klopt.";
           ordersEl.innerHTML = `<div class="empty">${escapeHtml(error.message)}<br><br>${escapeHtml(extra)}</div>`;
         }
       }
 
       saveSecretButton.addEventListener("click", () => {
-        const secret = secretInput.value.trim();
-        if (!secret) return;
-        localStorage.setItem("loadedOrdersSecret", secret);
-        loginPanel.classList.add("hidden");
-        deliveryPanel.classList.remove("hidden");
-        loadOrders();
+        const pin = secretInput.value.trim();
+        if (!pin) return;
+        loginDriver(pin)
+          .then(() => {
+            loginPanel.classList.add("hidden");
+            deliveryPanel.classList.remove("hidden");
+            loadOrders();
+          })
+          .catch((error) => {
+            setConnected(false, "Fout");
+            lastUpdated.textContent = error.message;
+          });
       });
 
       refreshButton.addEventListener("click", loadOrders);
-      changeCodeButton.addEventListener("click", () => showLogin("Vul de ordercode opnieuw in."));
+      changeCodeButton.addEventListener("click", () => showLogin("Vul de pincode van de chauffeur opnieuw in."));
+
+      ordersEl.addEventListener("click", async (event) => {
+        const button = event.target.closest("[data-delivered]");
+        if (!button) return;
+        try {
+          const response = await fetch(`${apiBase}/api/driver-orders`, {
+            method: "PATCH",
+            headers: { "content-type": "application/json" },
+            body: JSON.stringify({ pin: getSecret(), id: button.dataset.delivered, status: "Geleverd" })
+          });
+          const data = await response.json().catch(() => ({}));
+          if (!response.ok) throw new Error(data.error || "Status aanpassen mislukt.");
+          await loadOrders();
+        } catch (error) {
+          ordersEl.insertAdjacentHTML("afterbegin", `<div class="empty">${escapeHtml(error.message)}</div>`);
+        }
+      });
+
+      function urlBase64ToUint8Array(base64String) {
+        const padding = "=".repeat((4 - base64String.length % 4) % 4);
+        const base64 = (base64String + padding).replace(/-/g, "+").replace(/_/g, "/");
+        const rawData = atob(base64);
+        return Uint8Array.from([...rawData].map(char => char.charCodeAt(0)));
+      }
+
+      async function enableDriverPush() {
+        if (!("Notification" in window) || !("serviceWorker" in navigator) || !("PushManager" in window)) {
+          lastUpdated.textContent = "Meldingen worden niet ondersteund op deze browser.";
+          return;
+        }
+        const permission = Notification.permission === "granted" ? "granted" : await Notification.requestPermission();
+        if (permission !== "granted") {
+          lastUpdated.textContent = "Meldingen zijn niet toegestaan op deze gsm.";
+          return;
+        }
+        const keyResponse = await fetch(`${apiBase}/api/push-public-key`);
+        const keyData = await keyResponse.json();
+        const registration = await navigator.serviceWorker.register("/service-worker.js");
+        let subscription = await registration.pushManager.getSubscription();
+        if (!subscription) {
+          subscription = await registration.pushManager.subscribe({
+            userVisibleOnly: true,
+            applicationServerKey: urlBase64ToUint8Array(keyData.publicKey)
+          });
+        }
+        const response = await fetch(`${apiBase}/api/driver-push-subscribe`, {
+          method: "POST",
+          headers: { "content-type": "application/json" },
+          body: JSON.stringify({ pin: getSecret(), subscription })
+        });
+        const data = await response.json().catch(() => ({}));
+        if (!response.ok) throw new Error(data.error || "Meldingen activeren mislukt.");
+        enablePushButton.textContent = "Meldingen staan aan";
+        lastUpdated.textContent = "Meldingen staan aan voor deze chauffeur.";
+      }
+
+      enablePushButton.addEventListener("click", () => {
+        enableDriverPush().catch((error) => {
+          lastUpdated.textContent = error.message;
+        });
+      });
 
       tabs.forEach((tab) => {
         tab.addEventListener("click", () => {
@@ -569,6 +661,10 @@
       });
 
       if (getSecret()) {
+        currentDriver = {
+          id: sessionStorage.getItem("loadedDriverId") || "",
+          name: sessionStorage.getItem("loadedDriverName") || ""
+        };
         loginPanel.classList.add("hidden");
         deliveryPanel.classList.remove("hidden");
         loadOrders();
