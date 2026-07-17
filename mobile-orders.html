@@ -206,6 +206,7 @@
       let activeStatus = "Nieuw";
       let viewMode = "active";
       let orders = [];
+      let drivers = [];
 
       function escapeHtml(value) {
         return String(value ?? "").replace(/[&<>"']/g, char => ({ "&":"&amp;", "<":"&lt;", ">":"&gt;", '"':"&quot;", "'":"&#39;" }[char]));
@@ -309,7 +310,7 @@
 
         if (status === "In bereiding") {
           const nextStatus = method === "Levering" ? "Onderweg" : "Klaar";
-          buttons.push(`<button class="green" type="button" data-status="${escapeHtml(nextStatus)}" data-id="${escapeHtml(record.id)}">${escapeHtml(nextStatus)}</button>`);
+          buttons.push(`<button class="green" type="button" data-status="${escapeHtml(nextStatus)}" data-id="${escapeHtml(record.id)}" data-method="${escapeHtml(method)}">${escapeHtml(nextStatus)}</button>`);
         }
 
         if (status === "Klaar") {
@@ -359,6 +360,7 @@
                 Tel: <a href="tel:${escapeHtml(customer.phone || "")}" style="color:var(--gold)">${escapeHtml(customer.phone || "-")}</a><br>
                 ${customer.email ? `Mail: ${escapeHtml(customer.email)}<br>` : ""}
                 ${address ? `Adres: ${escapeHtml(address)}<br>` : ""}
+                ${record.driverName ? `Bezorger: ${escapeHtml(record.driverName)}<br>` : ""}
                 ${customer.note ? `Opmerking: ${escapeHtml(customer.note)}` : ""}
               </p>
               <div class="items">${items.map(item => `${escapeHtml(item.quantity || 1)}x ${escapeHtml(item.name || "Item")}\\n${escapeHtml(item.details || "")}`).join("\\n\\n")}</div>
@@ -369,12 +371,30 @@
         }).join("");
       }
 
-      async function updateStatus(id, status) {
+      async function updateStatus(id, status, extra = {}) {
         await api("/api/orders", {
           method: "PATCH",
           headers: { "content-type": "application/json" },
-          body: JSON.stringify({ id, status })
+          body: JSON.stringify({ id, status, ...extra })
         });
+      }
+
+      async function loadDrivers() {
+        const data = await api("/api/drivers");
+        drivers = data.drivers || [];
+        return drivers;
+      }
+
+      async function chooseDriver() {
+        await loadDrivers();
+        const activeDrivers = drivers.filter(driver => driver.active !== false);
+        if (!activeDrivers.length) throw new Error("Voeg eerst een bezorger toe via de laptop-orderapp.");
+        const list = activeDrivers.map((driver, index) => `${index + 1}. ${driver.name}`).join("\n");
+        const answer = prompt(`Welke bezorger?\n\n${list}`);
+        const index = Number(answer) - 1;
+        const driver = activeDrivers[index];
+        if (!driver) throw new Error("Geen geldige bezorger gekozen.");
+        return driver;
       }
 
       async function refreshOrders() {
@@ -503,7 +523,12 @@
         if (!button) return;
         try {
           setError("");
-          await updateStatus(button.dataset.id, button.dataset.status);
+          let extra = {};
+          if (button.dataset.status === "Onderweg" && button.dataset.method === "Levering") {
+            const driver = await chooseDriver();
+            extra = { driverId: driver.id, driverName: driver.name };
+          }
+          await updateStatus(button.dataset.id, button.dataset.status, extra);
           if (historyStatuses.includes(button.dataset.status)) {
             viewMode = "history";
           } else {
