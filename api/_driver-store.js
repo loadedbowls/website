@@ -38,6 +38,13 @@ function parseValue(value) {
   }
 }
 
+function normalizeDrivers(value) {
+  const parsed = parseValue(value);
+  if (Array.isArray(parsed)) return parsed;
+  if (Array.isArray(parsed?.drivers)) return parsed.drivers;
+  return [];
+}
+
 function driverId() {
   return `drv_${Date.now().toString(36)}_${Math.random().toString(36).slice(2, 8)}`;
 }
@@ -53,12 +60,12 @@ export function publicDriver(driver) {
 }
 
 export async function listDrivers({ includePins = false } = {}) {
-  const drivers = parseValue(await storeGet(DRIVER_LIST_KEY)) || [];
+  const drivers = normalizeDrivers(await storeGet(DRIVER_LIST_KEY));
   return includePins ? drivers : drivers.map(publicDriver);
 }
 
 export async function saveDriver(input) {
-  const drivers = parseValue(await storeGet(DRIVER_LIST_KEY)) || [];
+  const drivers = normalizeDrivers(await storeGet(DRIVER_LIST_KEY));
   const now = new Date().toISOString();
   const cleanName = String(input?.name || "").trim();
   const cleanPin = String(input?.pin || "").trim();
@@ -85,7 +92,7 @@ export async function saveDriver(input) {
 }
 
 export async function removeDriver(id) {
-  const drivers = parseValue(await storeGet(DRIVER_LIST_KEY)) || [];
+  const drivers = normalizeDrivers(await storeGet(DRIVER_LIST_KEY));
   const nextDrivers = drivers.filter((driver) => driver.id !== id);
   await storeSet(DRIVER_LIST_KEY, nextDrivers);
   return true;
@@ -93,6 +100,6 @@ export async function removeDriver(id) {
 
 export async function findDriverByPin(pin) {
   const cleanPin = String(pin || "").trim();
-  const drivers = parseValue(await storeGet(DRIVER_LIST_KEY)) || [];
+  const drivers = normalizeDrivers(await storeGet(DRIVER_LIST_KEY));
   return drivers.find((driver) => driver.active !== false && driver.pin === cleanPin) || null;
 }
