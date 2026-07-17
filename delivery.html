@@ -449,10 +449,10 @@
       }
 
       async function loginDriver(pin) {
-        const response = await fetch(`${apiBase}/api/driver-login`, {
+        const response = await fetch(`${apiBase}/api/drivers`, {
           method: "POST",
           headers: { "content-type": "application/json" },
-          body: JSON.stringify({ pin })
+          body: JSON.stringify({ action: "login", pin })
         });
         const data = await response.json().catch(() => ({}));
         if (!response.ok) throw new Error(data.error || "Login mislukt.");
@@ -548,10 +548,10 @@
         if (!pin) return;
 
         try {
-          const response = await fetch(`${apiBase}/api/driver-orders`, {
+          const response = await fetch(`${apiBase}/api/drivers`, {
             method: "POST",
             headers: { "content-type": "application/json" },
-            body: JSON.stringify({ pin })
+            body: JSON.stringify({ action: "orders", pin })
           });
           const data = await response.json();
           if (!response.ok) throw new Error(data.error || "Leveringen laden mislukt.");
@@ -595,7 +595,7 @@
         const button = event.target.closest("[data-delivered]");
         if (!button) return;
         try {
-          const response = await fetch(`${apiBase}/api/driver-orders`, {
+          const response = await fetch(`${apiBase}/api/drivers`, {
             method: "PATCH",
             headers: { "content-type": "application/json" },
             body: JSON.stringify({ pin: getSecret(), id: button.dataset.delivered, status: "Geleverd" })
@@ -635,10 +635,10 @@
             applicationServerKey: urlBase64ToUint8Array(keyData.publicKey)
           });
         }
-        const response = await fetch(`${apiBase}/api/driver-push-subscribe`, {
+        const response = await fetch(`${apiBase}/api/drivers`, {
           method: "POST",
           headers: { "content-type": "application/json" },
-          body: JSON.stringify({ pin: getSecret(), subscription })
+          body: JSON.stringify({ action: "subscribe", pin: getSecret(), subscription })
         });
         const data = await response.json().catch(() => ({}));
         if (!response.ok) throw new Error(data.error || "Meldingen activeren mislukt.");
