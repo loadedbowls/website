@@ -202,6 +202,7 @@
       const errorEl = document.querySelector("#error");
       const activeViewButton = document.querySelector("#activeView");
       const historyViewButton = document.querySelector("#historyView");
+      const PUSH_ENABLED_KEY = "loadedBowlsPushEnabled";
       let activeStatus = "Nieuw";
       let viewMode = "active";
       let orders = [];
@@ -271,7 +272,10 @@
         loginPanel.classList.toggle("hidden", hasSecret);
         pushPanel.classList.toggle("hidden", !hasSecret);
         ordersPanel.classList.toggle("hidden", !hasSecret);
-        if (hasSecret) refreshOrders();
+        if (hasSecret) {
+          refreshOrders();
+          checkSavedPush();
+        }
       }
 
       function renderTabs() {
@@ -384,35 +388,82 @@
         }
       }
 
-      async function registerPush() {
-        try {
-          setError("");
-          if (!("serviceWorker" in navigator) || !("PushManager" in window)) {
-            throw new Error("Pushmeldingen worden niet ondersteund op deze browser.");
-          }
+      async function saveSubscription(subscription) {
+        await api("/api/push-subscribe", {
+          method: "POST",
+          headers: { "content-type": "application/json" },
+          body: JSON.stringify({ subscription })
+        });
+        localStorage.setItem(PUSH_ENABLED_KEY, "1");
+        pushStatus.textContent = "Meldingen staan aan op deze gsm.";
+        pushStatus.classList.add("ok");
+        document.querySelector("#enablePush").textContent = "Meldingen staan aan";
+      }
 
-          const keyData = await api("/api/push-public-key");
-          if (!keyData.publicKey) {
-            throw new Error("VAPID_PUBLIC_KEY ontbreekt nog in Vercel.");
-          }
+      async function getPushRegistration() {
+        const registration = await navigator.serviceWorker.register("/service-worker.js");
+        return registration;
+      }
 
+      async function ensurePushSubscription({ askPermission = false } = {}) {
+        if (!("Notification" in window) || !("serviceWorker" in navigator) || !("PushManager" in window)) {
+          throw new Error("Pushmeldingen worden niet ondersteund op deze browser.");
+        }
+
+        if (Notification.permission === "denied") {
+          localStorage.removeItem(PUSH_ENABLED_KEY);
+          throw new Error("Meldingen zijn geblokkeerd. Zet ze aan in de instellingen van je browser/gsm.");
+        }
+
+        if (askPermission && Notification.permission !== "granted") {
           const permission = await Notification.requestPermission();
           if (permission !== "granted") throw new Error("Meldingen zijn niet toegestaan.");
+        }
 
-          const registration = await navigator.serviceWorker.register("/service-worker.js");
-          const subscription = await registration.pushManager.subscribe({
+        if (Notification.permission !== "granted") {
+          pushStatus.textContent = "Meldingen zijn nog niet actief op deze gsm.";
+          pushStatus.classList.remove("ok");
+          document.querySelector("#enablePush").textContent = "Meldingen activeren";
+          return null;
+        }
+
+        const keyData = await api("/api/push-public-key");
+        if (!keyData.publicKey) {
+          throw new Error("VAPID_PUBLIC_KEY ontbreekt nog in Vercel.");
+        }
+
+        const registration = await getPushRegistration();
+        let subscription = await registration.pushManager.getSubscription();
+        if (!subscription) {
+          subscription = await registration.pushManager.subscribe({
             userVisibleOnly: true,
             applicationServerKey: urlBase64ToUint8Array(keyData.publicKey)
           });
+        }
 
-          await api("/api/push-subscribe", {
-            method: "POST",
-            headers: { "content-type": "application/json" },
-            body: JSON.stringify({ subscription })
-          });
+        await saveSubscription(subscription);
+        return subscription;
+      }
 
-          pushStatus.textContent = "Meldingen staan aan op deze gsm.";
-          pushStatus.classList.add("ok");
+      async function checkSavedPush() {
+        if (!("Notification" in window)) return;
+        if (Notification.permission === "granted" || localStorage.getItem(PUSH_ENABLED_KEY) === "1") {
+          try {
+            await ensurePushSubscription({ askPermission: false });
+          } catch (error) {
+            pushStatus.classList.remove("ok");
+            pushStatus.textContent = "Meldingen opnieuw verbinden lukte niet. Druk eenmalig op activeren.";
+          }
+          return;
+        }
+        pushStatus.textContent = "Voeg deze pagina toe aan je beginscherm en activeer daarna meldingen.";
+        pushStatus.classList.remove("ok");
+      }
+
+      async function registerPush() {
+        try {
+          setError("");
+          await ensurePushSubscription({ askPermission: true });
         } catch (error) {
           pushStatus.classList.remove("ok");
           setError(error.message);
