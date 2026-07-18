@@ -1,0 +1,544 @@
+<!doctype html>
+<html lang="nl">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="theme-color" content="#07111d">
+    <title>Loaded Bowls Live Kaart</title>
+    <style>
+      :root {
+        --bg: #07111d;
+        --panel: #101923;
+        --panel-2: #172231;
+        --text: #fff6e2;
+        --muted: #cdbf9f;
+        --gold: #f2b231;
+        --line: rgba(242, 178, 49, 0.26);
+        --new: #f2b231;
+        --prep: #4ea1ff;
+        --ready: #f28a2d;
+        --road: #8a6cff;
+        --driver: #65d98b;
+        --danger: #e8664e;
+      }
+
+      * { box-sizing: border-box; }
+      body {
+        margin: 0;
+        min-height: 100vh;
+        font-family: Arial, Helvetica, sans-serif;
+        background:
+          radial-gradient(circle at 20% 0%, rgba(242, 178, 49, 0.13), transparent 28%),
+          radial-gradient(circle at 90% 10%, rgba(242, 138, 45, 0.11), transparent 34%),
+          linear-gradient(180deg, #07111d, #050b12);
+        color: var(--text);
+      }
+
+      button, input { font: inherit; }
+      a { color: inherit; }
+
+      .app {
+        width: min(1180px, 100%);
+        margin: 0 auto;
+        padding: 16px;
+        display: grid;
+        gap: 14px;
+      }
+
+      .top, .panel {
+        background: rgba(16, 25, 35, 0.92);
+        border: 1px solid var(--line);
+        border-radius: 18px;
+        padding: 14px;
+      }
+
+      .top {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+        flex-wrap: wrap;
+      }
+
+      h1, h2, p { margin: 0; }
+      h1 {
+        font-family: Impact, Haettenschweiler, "Arial Narrow Bold", sans-serif;
+        font-size: clamp(34px, 8vw, 64px);
+        line-height: .9;
+        text-transform: uppercase;
+      }
+      h1 span { color: var(--gold); }
+      .muted { color: var(--muted); }
+
+      .actions {
+        display: flex;
+        gap: 8px;
+        flex-wrap: wrap;
+        align-items: center;
+      }
+
+      .btn {
+        border: 0;
+        border-radius: 12px;
+        padding: 11px 13px;
+        background: var(--gold);
+        color: #100b05;
+        font-weight: 950;
+        text-decoration: none;
+        cursor: pointer;
+      }
+
+      .btn.secondary {
+        background: var(--panel-2);
+        color: var(--text);
+        border: 1px solid var(--line);
+      }
+
+      input {
+        min-height: 44px;
+        border: 1px solid var(--line);
+        border-radius: 12px;
+        padding: 10px 12px;
+        background: #07111d;
+        color: var(--text);
+      }
+
+      .hidden { display: none !important; }
+
+      .map-layout {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) 330px;
+        gap: 14px;
+      }
+
+      .map {
+        position: relative;
+        min-height: 640px;
+        overflow: hidden;
+        border-radius: 22px;
+        border: 1px solid var(--line);
+        background:
+          linear-gradient(rgba(242, 178, 49, 0.08) 1px, transparent 1px),
+          linear-gradient(90deg, rgba(242, 178, 49, 0.08) 1px, transparent 1px),
+          radial-gradient(circle at 50% 50%, rgba(242, 178, 49, 0.09), transparent 22%),
+          #070d15;
+        background-size: 58px 58px, 58px 58px, auto, auto;
+      }
+
+      .shop {
+        position: absolute;
+        left: 50%;
+        top: 50%;
+        transform: translate(-50%, -50%);
+        z-index: 3;
+        display: grid;
+        place-items: center;
+        width: 74px;
+        height: 74px;
+        border-radius: 999px;
+        border: 3px solid var(--gold);
+        background: #0e1015;
+        color: var(--gold);
+        font-weight: 950;
+        text-align: center;
+        box-shadow: 0 0 0 10px rgba(242, 178, 49, 0.08);
+      }
+
+      .radius {
+        position: absolute;
+        left: 50%;
+        top: 50%;
+        width: min(78%, 760px);
+        aspect-ratio: 1;
+        transform: translate(-50%, -50%);
+        border: 1px dashed rgba(242, 178, 49, 0.35);
+        border-radius: 999px;
+        pointer-events: none;
+      }
+
+      .pin {
+        --pin: var(--new);
+        position: absolute;
+        left: var(--x);
+        top: var(--y);
+        transform: translate(-50%, -100%);
+        z-index: 4;
+        border: 0;
+        background: transparent;
+        color: var(--text);
+        cursor: pointer;
+      }
+
+      .pin-dot {
+        width: 28px;
+        height: 28px;
+        border-radius: 999px 999px 999px 4px;
+        rotate: -45deg;
+        background: var(--pin);
+        box-shadow: 0 0 0 7px color-mix(in srgb, var(--pin) 22%, transparent);
+        display: block;
+      }
+
+      .pin-label {
+        position: absolute;
+        left: 28px;
+        top: -34px;
+        min-width: 112px;
+        padding: 6px 8px;
+        border-radius: 10px;
+        background: rgba(5, 11, 18, 0.9);
+        border: 1px solid rgba(255,255,255,.12);
+        font-size: 12px;
+        font-weight: 900;
+        text-align: left;
+        white-space: nowrap;
+      }
+
+      .driver-pin {
+        --pin: var(--driver);
+        z-index: 5;
+      }
+
+      .driver-pin .pin-dot {
+        border-radius: 999px;
+        rotate: 0deg;
+        border: 3px solid #fff6e2;
+      }
+
+      .side {
+        display: grid;
+        gap: 12px;
+        align-content: start;
+      }
+
+      .legend {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 8px;
+      }
+
+      .legend span {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        color: var(--muted);
+        font-size: 13px;
+      }
+
+      .swatch {
+        width: 12px;
+        height: 12px;
+        border-radius: 50%;
+        background: var(--color);
+      }
+
+      .details {
+        min-height: 220px;
+        line-height: 1.45;
+      }
+
+      .details strong { color: var(--gold); }
+      .details .route {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 8px;
+        margin-top: 10px;
+      }
+
+      .list {
+        display: grid;
+        gap: 8px;
+        max-height: 250px;
+        overflow: auto;
+      }
+
+      .row {
+        border: 1px solid rgba(255,255,255,.08);
+        border-radius: 12px;
+        padding: 10px;
+        background: rgba(255,255,255,.035);
+      }
+
+      .error { color: var(--danger); }
+
+      @media (max-width: 860px) {
+        .map-layout { grid-template-columns: 1fr; }
+        .map { min-height: 520px; }
+      }
+    </style>
+  </head>
+  <body>
+    <main class="app">
+      <header class="top">
+        <div>
+          <h1>Live <span>Kaart</span></h1>
+          <p class="muted">Leveringen, regio's en chauffeurs in een overzicht.</p>
+        </div>
+        <div class="actions">
+          <a class="btn secondary" href="orders.html">Orderapp</a>
+          <a class="btn secondary" href="mobile-orders.html">Gsm orders</a>
+          <button class="btn" id="refreshButton" type="button">Vernieuwen</button>
+        </div>
+      </header>
+
+      <section class="panel" id="loginPanel">
+        <h2>Toegang</h2>
+        <p class="muted">Gebruik dezelfde ordercode als de orderapp.</p>
+        <div class="actions" style="margin-top: 10px;">
+          <input id="secretInput" type="password" placeholder="Ordercode">
+          <button class="btn" id="saveSecretButton" type="button">Kaart openen</button>
+        </div>
+        <p class="error" id="error"></p>
+      </section>
+
+      <section class="map-layout hidden" id="mapPanel">
+        <div class="map" id="map">
+          <div class="radius" aria-hidden="true"></div>
+          <div class="shop">Loaded<br>Bowls</div>
+        </div>
+
+        <aside class="side">
+          <section class="panel">
+            <h2>Status</h2>
+            <p class="muted" id="summary">Nog niet geladen.</p>
+            <div class="legend" style="margin-top: 12px;">
+              <span><i class="swatch" style="--color: var(--new)"></i>Nieuw</span>
+              <span><i class="swatch" style="--color: var(--prep)"></i>In bereiding</span>
+              <span><i class="swatch" style="--color: var(--ready)"></i>Klaar</span>
+              <span><i class="swatch" style="--color: var(--road)"></i>Onderweg</span>
+              <span><i class="swatch" style="--color: var(--driver)"></i>Chauffeur</span>
+            </div>
+          </section>
+
+          <section class="panel details" id="details">
+            <h2>Pin info</h2>
+            <p class="muted">Klik op een pin om de details te zien.</p>
+          </section>
+
+          <section class="panel">
+            <h2>Chauffeurs</h2>
+            <div class="list" id="driverList"></div>
+          </section>
+        </aside>
+      </section>
+    </main>
+
+    <script>
+      const apiBase = location.protocol === "file:" ? "https://loadedbowls.be" : "";
+      const shop = { lat: 51.0461, lng: 3.7248 };
+      const activeStatuses = ["Nieuw", "In bereiding", "Klaar", "Onderweg"];
+      const statusColors = {
+        "Nieuw": "var(--new)",
+        "In bereiding": "var(--prep)",
+        "Klaar": "var(--ready)",
+        "Onderweg": "var(--road)"
+      };
+
+      const mapEl = document.querySelector("#map");
+      const mapPanel = document.querySelector("#mapPanel");
+      const loginPanel = document.querySelector("#loginPanel");
+      const secretInput = document.querySelector("#secretInput");
+      const errorEl = document.querySelector("#error");
+      const summaryEl = document.querySelector("#summary");
+      const detailsEl = document.querySelector("#details");
+      const driverListEl = document.querySelector("#driverList");
+
+      let orders = [];
+      let drivers = [];
+      let locations = {};
+
+      function escapeHtml(value = "") {
+        return String(value)
+          .replaceAll("&", "&amp;")
+          .replaceAll("<", "&lt;")
+          .replaceAll(">", "&gt;")
+          .replaceAll('"', "&quot;")
+          .replaceAll("'", "&#039;");
+      }
+
+      function getSecret() {
+        return localStorage.getItem("loadedOrdersSecret") || "";
+      }
+
+      function setSecret(value) {
+        localStorage.setItem("loadedOrdersSecret", value);
+      }
+
+      async function api(path) {
+        const response = await fetch(`${apiBase}${path}`, {
+          headers: { "x-admin-secret": getSecret() }
+        });
+        const data = await response.json().catch(() => ({}));
+        if (!response.ok) throw new Error(data.error || "Laden mislukt.");
+        return data;
+      }
+
+      function money(value) {
+        return new Intl.NumberFormat("nl-BE", { style: "currency", currency: "EUR" }).format(Number(value || 0));
+      }
+
+      function orderNumber(record) {
+        return record.displayOrderNumber || record.order?.orderNumber || record.order?.orderId || record.id || "Order";
+      }
+
+      function customer(record) {
+        return record.order?.customer || {};
+      }
+
+      function orderAddress(record) {
+        return customer(record).address || "";
+      }
+
+      function routeQuery(address) {
+        return encodeURIComponent(`${address}, Gent, Belgium`);
+      }
+
+      function hashPoint(text, index) {
+        let hash = 0;
+        const source = `${text || "gent"}-${index}`;
+        for (let i = 0; i < source.length; i += 1) hash = ((hash << 5) - hash) + source.charCodeAt(i);
+        const angle = Math.abs(hash % 360) * Math.PI / 180;
+        const radius = 16 + Math.abs(hash % 32);
+        return {
+          x: Math.max(8, Math.min(92, 50 + Math.cos(angle) * radius)),
+          y: Math.max(8, Math.min(92, 50 + Math.sin(angle) * radius))
+        };
+      }
+
+      function coordPoint(lat, lng) {
+        const radiusKm = 6;
+        const kmPerLat = 111;
+        const kmPerLng = 111 * Math.cos(shop.lat * Math.PI / 180);
+        const x = 50 + ((lng - shop.lng) * kmPerLng / radiusKm) * 39;
+        const y = 50 - ((lat - shop.lat) * kmPerLat / radiusKm) * 39;
+        return { x: Math.max(4, Math.min(96, x)), y: Math.max(4, Math.min(96, y)) };
+      }
+
+      function pointForOrder(record, index) {
+        const c = customer(record);
+        const lat = Number(c.latitude || c.lat || record.latitude || record.lat);
+        const lng = Number(c.longitude || c.lng || record.longitude || record.lng);
+        if (Number.isFinite(lat) && Number.isFinite(lng)) return coordPoint(lat, lng);
+        return hashPoint(orderAddress(record), index);
+      }
+
+      function pinButton({ point, color, label, className = "", onClick }) {
+        const button = document.createElement("button");
+        button.className = `pin ${className}`;
+        button.style.setProperty("--x", `${point.x}%`);
+        button.style.setProperty("--y", `${point.y}%`);
+        button.style.setProperty("--pin", color);
+        button.type = "button";
+        button.innerHTML = `<span class="pin-dot"></span><span class="pin-label">${escapeHtml(label)}</span>`;
+        button.addEventListener("click", onClick);
+        mapEl.appendChild(button);
+      }
+
+      function showOrder(record) {
+        const c = customer(record);
+        const items = Array.isArray(record.order?.items) ? record.order.items : [];
+        const address = orderAddress(record);
+        detailsEl.innerHTML = `
+          <h2>${escapeHtml(orderNumber(record))}</h2>
+          <p><strong>${escapeHtml(record.status || "Nieuw")}</strong> - ${escapeHtml(c.orderTime || "--:--")}</p>
+          <p>${escapeHtml(c.name || "-")}</p>
+          <p>${escapeHtml(address || "-")}</p>
+          <p>${escapeHtml(c.phone || "-")}</p>
+          <p><strong>${money(record.order?.total || record.amount?.value || 0)}</strong></p>
+          <div class="route">
+            <a class="btn" href="https://waze.com/ul?q=${routeQuery(address)}&navigate=yes" target="_blank" rel="noopener">Waze</a>
+            <a class="btn secondary" href="https://www.google.com/maps/search/?api=1&query=${routeQuery(address)}" target="_blank" rel="noopener">Maps</a>
+          </div>
+          <div style="margin-top: 12px;">${items.map(item => `<p>${escapeHtml(item.quantity || 1)}x ${escapeHtml(item.name || "Item")}</p>`).join("")}</div>
+        `;
+      }
+
+      function showDriver(location) {
+        const updated = location.updatedAt ? new Date(location.updatedAt).toLocaleTimeString("nl-BE", { hour: "2-digit", minute: "2-digit", second: "2-digit" }) : "-";
+        detailsEl.innerHTML = `
+          <h2>${escapeHtml(location.driverName || "Chauffeur")}</h2>
+          <p><strong>Laatste locatie</strong>: ${escapeHtml(updated)}</p>
+          <p class="muted">Wordt enkel doorgestuurd wanneer de chauffeur tracking toestemming heeft gegeven en actieve leveringen heeft.</p>
+          <div class="route">
+            <a class="btn" href="https://waze.com/ul?ll=${encodeURIComponent(location.latitude)},${encodeURIComponent(location.longitude)}&navigate=yes" target="_blank" rel="noopener">Waze</a>
+            <a class="btn secondary" href="https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(`${location.latitude},${location.longitude}`)}" target="_blank" rel="noopener">Maps</a>
+          </div>
+        `;
+      }
+
+      function renderMap() {
+        mapEl.querySelectorAll(".pin").forEach((pin) => pin.remove());
+        const activeOrders = orders.filter((record) => activeStatuses.includes(record.status));
+        activeOrders.forEach((record, index) => {
+          const point = pointForOrder(record, index);
+          pinButton({
+            point,
+            color: statusColors[record.status] || "var(--new)",
+            label: `${orderNumber(record)} - ${record.status}`,
+            onClick: () => showOrder(record)
+          });
+        });
+
+        Object.values(locations || {}).forEach((location) => {
+          const lat = Number(location.latitude);
+          const lng = Number(location.longitude);
+          if (!Number.isFinite(lat) || !Number.isFinite(lng)) return;
+          pinButton({
+            point: coordPoint(lat, lng),
+            color: "var(--driver)",
+            label: location.driverName || "Chauffeur",
+            className: "driver-pin",
+            onClick: () => showDriver(location)
+          });
+        });
+
+        summaryEl.textContent = `${activeOrders.length} actieve leveringen - ${Object.keys(locations || {}).length} chauffeurlocaties`;
+        driverListEl.innerHTML = drivers.length
+          ? drivers.map((driver) => {
+              const location = locations?.[driver.id];
+              const updated = location?.updatedAt ? new Date(location.updatedAt).toLocaleTimeString("nl-BE", { hour: "2-digit", minute: "2-digit" }) : "geen locatie";
+              return `<div class="row"><strong>${escapeHtml(driver.name)}</strong><br><span class="muted">${escapeHtml(updated)}</span></div>`;
+            }).join("")
+          : `<p class="muted">Nog geen chauffeurs toegevoegd.</p>`;
+      }
+
+      async function loadMap() {
+        try {
+          errorEl.textContent = "";
+          const [orderData, driverData] = await Promise.all([
+            api("/api/orders"),
+            api("/api/drivers")
+          ]);
+          orders = Array.isArray(orderData.orders) ? orderData.orders : [];
+          drivers = Array.isArray(driverData.drivers) ? driverData.drivers : [];
+          locations = driverData.locations || {};
+          loginPanel.classList.add("hidden");
+          mapPanel.classList.remove("hidden");
+          renderMap();
+        } catch (error) {
+          errorEl.textContent = error.message;
+          loginPanel.classList.remove("hidden");
+          mapPanel.classList.add("hidden");
+        }
+      }
+
+      document.querySelector("#saveSecretButton").addEventListener("click", () => {
+        const secret = secretInput.value.trim();
+        if (!secret) return;
+        setSecret(secret);
+        loadMap();
+      });
+
+      document.querySelector("#refreshButton").addEventListener("click", loadMap);
+
+      if (getSecret()) {
+        secretInput.value = getSecret();
+        loadMap();
+      }
+
+      setInterval(() => {
+        if (getSecret()) loadMap();
+      }, 10000);
+    </script>
+  </body>
+</html>
