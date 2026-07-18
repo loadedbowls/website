@@ -2,6 +2,7 @@ import { kv } from "@vercel/kv";
 import { createClient } from "redis";
 
 const DRIVER_LIST_KEY = "loaded-bowls:drivers";
+const DRIVER_LOCATION_KEY = "loaded-bowls:driver-locations";
 let redisClient;
 
 async function getRedisClient() {
@@ -43,6 +44,12 @@ function normalizeDrivers(value) {
   if (Array.isArray(parsed)) return parsed;
   if (Array.isArray(parsed?.drivers)) return parsed.drivers;
   return [];
+}
+
+function normalizeLocations(value) {
+  const parsed = parseValue(value);
+  if (parsed && typeof parsed === "object" && !Array.isArray(parsed)) return parsed;
+  return {};
 }
 
 function driverId() {
@@ -102,4 +109,37 @@ export async function findDriverByPin(pin) {
   const cleanPin = String(pin || "").trim();
   const drivers = normalizeDrivers(await storeGet(DRIVER_LIST_KEY));
   return drivers.find((driver) => driver.active !== false && driver.pin === cleanPin) || null;
+}
+
+export async function listDriverLocations() {
+  return normalizeLocations(await storeGet(DRIVER_LOCATION_KEY));
+}
+
+export async function saveDriverLocation(driver, input) {
+  const latitude = Number(input?.latitude ?? input?.lat);
+  const longitude = Number(input?.longitude ?? input?.lng);
+  if (!Number.isFinite(latitude) || !Number.isFinite(longitude)) {
+    throw new Error("Locatie ontbreekt.");
+  }
+
+  const now = new Date().toISOString();
+  let updatedAt = now;
+  if (input?.timestamp) {
+    const timestamp = new Date(input.timestamp);
+    if (!Number.isNaN(timestamp.getTime())) updatedAt = timestamp.toISOString();
+  }
+
+  const locations = await listDriverLocations();
+  const location = {
+    driverId: driver.id,
+    driverName: driver.name,
+    latitude,
+    longitude,
+    accuracy: Number.isFinite(Number(input?.accuracy)) ? Number(input.accuracy) : null,
+    updatedAt
+  };
+
+  locations[driver.id] = location;
+  await storeSet(DRIVER_LOCATION_KEY, locations);
+  return location;
 }
