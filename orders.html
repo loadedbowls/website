@@ -94,6 +94,32 @@
         color: var(--ok);
       }
 
+      .source-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        width: fit-content;
+        margin-top: 8px;
+        border-radius: 999px;
+        padding: 8px 12px;
+        background: var(--orange);
+        color: #07111d;
+        font-size: 0.85rem;
+        font-weight: 950;
+        text-transform: uppercase;
+      }
+
+      .source-badge.webshop {
+        background: rgba(255,255,255,0.08);
+        color: var(--muted);
+        border: 1px solid var(--line);
+      }
+
+      .kassa-alert {
+        border: 2px solid var(--orange);
+        box-shadow: 0 0 0 4px rgba(242, 138, 45, 0.12), 0 18px 40px rgba(0,0,0,0.22);
+      }
+
       .login,
       .toolbar,
       .empty,
@@ -498,7 +524,40 @@
       }
 
       function itemTotal(item) {
-        return Number(item.price || 0) * Number(item.quantity || 1);
+        return Number(item.price || 0) * Number(item.quantity || item.qty || 1);
+      }
+
+      function itemQuantity(item) {
+        return item.quantity || item.qty || 1;
+      }
+
+      function itemDetails(item) {
+        if (item.details) return item.details;
+        if (Array.isArray(item.options)) return item.options.filter(Boolean).join(" | ");
+        return "";
+      }
+
+      function isKassaOrder(record) {
+        const order = record.order || {};
+        const source = String(order.source || record.source || "").toLowerCase();
+        const number = String(record.displayOrderNumber || "");
+        return source === "kassa" || source === "pos" || number.startsWith("KLB");
+      }
+
+      function orderCustomer(record) {
+        const order = record.order || {};
+        if (isKassaOrder(record)) {
+          return {
+            name: order.customer?.name || order.customerName || "Klant in de winkel",
+            phone: order.customer?.phone || "",
+            email: order.customer?.email || "",
+            method: order.customer?.method || order.type || "Kassa",
+            orderTime: order.customer?.orderTime || "Nu",
+            address: order.customer?.address || "",
+            note: [order.tablePlace ? `Tafel: ${order.tablePlace}` : "", order.note || order.customer?.note || ""].filter(Boolean).join(" | ")
+          };
+        }
+        return order.customer || {};
       }
 
       function renderOrders(orders) {
@@ -514,25 +573,27 @@
 
         ordersEl.innerHTML = filteredOrders.map((record) => {
           const order = record.order || {};
-          const customer = order.customer || {};
+          const customer = orderCustomer(record);
           const items = Array.isArray(order.items) ? order.items : [];
           const total = Number(order.total || record.amount?.value || 0);
           const createdAt = record.createdAt || record.paidAt;
           const statusOptions = statuses.map((status) => `<option value="${status}" ${record.status === status ? "selected" : ""}>${status}</option>`).join("");
+          const kassaOrder = isKassaOrder(record);
           const itemHtml = items.map((item) => `
             <div class="item">
-              <strong>${item.quantity || 1}x ${item.name || "Item"}</strong>
+              <strong>${itemQuantity(item)}x ${item.name || "Item"}</strong>
               <span>${money.format(itemTotal(item))}</span>
-              ${item.details ? `<div class="details">${item.details}</div>` : ""}
+              ${itemDetails(item) ? `<div class="details">${itemDetails(item)}</div>` : ""}
             </div>
           `).join("");
 
           return `
-            <article class="order" data-id="${record.id}">
+            <article class="order ${kassaOrder ? "kassa-alert" : ""}" data-id="${record.id}">
               <div class="order-head">
                 <div>
                   <h2>${customer.method || "Order"} <span>${customer.orderTime || ""}</span></h2>
                   <p class="muted">Binnengekomen: ${formatDate(createdAt)} om ${formatTime(createdAt)} - ${record.paymentLabel || "Order"} - ${record.id}</p>
+                  <span class="source-badge ${kassaOrder ? "" : "webshop"}">${kassaOrder ? "Via kassa - klant staat in de winkel" : "Via webshop"}</span>
                 </div>
                 <div class="total">${money.format(total)}</div>
               </div>
