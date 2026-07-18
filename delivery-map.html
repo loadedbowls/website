@@ -91,6 +91,34 @@
         flex-wrap: wrap;
       }
 
+      .zoom-controls {
+        position: absolute;
+        right: 16px;
+        bottom: 78px;
+        z-index: 8;
+        display: grid;
+        gap: 7px;
+      }
+
+      .zoom-controls button,
+      .zoom-level {
+        width: 44px;
+        min-height: 38px;
+        border: 1px solid rgba(255,255,255,.12);
+        border-radius: 12px;
+        background: rgba(5, 11, 18, 0.9);
+        color: var(--text);
+        font-weight: 950;
+        text-align: center;
+      }
+
+      .zoom-level {
+        display: grid;
+        place-items: center;
+        color: var(--gold);
+        font-size: 12px;
+      }
+
       .btn {
         border: 0;
         border-radius: 12px;
@@ -218,15 +246,17 @@
         transform: translate(-50%, -50%);
         display: grid;
         place-items: center;
-        width: 76px;
-        height: 76px;
+        width: 48px;
+        height: 48px;
         border-radius: 999px;
-        border: 3px solid var(--gold);
+        border: 2px solid var(--gold);
         background: #0e1015;
         color: var(--gold);
         font-weight: 950;
+        font-size: 9px;
+        line-height: 1.05;
         text-align: center;
-        box-shadow: 0 0 0 10px rgba(242, 178, 49, 0.08);
+        box-shadow: 0 0 0 6px rgba(242, 178, 49, 0.08);
       }
 
       .radius {
@@ -304,6 +334,10 @@
           right: 12px;
           bottom: 12px;
         }
+        .zoom-controls {
+          right: 12px;
+          bottom: 96px;
+        }
       }
     </style>
   </head>
@@ -332,6 +366,11 @@
         <div class="radius" aria-hidden="true"></div>
         <div class="shop">Loaded<br>Bowls</div>
         <div class="summary" id="summary">Nog niet geladen</div>
+        <div class="zoom-controls" aria-label="Kaart zoom">
+          <button id="zoomInButton" type="button">+</button>
+          <span class="zoom-level" id="zoomLevel">14</span>
+          <button id="zoomOutButton" type="button">-</button>
+        </div>
         <div class="legend">
           <span><i class="swatch" style="--color: var(--new)"></i>Nieuw</span>
           <span><i class="swatch" style="--color: var(--prep)"></i>In bereiding</span>
@@ -359,9 +398,14 @@
       const secretInput = document.querySelector("#secretInput");
       const errorEl = document.querySelector("#error");
       const summaryEl = document.querySelector("#summary");
+      const zoomLevelEl = document.querySelector("#zoomLevel");
+      const zoomInButton = document.querySelector("#zoomInButton");
+      const zoomOutButton = document.querySelector("#zoomOutButton");
 
       let orders = [];
       let locations = {};
+      let mapZoom = Number(localStorage.getItem("loadedMapZoom") || 14);
+      const geocodeCache = JSON.parse(localStorage.getItem("loadedMapGeocodeCache") || "{}");
 
       function lonToTileX(lon, zoom) {
         return ((lon + 180) / 360) * 2 ** zoom;
@@ -373,7 +417,7 @@
       }
 
       function renderTiles() {
-        const zoom = 14;
+        const zoom = mapZoom;
         const rect = mapEl.getBoundingClientRect();
         const centerX = lonToTileX(shop.lng, zoom);
         const centerY = latToTileY(shop.lat, zoom);
@@ -399,6 +443,7 @@
             tileLayer.appendChild(img);
           }
         }
+        if (zoomLevelEl) zoomLevelEl.textContent = String(zoom);
       }
 
       function escapeHtml(value = "") {
@@ -444,46 +489,87 @@
         return customer(record).address || "";
       }
 
+      function saveGeocodeCache() {
+        localStorage.setItem("loadedMapGeocodeCache", JSON.stringify(geocodeCache));
+      }
+
+      function cleanAddress(address = "") {
+        const value = String(address || "").trim();
+        if (!value) return "";
+        if (/gent/i.test(value)) return `${value}, Belgium`;
+        return `${value}, Gent, Belgium`;
+      }
+
+      async function geocodeAddress(address) {
+        const query = cleanAddress(address);
+        if (!query) return null;
+        const cacheKey = query.toLowerCase();
+        if (geocodeCache[cacheKey]) return geocodeCache[cacheKey];
+
+        try {
+          const response = await fetch(`https://nominatim.openstreetmap.org/search?format=json&limit=1&countrycodes=be&q=${encodeURIComponent(query)}`);
+          const results = await response.json();
+          const first = Array.isArray(results) ? results[0] : null;
+          const latitude = Number(first?.lat);
+          const longitude = Number(first?.lon);
+          if (Number.isFinite(latitude) && Number.isFinite(longitude)) {
+            geocodeCache[cacheKey] = { latitude, longitude };
+            saveGeocodeCache();
+            return geocodeCache[cacheKey];
+          }
+        } catch {
+          return null;
+        }
+
+        return null;
+      }
+
       function hashPoint(text, index) {
+        const rect = mapEl.getBoundingClientRect();
         let hash = 0;
         const source = `${text || "gent"}-${index}`;
         for (let i = 0; i < source.length; i += 1) hash = ((hash << 5) - hash) + source.charCodeAt(i);
         const angle = Math.abs(hash % 360) * Math.PI / 180;
-        const radius = 16 + Math.abs(hash % 32);
+        const radius = Math.min(rect.width, rect.height) * (0.18 + Math.abs(hash % 24) / 100);
         return {
-          x: Math.max(8, Math.min(92, 50 + Math.cos(angle) * radius)),
-          y: Math.max(8, Math.min(92, 50 + Math.sin(angle) * radius))
+          x: Math.max(28, Math.min(rect.width - 28, rect.width / 2 + Math.cos(angle) * radius)),
+          y: Math.max(46, Math.min(rect.height - 28, rect.height / 2 + Math.sin(angle) * radius))
         };
       }
 
-      function coordPoint(lat, lng) {
-        const radiusKm = 6;
-        const kmPerLat = 111;
-        const kmPerLng = 111 * Math.cos(shop.lat * Math.PI / 180);
-        const x = 50 + ((lng - shop.lng) * kmPerLng / radiusKm) * 39;
-        const y = 50 - ((lat - shop.lat) * kmPerLat / radiusKm) * 39;
-        return { x: Math.max(4, Math.min(96, x)), y: Math.max(4, Math.min(96, y)) };
+      function latLngPoint(lat, lng) {
+        const rect = mapEl.getBoundingClientRect();
+        const centerX = lonToTileX(shop.lng, mapZoom);
+        const centerY = latToTileY(shop.lat, mapZoom);
+        const pointX = lonToTileX(lng, mapZoom);
+        const pointY = latToTileY(lat, mapZoom);
+        return {
+          x: Math.max(28, Math.min(rect.width - 28, rect.width / 2 + (pointX - centerX) * 256)),
+          y: Math.max(46, Math.min(rect.height - 28, rect.height / 2 + (pointY - centerY) * 256))
+        };
       }
 
-      function pointForOrder(record, index) {
+      async function pointForOrder(record, index) {
         const c = customer(record);
         const lat = Number(c.latitude || c.lat || record.latitude || record.lat);
         const lng = Number(c.longitude || c.lng || record.longitude || record.lng);
-        if (Number.isFinite(lat) && Number.isFinite(lng)) return coordPoint(lat, lng);
+        if (Number.isFinite(lat) && Number.isFinite(lng)) return latLngPoint(lat, lng);
+        const geocoded = await geocodeAddress(orderAddress(record));
+        if (geocoded) return latLngPoint(geocoded.latitude, geocoded.longitude);
         return hashPoint(orderAddress(record), index);
       }
 
       function addPin({ point, color, label, className = "" }) {
         const pin = document.createElement("div");
         pin.className = `pin ${className}`;
-        pin.style.setProperty("--x", `${point.x}%`);
-        pin.style.setProperty("--y", `${point.y}%`);
+        pin.style.setProperty("--x", `${point.x}px`);
+        pin.style.setProperty("--y", `${point.y}px`);
         pin.style.setProperty("--pin", color);
         pin.innerHTML = `<span class="pin-dot"></span><span class="pin-label">${escapeHtml(label)}</span>`;
         mapEl.appendChild(pin);
       }
 
-      function renderMap() {
+      async function renderMap() {
         renderTiles();
         mapEl.querySelectorAll(".pin").forEach((pin) => pin.remove());
         const activeOrders = orders.filter((record) => activeStatuses.includes(record.status));
@@ -493,13 +579,13 @@
             .map((record) => String(record.driverId))
         );
 
-        activeOrders.forEach((record, index) => {
+        for (const [index, record] of activeOrders.entries()) {
           addPin({
-            point: pointForOrder(record, index),
+            point: await pointForOrder(record, index),
             color: statusColors[record.status] || "var(--new)",
             label: `${orderNumber(record)} - ${record.status}`
           });
-        });
+        }
 
         Object.values(locations || {})
           .filter((location) => activeDriverIds.has(String(location.driverId)))
@@ -508,7 +594,7 @@
           const lng = Number(location.longitude);
           if (!Number.isFinite(lat) || !Number.isFinite(lng)) return;
           addPin({
-            point: coordPoint(lat, lng),
+            point: latLngPoint(lat, lng),
             color: "var(--driver)",
             label: location.driverName || "Chauffeur",
             className: "driver-pin"
@@ -529,7 +615,7 @@
           locations = driverData.locations || {};
           loginPanel.classList.add("hidden");
           mapEl.classList.remove("hidden");
-          renderMap();
+          await renderMap();
         } catch (error) {
           errorEl.textContent = error.message;
           loginPanel.classList.remove("hidden");
@@ -545,6 +631,16 @@
       });
 
       document.querySelector("#refreshButton").addEventListener("click", loadMap);
+      zoomInButton.addEventListener("click", () => {
+        mapZoom = Math.min(18, mapZoom + 1);
+        localStorage.setItem("loadedMapZoom", String(mapZoom));
+        renderMap();
+      });
+      zoomOutButton.addEventListener("click", () => {
+        mapZoom = Math.max(12, mapZoom - 1);
+        localStorage.setItem("loadedMapZoom", String(mapZoom));
+        renderMap();
+      });
 
       if (getSecret()) {
         secretInput.value = getSecret();
