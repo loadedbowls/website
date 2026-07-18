@@ -103,6 +103,11 @@
         color: var(--ok);
       }
 
+      .pill.tracking {
+        background: rgba(50, 204, 254, 0.14);
+        color: #72dbff;
+      }
+
       .tabs {
         display: grid;
         grid-template-columns: 1fr 1fr;
@@ -350,7 +355,9 @@
           </div>
           <div class="toolbar-row wrap">
             <button class="btn secondary" id="enablePushButton" type="button">Meldingen aanzetten</button>
+            <button class="btn secondary" id="enableTrackingButton" type="button">Tracking toestaan</button>
             <button class="btn secondary" id="changeCodeButton" type="button">Chauffeur wisselen</button>
+            <span class="pill tracking" id="trackingStatus">Tracking uit</span>
           </div>
           <p class="muted" id="lastUpdated">Nog niet vernieuwd</p>
         </div>
@@ -368,6 +375,8 @@
       const deliveryPanel = $("#deliveryPanel");
       const secretInput = $("#secretInput");
       const enablePushButton = $("#enablePushButton");
+      const enableTrackingButton = $("#enableTrackingButton");
+      const trackingStatus = $("#trackingStatus");
       const ordersEl = $("#orders");
       const connectionStatus = $("#connectionStatus");
       const deliveryCount = $("#deliveryCount");
@@ -378,6 +387,8 @@
       const apiBase = location.protocol === "file:" ? "https://loadedbowls.be" : "";
       let currentFilter = "today";
       let currentDriver = null;
+      let trackingWatchId = null;
+      let hasActiveDeliveries = false;
 
       function escapeHtml(value = "") {
         return String(value)
@@ -410,6 +421,12 @@
         if (!connectionStatus) return;
         connectionStatus.textContent = text;
         connectionStatus.classList.toggle("ok", ok);
+      }
+
+      function setTrackingStatus(text, ok = false) {
+        if (!trackingStatus) return;
+        trackingStatus.textContent = text;
+        trackingStatus.classList.toggle("ok", ok);
       }
 
       function showLogin(message = "") {
@@ -474,6 +491,8 @@
           });
 
         if (deliveryCount) deliveryCount.textContent = `${deliveryOrders.length} leveringen`;
+        hasActiveDeliveries = deliveryOrders.length > 0;
+        updateAutoTracking();
 
         if (!deliveryOrders.length) {
           if (ordersEl) ordersEl.innerHTML = `<div class="empty">Geen leveringen gevonden.</div>`;
@@ -578,6 +597,64 @@
         }
       }
 
+      async function sendDriverLocation(position) {
+        const pin = getSecret();
+        if (!pin || !position?.coords) return;
+
+        const response = await fetch(`${apiBase}/api/drivers`, {
+          method: "POST",
+          headers: { "content-type": "application/json" },
+          body: JSON.stringify({
+            action: "location",
+            pin,
+            latitude: position.coords.latitude,
+            longitude: position.coords.longitude,
+            accuracy: position.coords.accuracy,
+            timestamp: new Date(position.timestamp || Date.now()).toISOString()
+          })
+        });
+        if (!response.ok) {
+          const data = await response.json().catch(() => ({}));
+          throw new Error(data.error || "Locatie doorsturen mislukt.");
+        }
+        setTrackingStatus("Tracking actief", true);
+      }
+
+      function startTracking() {
+        if (!("geolocation" in navigator)) {
+          setTrackingStatus("GPS niet ondersteund");
+          return;
+        }
+        localStorage.setItem("loadedDriverTrackingAllowed", "yes");
+        if (trackingWatchId !== null) return;
+        setTrackingStatus("GPS starten...");
+        trackingWatchId = navigator.geolocation.watchPosition(
+          (position) => sendDriverLocation(position).catch((error) => setTrackingStatus(error.message)),
+          (error) => {
+            const denied = error.code === error.PERMISSION_DENIED;
+            if (denied) localStorage.removeItem("loadedDriverTrackingAllowed");
+            setTrackingStatus(denied ? "GPS geweigerd" : "GPS wacht...");
+          },
+          { enableHighAccuracy: true, maximumAge: 15000, timeout: 20000 }
+        );
+        if (enableTrackingButton) enableTrackingButton.textContent = "Tracking toegestaan";
+      }
+
+      function stopTracking() {
+        if (trackingWatchId !== null && "geolocation" in navigator) {
+          navigator.geolocation.clearWatch(trackingWatchId);
+        }
+        trackingWatchId = null;
+        setTrackingStatus("Geen actieve levering");
+      }
+
+      function updateAutoTracking() {
+        const allowed = localStorage.getItem("loadedDriverTrackingAllowed") === "yes";
+        if (hasActiveDeliveries && allowed) startTracking();
+        if (hasActiveDeliveries && !allowed) setTrackingStatus("GPS toestemming nodig");
+        if (!hasActiveDeliveries) stopTracking();
+      }
+
       on("#saveSecretButton", "click", () => {
         const pin = (secretInput?.value || "").trim();
         if (!pin) return;
@@ -594,6 +671,10 @@
       });
 
       on("#refreshButton", "click", loadOrders);
+      on("#enableTrackingButton", "click", () => {
+        localStorage.setItem("loadedDriverTrackingAllowed", "yes");
+        startTracking();
+      });
       on("#changeCodeButton", "click", () => showLogin("Vul de pincode van de chauffeur opnieuw in."));
 
       on("#orders", "click", async (event) => {
