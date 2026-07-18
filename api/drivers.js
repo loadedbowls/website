@@ -1,4 +1,4 @@
-import { findDriverByPin, listDrivers, publicDriver, removeDriver, saveDriver } from "./_driver-store.js";
+import { findDriverByPin, listDriverLocations, listDrivers, publicDriver, removeDriver, saveDriver, saveDriverLocation } from "./_driver-store.js";
 import { getOrderById, listOrders, requireAdmin, updateOrderStatus } from "./_order-store.js";
 import { saveDriverPushSubscription } from "./_push.js";
 
@@ -27,7 +27,8 @@ export default async function handler(req, res) {
     if (req.method === "GET") {
       if (!requireAdmin(req, res)) return;
       const drivers = await listDrivers({ includePins: true });
-      return res.status(200).json({ drivers });
+      const locations = await listDriverLocations();
+      return res.status(200).json({ drivers, locations });
     }
 
     if (req.method === "POST") {
@@ -56,6 +57,13 @@ export default async function handler(req, res) {
         if (!driver) return res.status(401).json({ error: "Pincode niet herkend." });
         const count = await saveDriverPushSubscription(driver.id, subscription);
         return res.status(200).json({ ok: true, count });
+      }
+
+      if (action === "location") {
+        const driver = await findDriverByPin(pin);
+        if (!driver) return res.status(401).json({ error: "Pincode niet herkend." });
+        const location = await saveDriverLocation(driver, req.body || {});
+        return res.status(200).json({ ok: true, location });
       }
 
       if (!requireAdmin(req, res)) return;
