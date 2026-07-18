@@ -128,9 +128,12 @@
 
       .orders { display: grid; gap: 12px; }
       .order { padding: 14px; display: grid; gap: 10px; }
+      .order.kassa-alert { border: 2px solid var(--orange); box-shadow: 0 0 0 4px rgba(242,138,45,.14), 0 16px 44px rgba(0,0,0,.25); }
       .order-top { display: flex; justify-content: space-between; gap: 12px; align-items: flex-start; }
       .order h3 { font-size: 19px; }
       .pill { display: inline-flex; align-items: center; padding: 6px 9px; border-radius: 999px; background: #2a2317; color: var(--gold); font-size: 12px; font-weight: 900; }
+      .source-badge { display: inline-flex; width: fit-content; margin-top: 6px; border-radius: 999px; padding: 7px 10px; background: var(--orange); color: #140d05; font-size: 12px; font-weight: 950; text-transform: uppercase; }
+      .source-badge.webshop { background: #1b2837; color: var(--muted); border: 1px solid var(--line); }
       .meta { color: var(--muted); font-size: 13px; line-height: 1.5; }
       .items { white-space: pre-line; font-size: 14px; line-height: 1.45; }
       .total { font-weight: 950; color: var(--gold); }
@@ -214,7 +217,17 @@
       }
 
       function money(value) {
-        return "€" + Number(value || 0).toFixed(2).replace(".", ",");
+        return "â‚¬" + Number(value || 0).toFixed(2).replace(".", ",");
+      }
+
+      function itemQuantity(item) {
+        return item.quantity || item.qty || 1;
+      }
+
+      function itemDetails(item) {
+        if (item.details) return item.details;
+        if (Array.isArray(item.options)) return item.options.filter(Boolean).join(" | ");
+        return "";
       }
 
       function statusGroup(record) {
@@ -235,6 +248,29 @@
           customer.note
         ].join(" ").toLowerCase();
         return haystack.includes("test");
+      }
+
+      function isKassaOrder(record) {
+        const order = record.order || {};
+        const source = String(order.source || record.source || "").toLowerCase();
+        const number = String(record.displayOrderNumber || "");
+        return source === "kassa" || source === "pos" || number.startsWith("KLB");
+      }
+
+      function orderCustomer(record) {
+        const order = record.order || {};
+        if (isKassaOrder(record)) {
+          return {
+            name: order.customer?.name || order.customerName || "Klant in de winkel",
+            phone: order.customer?.phone || "",
+            email: order.customer?.email || "",
+            method: order.customer?.method || order.type || "Kassa",
+            orderTime: order.customer?.orderTime || "Nu",
+            address: order.customer?.address || "",
+            note: [order.tablePlace ? `Tafel: ${order.tablePlace}` : "", order.note || order.customer?.note || ""].filter(Boolean).join(" | ")
+          };
+        }
+        return order.customer || {};
       }
 
       function isHistoryOrder(record) {
@@ -338,22 +374,24 @@
 
         ordersEl.innerHTML = filtered.map(record => {
           const order = record.order || {};
-          const customer = order.customer || {};
+          const customer = orderCustomer(record);
           const items = Array.isArray(order.items) ? order.items : [];
           const address = customer.address || "";
           const number = record.displayOrderNumber || record.localOrderNumber || record.id || "-";
           const total = order.total || record.amount?.value || 0;
+          const kassaOrder = isKassaOrder(record);
           const routeButtons = customer.method === "Levering" && address
             ? `<a class="button-link" href="${wazeLink(address)}" target="_blank" rel="noreferrer">Waze</a><a class="button-link secondary" href="${mapsLink(address)}" target="_blank" rel="noreferrer">Maps</a>`
             : "";
           const actionButtons = [statusButtons(record), routeButtons].filter(Boolean).join("");
 
           return `
-            <article class="order">
+            <article class="order ${kassaOrder ? "kassa-alert" : ""}">
               <div class="order-top">
                 <div>
                   <h3>${escapeHtml(number)}</h3>
-                  <p class="meta">${escapeHtml(customer.name || "Klant")} · ${escapeHtml(customer.method || "-")} · ${escapeHtml(customer.orderTime || "-")}</p>
+                  <p class="meta">${escapeHtml(customer.name || "Klant")} Â· ${escapeHtml(customer.method || "-")} Â· ${escapeHtml(customer.orderTime || "-")}</p>
+                  <span class="source-badge ${kassaOrder ? "" : "webshop"}">${kassaOrder ? "Via kassa - klant staat in winkel" : "Via webshop"}</span>
                 </div>
                 <span class="pill">${escapeHtml(isTestOrder(record) ? "Testorder" : (record.status || "Nieuw"))}</span>
               </div>
@@ -364,7 +402,7 @@
                 ${record.driverName ? `Bezorger: ${escapeHtml(record.driverName)}<br>` : ""}
                 ${customer.note ? `Opmerking: ${escapeHtml(customer.note)}` : ""}
               </p>
-              <div class="items">${items.map(item => `${escapeHtml(item.quantity || 1)}x ${escapeHtml(item.name || "Item")}\\n${escapeHtml(item.details || "")}`).join("\\n\\n")}</div>
+              <div class="items">${items.map(item => `${escapeHtml(itemQuantity(item))}x ${escapeHtml(item.name || "Item")}\\n${escapeHtml(itemDetails(item))}`).join("\\n\\n")}</div>
               <p class="total">Totaal: ${money(total)}</p>
               <div class="actions">${actionButtons}</div>
             </article>
@@ -550,3 +588,4 @@
     </script>
   </body>
 </html>
+
