@@ -165,6 +165,12 @@
         border-radius: 24px;
         border: 1px solid var(--line);
         background: #d9e0d3;
+        cursor: grab;
+        touch-action: none;
+      }
+
+      .map.dragging {
+        cursor: grabbing;
       }
 
       .map::after {
@@ -190,6 +196,7 @@
         width: 256px;
         height: 256px;
         user-select: none;
+        -webkit-user-drag: none;
       }
 
       .legend {
@@ -240,8 +247,8 @@
 
       .shop {
         position: absolute;
-        left: 50%;
-        top: 50%;
+        left: var(--shop-x, 50%);
+        top: var(--shop-y, 50%);
         z-index: 4;
         transform: translate(-50%, -50%);
         display: grid;
@@ -257,12 +264,13 @@
         line-height: 1.05;
         text-align: center;
         box-shadow: 0 0 0 6px rgba(242, 178, 49, 0.08);
+        pointer-events: none;
       }
 
       .radius {
         position: absolute;
-        left: 50%;
-        top: 50%;
+        left: var(--shop-x, 50%);
+        top: var(--shop-y, 50%);
         width: min(80%, 780px);
         aspect-ratio: 1;
         transform: translate(-50%, -50%);
@@ -401,11 +409,20 @@
       const zoomLevelEl = document.querySelector("#zoomLevel");
       const zoomInButton = document.querySelector("#zoomInButton");
       const zoomOutButton = document.querySelector("#zoomOutButton");
+      const shopMarker = document.querySelector(".shop");
+      const radiusMarker = document.querySelector(".radius");
 
       let orders = [];
       let locations = {};
       let mapZoom = Number(localStorage.getItem("loadedMapZoom") || 14);
+      let mapCenter = JSON.parse(localStorage.getItem("loadedMapCenter") || "null") || shop;
+      let dragState = null;
+      let renderFrame = null;
       const geocodeCache = JSON.parse(localStorage.getItem("loadedMapGeocodeCache") || "{}");
+
+      if (!Number.isFinite(Number(mapCenter.lat)) || !Number.isFinite(Number(mapCenter.lng))) {
+        mapCenter = shop;
+      }
 
       function lonToTileX(lon, zoom) {
         return ((lon + 180) / 360) * 2 ** zoom;
@@ -416,11 +433,32 @@
         return (1 - Math.log(Math.tan(rad) + 1 / Math.cos(rad)) / Math.PI) / 2 * 2 ** zoom;
       }
 
+      function tileXToLon(x, zoom) {
+        return (x / 2 ** zoom) * 360 - 180;
+      }
+
+      function tileYToLat(y, zoom) {
+        const value = Math.PI - (2 * Math.PI * y) / 2 ** zoom;
+        return (180 / Math.PI) * Math.atan(0.5 * (Math.exp(value) - Math.exp(-value)));
+      }
+
+      function saveMapCenter() {
+        localStorage.setItem("loadedMapCenter", JSON.stringify(mapCenter));
+      }
+
+      function scheduleRenderMap() {
+        if (renderFrame) return;
+        renderFrame = requestAnimationFrame(() => {
+          renderFrame = null;
+          renderMap();
+        });
+      }
+
       function renderTiles() {
         const zoom = mapZoom;
         const rect = mapEl.getBoundingClientRect();
-        const centerX = lonToTileX(shop.lng, zoom);
-        const centerY = latToTileY(shop.lat, zoom);
+        const centerX = lonToTileX(mapCenter.lng, zoom);
+        const centerY = latToTileY(mapCenter.lat, zoom);
         const tileX = Math.floor(centerX);
         const tileY = Math.floor(centerY);
         const tilesX = Math.ceil(rect.width / 256) + 2;
@@ -539,8 +577,8 @@
 
       function latLngPoint(lat, lng) {
         const rect = mapEl.getBoundingClientRect();
-        const centerX = lonToTileX(shop.lng, mapZoom);
-        const centerY = latToTileY(shop.lat, mapZoom);
+        const centerX = lonToTileX(mapCenter.lng, mapZoom);
+        const centerY = latToTileY(mapCenter.lat, mapZoom);
         const pointX = lonToTileX(lng, mapZoom);
         const pointY = latToTileY(lat, mapZoom);
         return {
@@ -572,6 +610,11 @@
       async function renderMap() {
         renderTiles();
         mapEl.querySelectorAll(".pin").forEach((pin) => pin.remove());
+        const shopPoint = latLngPoint(shop.lat, shop.lng);
+        [shopMarker, radiusMarker].forEach((element) => {
+          element.style.setProperty("--shop-x", `${shopPoint.x}px`);
+          element.style.setProperty("--shop-y", `${shopPoint.y}px`);
+        });
         const activeOrders = orders.filter((record) => activeStatuses.includes(record.status));
         const activeDriverIds = new Set(
           activeOrders
@@ -641,6 +684,42 @@
         localStorage.setItem("loadedMapZoom", String(mapZoom));
         renderMap();
       });
+
+      mapEl.addEventListener("pointerdown", (event) => {
+        if (event.target.closest("button, input, .legend, .summary, .zoom-controls")) return;
+        mapEl.setPointerCapture(event.pointerId);
+        mapEl.classList.add("dragging");
+        dragState = {
+          pointerId: event.pointerId,
+          startX: event.clientX,
+          startY: event.clientY,
+          centerX: lonToTileX(mapCenter.lng, mapZoom),
+          centerY: latToTileY(mapCenter.lat, mapZoom)
+        };
+      });
+
+      mapEl.addEventListener("pointermove", (event) => {
+        if (!dragState || dragState.pointerId !== event.pointerId) return;
+        const deltaX = event.clientX - dragState.startX;
+        const deltaY = event.clientY - dragState.startY;
+        const nextCenterX = dragState.centerX - deltaX / 256;
+        const nextCenterY = dragState.centerY - deltaY / 256;
+        mapCenter = {
+          lat: Math.max(-85, Math.min(85, tileYToLat(nextCenterY, mapZoom))),
+          lng: tileXToLon(nextCenterX, mapZoom)
+        };
+        saveMapCenter();
+        scheduleRenderMap();
+      });
+
+      function endDrag(event) {
+        if (!dragState || dragState.pointerId !== event.pointerId) return;
+        dragState = null;
+        mapEl.classList.remove("dragging");
+      }
+
+      mapEl.addEventListener("pointerup", endDrag);
+      mapEl.addEventListener("pointercancel", endDrag);
 
       if (getSecret()) {
         secretInput.value = getSecret();
