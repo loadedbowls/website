@@ -134,6 +134,7 @@
       .pill { display: inline-flex; align-items: center; padding: 6px 9px; border-radius: 999px; background: #2a2317; color: var(--gold); font-size: 12px; font-weight: 900; }
       .source-badge { display: inline-flex; width: fit-content; margin-top: 6px; border-radius: 999px; padding: 7px 10px; background: var(--orange); color: #140d05; font-size: 12px; font-weight: 950; text-transform: uppercase; }
       .source-badge.webshop { background: #1b2837; color: var(--muted); border: 1px solid var(--line); }
+      .kassa-title { display: block; margin-bottom: 5px; color: var(--orange); font-size: 28px; font-weight: 950; line-height: .9; letter-spacing: .04em; text-transform: uppercase; }
       .meta { color: var(--muted); font-size: 13px; line-height: 1.5; }
       .items { white-space: pre-line; font-size: 14px; line-height: 1.45; }
       .total { font-weight: 950; color: var(--gold); }
@@ -389,6 +390,7 @@
             <article class="order ${kassaOrder ? "kassa-alert" : ""}">
               <div class="order-top">
                 <div>
+                  ${kassaOrder ? `<strong class="kassa-title">KASSA</strong>` : ""}
                   <h3>${escapeHtml(number)}</h3>
                   <p class="meta">${escapeHtml(customer.name || "Klant")} Â· ${escapeHtml(customer.method || "-")} Â· ${escapeHtml(customer.orderTime || "-")}</p>
                   <span class="source-badge ${kassaOrder ? "" : "webshop"}">${kassaOrder ? "Via kassa - klant staat in winkel" : "Via webshop"}</span>
