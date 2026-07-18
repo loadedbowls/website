@@ -115,6 +115,17 @@
         border: 1px solid var(--line);
       }
 
+      .kassa-title {
+        display: block;
+        margin-bottom: 8px;
+        color: var(--orange);
+        font-size: clamp(1.7rem, 5vw, 3.2rem);
+        font-weight: 950;
+        line-height: 0.9;
+        letter-spacing: 0.04em;
+        text-transform: uppercase;
+      }
+
       .kassa-alert {
         border: 2px solid var(--orange);
         box-shadow: 0 0 0 4px rgba(242, 138, 45, 0.12), 0 18px 40px rgba(0,0,0,0.22);
@@ -591,6 +602,7 @@
             <article class="order ${kassaOrder ? "kassa-alert" : ""}" data-id="${record.id}">
               <div class="order-head">
                 <div>
+                  ${kassaOrder ? `<strong class="kassa-title">KASSA</strong>` : ""}
                   <h2>${customer.method || "Order"} <span>${customer.orderTime || ""}</span></h2>
                   <p class="muted">Binnengekomen: ${formatDate(createdAt)} om ${formatTime(createdAt)} - ${record.paymentLabel || "Order"} - ${record.id}</p>
                   <span class="source-badge ${kassaOrder ? "" : "webshop"}">${kassaOrder ? "Via kassa - klant staat in de winkel" : "Via webshop"}</span>
