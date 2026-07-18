@@ -136,19 +136,39 @@
         overflow: hidden;
         border-radius: 24px;
         border: 1px solid var(--line);
+        background: #d9e0d3;
+      }
+
+      .map::after {
+        content: "";
+        position: absolute;
+        inset: 0;
+        z-index: 1;
+        pointer-events: none;
         background:
-          linear-gradient(rgba(242, 178, 49, 0.08) 1px, transparent 1px),
-          linear-gradient(90deg, rgba(242, 178, 49, 0.08) 1px, transparent 1px),
-          radial-gradient(circle at 50% 50%, rgba(242, 178, 49, 0.09), transparent 24%),
-          #070d15;
-        background-size: 58px 58px, 58px 58px, auto, auto;
+          radial-gradient(circle at 50% 50%, transparent 0 44%, rgba(7, 17, 29, 0.08) 70%),
+          linear-gradient(180deg, rgba(7, 17, 29, 0.04), rgba(7, 17, 29, 0.18));
+      }
+
+      .tile-layer {
+        position: absolute;
+        inset: 0;
+        z-index: 0;
+        overflow: hidden;
+      }
+
+      .tile-layer img {
+        position: absolute;
+        width: 256px;
+        height: 256px;
+        user-select: none;
       }
 
       .legend {
         position: absolute;
         left: 16px;
         bottom: 16px;
-        z-index: 7;
+        z-index: 8;
         display: flex;
         flex-wrap: wrap;
         gap: 8px 12px;
@@ -180,7 +200,7 @@
         position: absolute;
         right: 16px;
         top: 16px;
-        z-index: 7;
+        z-index: 8;
         padding: 10px 12px;
         border-radius: 14px;
         border: 1px solid rgba(255,255,255,.1);
@@ -194,7 +214,7 @@
         position: absolute;
         left: 50%;
         top: 50%;
-        z-index: 3;
+        z-index: 4;
         transform: translate(-50%, -50%);
         display: grid;
         place-items: center;
@@ -226,7 +246,7 @@
         position: absolute;
         left: var(--x);
         top: var(--y);
-        z-index: 4;
+        z-index: 5;
         transform: translate(-50%, -100%);
         border: 0;
         background: transparent;
@@ -261,7 +281,7 @@
 
       .driver-pin {
         --pin: var(--driver);
-        z-index: 5;
+        z-index: 6;
       }
 
       .driver-pin .pin-dot {
@@ -308,6 +328,7 @@
       </section>
 
       <section class="map hidden" id="map">
+        <div class="tile-layer" id="tileLayer" aria-hidden="true"></div>
         <div class="radius" aria-hidden="true"></div>
         <div class="shop">Loaded<br>Bowls</div>
         <div class="summary" id="summary">Nog niet geladen</div>
@@ -333,6 +354,7 @@
       };
 
       const mapEl = document.querySelector("#map");
+      const tileLayer = document.querySelector("#tileLayer");
       const loginPanel = document.querySelector("#loginPanel");
       const secretInput = document.querySelector("#secretInput");
       const errorEl = document.querySelector("#error");
@@ -340,6 +362,44 @@
 
       let orders = [];
       let locations = {};
+
+      function lonToTileX(lon, zoom) {
+        return ((lon + 180) / 360) * 2 ** zoom;
+      }
+
+      function latToTileY(lat, zoom) {
+        const rad = lat * Math.PI / 180;
+        return (1 - Math.log(Math.tan(rad) + 1 / Math.cos(rad)) / Math.PI) / 2 * 2 ** zoom;
+      }
+
+      function renderTiles() {
+        const zoom = 14;
+        const rect = mapEl.getBoundingClientRect();
+        const centerX = lonToTileX(shop.lng, zoom);
+        const centerY = latToTileY(shop.lat, zoom);
+        const tileX = Math.floor(centerX);
+        const tileY = Math.floor(centerY);
+        const tilesX = Math.ceil(rect.width / 256) + 2;
+        const tilesY = Math.ceil(rect.height / 256) + 2;
+        const startX = tileX - Math.ceil(tilesX / 2);
+        const startY = tileY - Math.ceil(tilesY / 2);
+        const offsetX = rect.width / 2 - (centerX - startX) * 256;
+        const offsetY = rect.height / 2 - (centerY - startY) * 256;
+
+        tileLayer.innerHTML = "";
+        for (let x = 0; x < tilesX; x += 1) {
+          for (let y = 0; y < tilesY; y += 1) {
+            const img = document.createElement("img");
+            img.alt = "";
+            img.decoding = "async";
+            img.loading = "lazy";
+            img.src = `https://tile.openstreetmap.org/${zoom}/${startX + x}/${startY + y}.png`;
+            img.style.left = `${offsetX + x * 256}px`;
+            img.style.top = `${offsetY + y * 256}px`;
+            tileLayer.appendChild(img);
+          }
+        }
+      }
 
       function escapeHtml(value = "") {
         return String(value)
@@ -424,8 +484,14 @@
       }
 
       function renderMap() {
+        renderTiles();
         mapEl.querySelectorAll(".pin").forEach((pin) => pin.remove());
         const activeOrders = orders.filter((record) => activeStatuses.includes(record.status));
+        const activeDriverIds = new Set(
+          activeOrders
+            .filter((record) => record.status === "Onderweg" && record.driverId)
+            .map((record) => String(record.driverId))
+        );
 
         activeOrders.forEach((record, index) => {
           addPin({
@@ -435,7 +501,9 @@
           });
         });
 
-        Object.values(locations || {}).forEach((location) => {
+        Object.values(locations || {})
+          .filter((location) => activeDriverIds.has(String(location.driverId)))
+          .forEach((location) => {
           const lat = Number(location.latitude);
           const lng = Number(location.longitude);
           if (!Number.isFinite(lat) || !Number.isFinite(lng)) return;
@@ -447,7 +515,7 @@
           });
         });
 
-        summaryEl.textContent = `${activeOrders.length} actieve leveringen - ${Object.keys(locations || {}).length} chauffeurs`;
+        summaryEl.textContent = `${activeOrders.length} actieve leveringen - ${activeDriverIds.size} chauffeurs onderweg`;
       }
 
       async function loadMap() {
@@ -486,6 +554,10 @@
       setInterval(() => {
         if (getSecret()) loadMap();
       }, 10000);
+
+      window.addEventListener("resize", () => {
+        if (!mapEl.classList.contains("hidden")) renderMap();
+      });
     </script>
   </body>
 </html>
