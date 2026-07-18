@@ -372,7 +372,7 @@
       <section class="map hidden" id="map">
         <div class="tile-layer" id="tileLayer" aria-hidden="true"></div>
         <div class="radius" aria-hidden="true"></div>
-        <div class="shop">Loaded<br>Bowls</div>
+        <div class="shop" title="Loaded Bowls - Sint-Amandstraat 24, 9000 Gent">Loaded<br>Bowls</div>
         <div class="summary" id="summary">Nog niet geladen</div>
         <div class="zoom-controls" aria-label="Kaart zoom">
           <button id="zoomInButton" type="button">+</button>
@@ -391,7 +391,12 @@
 
     <script>
       const apiBase = location.protocol === "file:" ? "https://loadedbowls.be" : "";
-      const shop = { lat: 51.0461, lng: 3.7248 };
+      const shop = {
+        lat: 51.042810087083,
+        lng: 3.7247852080627,
+        address: "Sint-Amandstraat 24, 9000 Gent"
+      };
+      const oldShop = { lat: 51.0461, lng: 3.7248 };
       const activeStatuses = ["Nieuw", "In bereiding", "Klaar", "Onderweg"];
       const statusColors = {
         "Nieuw": "var(--new)",
@@ -422,6 +427,10 @@
 
       if (!Number.isFinite(Number(mapCenter.lat)) || !Number.isFinite(Number(mapCenter.lng))) {
         mapCenter = shop;
+      }
+      if (Math.abs(Number(mapCenter.lat) - oldShop.lat) < 0.0001 && Math.abs(Number(mapCenter.lng) - oldShop.lng) < 0.0001) {
+        mapCenter = shop;
+        saveMapCenter();
       }
 
       function lonToTileX(lon, zoom) {
