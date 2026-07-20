@@ -385,6 +385,7 @@
 
       const money = new Intl.NumberFormat("nl-BE", { style: "currency", currency: "EUR" });
       const apiBase = location.protocol === "file:" ? "https://loadedbowls.be" : "";
+      const driverSessionKey = "loadedDriverSession";
       let currentFilter = "today";
       let currentDriver = null;
       let trackingWatchId = null;
@@ -406,14 +407,39 @@
         return `${year}-${month}-${day}`;
       }
 
+      function readDriverSession() {
+        try {
+          const saved = JSON.parse(localStorage.getItem(driverSessionKey) || "null");
+          if (saved?.pin) return saved;
+        } catch {}
+
+        const pin = sessionStorage.getItem("loadedDriverPin") || "";
+        if (!pin) return null;
+        return {
+          pin,
+          driver: {
+            id: sessionStorage.getItem("loadedDriverId") || "",
+            name: sessionStorage.getItem("loadedDriverName") || ""
+          }
+        };
+      }
+
       function getSecret() {
-        return sessionStorage.getItem("loadedDriverPin") || "";
+        return readDriverSession()?.pin || "";
       }
 
       function setDriverSession(pin, driver) {
         sessionStorage.setItem("loadedDriverPin", pin);
         sessionStorage.setItem("loadedDriverName", driver.name || "");
         sessionStorage.setItem("loadedDriverId", driver.id || "");
+        localStorage.setItem(driverSessionKey, JSON.stringify({
+          pin,
+          driver: {
+            id: driver.id || "",
+            name: driver.name || ""
+          },
+          savedAt: new Date().toISOString()
+        }));
         currentDriver = driver;
       }
 
@@ -447,10 +473,11 @@
         setHidden(trackingStatus, trackingPermissionAllowed() && !hasActiveDeliveries);
       }
 
-      function showLogin(message = "") {
+      function showLogin(message = "", forgetSavedDriver = true) {
         sessionStorage.removeItem("loadedDriverPin");
         sessionStorage.removeItem("loadedDriverName");
         sessionStorage.removeItem("loadedDriverId");
+        if (forgetSavedDriver) localStorage.removeItem(driverSessionKey);
         deliveryPanel?.classList.add("hidden");
         loginPanel?.classList.remove("hidden");
         if (secretInput) secretInput.value = "";
@@ -598,6 +625,7 @@
           if (!response.ok) throw new Error(data.error || "Leveringen laden mislukt.");
 
           currentDriver = data.driver || currentDriver;
+          if (currentDriver && pin) setDriverSession(pin, currentDriver);
           renderOrders(data.orders || []);
           setConnected(true, currentDriver?.name ? currentDriver.name : "Verbonden");
           if (lastUpdated) lastUpdated.textContent = `Laatst vernieuwd: ${new Date().toLocaleTimeString("nl-BE", { hour: "2-digit", minute: "2-digit", second: "2-digit" })}`;
@@ -605,7 +633,8 @@
           refreshPermissionControls();
         } catch (error) {
           setConnected(false, "Fout");
-          if (String(error.message || "").toLowerCase().includes("geen toegang")) {
+          const errorText = String(error.message || "").toLowerCase();
+          if (errorText.includes("geen toegang") || errorText.includes("pincode")) {
             showLogin("Pincode niet aanvaard. Vul opnieuw in.");
             return;
           }
@@ -814,11 +843,9 @@
         });
       });
 
-      if (getSecret()) {
-        currentDriver = {
-          id: sessionStorage.getItem("loadedDriverId") || "",
-          name: sessionStorage.getItem("loadedDriverName") || ""
-        };
+      const savedSession = readDriverSession();
+      if (savedSession?.pin) {
+        currentDriver = savedSession.driver || null;
         loginPanel?.classList.add("hidden");
         deliveryPanel?.classList.remove("hidden");
         loadOrders();
