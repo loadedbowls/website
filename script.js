@@ -1,3 +1,4 @@
+
 const signatures = [
   {
     id: "loaded-fire-chicken",
@@ -950,8 +951,8 @@ function renderSignatureModal(item, config = {}) {
 }
 
 function renderSignatures() {
-  signatureGrid.innerHTML = signatures.map((item) => `
-    <article class="signature-card ${item.badge ? "bestseller" : ""}">
+  signatureGrid.innerHTML = signatures.filter((item) => item.active !== false).map((item) => `
+    <article class="signature-card ${item.badge ? "bestseller" : ""}" data-cms-product="${item.id}" data-cms-label="${item.name}">
       ${item.badge ? `<span class="badge">${item.badge}</span>` : ""}
       ${getSignatureImage(item, "Large") ? `<img class="signature-card-photo" src="${getSignatureImage(item, "Large")}" alt="${item.name}">` : ""}
       <div class="signature-head">
@@ -974,8 +975,8 @@ function renderSignatures() {
 }
 
 function renderSimpleList(target, items) {
-  target.innerHTML = items.map((item) => `
-    <p>
+  target.innerHTML = items.filter((item) => item.active !== false).map((item) => `
+    <p data-cms-simple-product="${item.id}">
       <button class="menu-add" type="button" data-simple="${item.id}">${item.name}</button>
       <span>${money.format(item.price)}</span>
     </p>
@@ -1297,9 +1298,10 @@ orderForm.addEventListener("submit", async (event) => {
     return;
   }
 
+  let deliveryInfo = null;
   if (method === "Levering") {
-    const deliveryAllowed = await checkDeliveryAddress(address);
-    if (!deliveryAllowed) return;
+    deliveryInfo = await checkDeliveryAddress(address);
+    if (!deliveryInfo) return;
   }
 
   const summary = getCartSummary(lines);
@@ -1313,6 +1315,13 @@ orderForm.addEventListener("submit", async (event) => {
       method,
       orderTime: selectedTime,
       address,
+      verifiedAddress: deliveryInfo?.verifiedAddress || "",
+      latitude: deliveryInfo?.latitude ?? null,
+      longitude: deliveryInfo?.longitude ?? null,
+      routeMinutes: deliveryInfo?.routeMinutes ?? null,
+      routeDistanceKm: deliveryInfo?.routeDistanceKm ?? null,
+      routeSource: deliveryInfo?.routeSource || "",
+      routeCheckedAt: deliveryInfo?.routeCheckedAt || "",
       note
     },
     items: lines,
@@ -1411,7 +1420,7 @@ languageSelect?.addEventListener("change", () => {
 async function checkDeliveryAddress(address) {
   if (address.length < 6) {
     showToast(t("fullAddress"));
-    return false;
+    return null;
   }
 
   try {
@@ -1427,14 +1436,22 @@ async function checkDeliveryAddress(address) {
 
     if (!response.ok || !data.ok) {
       showToast(data.error || t("deliveryZoneError"));
-      return false;
+      return null;
     }
 
     showToast(t("deliveryOk", { distance: data.distanceKm }));
-    return true;
+    return {
+      verifiedAddress: data.address || address,
+      latitude: Number(data.latitude),
+      longitude: Number(data.longitude),
+      routeMinutes: Number(data.routeMinutes) || null,
+      routeDistanceKm: Number(data.routeDistanceKm) || null,
+      routeSource: data.routeSource || "",
+      routeCheckedAt: new Date().toISOString()
+    };
   } catch (error) {
     showToast(t("addressCheckUnavailable"));
-    return false;
+    return null;
   }
 }
 
