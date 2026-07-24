@@ -1,0 +1,671 @@
+<!doctype html>
+<html lang="nl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#080d18">
+  <title>Loaded Bowls | Live backoffice</title>
+  <link rel="icon" href="/assets/loaded-bowls-logo.ico">
+  <style>
+    :root {
+      color-scheme: dark;
+      --bg: #080d18;
+      --panel: #101827;
+      --panel-2: #151f30;
+      --line: #29364a;
+      --text: #f5f7fb;
+      --muted: #9caabd;
+      --yellow: #f0ad2f;
+      --orange: #ed7d28;
+      --green: #37bd78;
+      --red: #ef665d;
+      --blue: #51a9ff;
+    }
+
+    * { box-sizing: border-box; }
+    html { min-height: 100%; background: var(--bg); }
+    body {
+      min-height: 100%;
+      margin: 0;
+      color: var(--text);
+      background:
+        linear-gradient(rgba(8, 13, 24, .97), rgba(8, 13, 24, .97)),
+        url("/assets/loaded-bowl-dark-chili-bg.png") center/cover fixed;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      letter-spacing: 0;
+    }
+    button, input { font: inherit; }
+    button { cursor: pointer; }
+    .hidden { display: none !important; }
+
+    .login {
+      min-height: 100dvh;
+      display: grid;
+      place-items: center;
+      padding: 24px;
+    }
+    .login-panel {
+      width: min(100%, 420px);
+      padding: 28px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: rgba(16, 24, 39, .96);
+      box-shadow: 0 22px 70px rgba(0, 0, 0, .42);
+    }
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 13px;
+      min-width: 0;
+    }
+    .brand img {
+      width: 52px;
+      height: 52px;
+      object-fit: cover;
+      border-radius: 6px;
+      border: 1px solid #3a4658;
+    }
+    .brand strong { display: block; font-size: 20px; text-transform: uppercase; }
+    .brand small { display: block; margin-top: 2px; color: var(--yellow); font-weight: 800; }
+    .login h1 { margin: 28px 0 8px; font-size: 32px; line-height: 1; }
+    .login p { margin: 0 0 22px; color: var(--muted); line-height: 1.55; }
+    label { display: grid; gap: 7px; color: var(--muted); font-size: 13px; font-weight: 750; }
+    input {
+      width: 100%;
+      min-height: 46px;
+      padding: 10px 12px;
+      border: 1px solid var(--line);
+      border-radius: 6px;
+      outline: none;
+      color: var(--text);
+      background: #0a111d;
+    }
+    input:focus { border-color: var(--yellow); box-shadow: 0 0 0 3px rgba(240, 173, 47, .14); }
+    .remember {
+      display: flex;
+      align-items: center;
+      gap: 9px;
+      margin: 14px 0 20px;
+      color: var(--muted);
+      font-size: 13px;
+    }
+    .remember input { width: 18px; min-height: 18px; accent-color: var(--yellow); }
+    .primary, .secondary, .icon-button {
+      min-height: 42px;
+      border: 1px solid transparent;
+      border-radius: 6px;
+      padding: 9px 14px;
+      color: #111720;
+      background: var(--yellow);
+      font-weight: 900;
+    }
+    .login .primary { width: 100%; min-height: 48px; }
+    .secondary {
+      color: var(--text);
+      border-color: var(--line);
+      background: #121c2b;
+    }
+    .icon-button {
+      width: 42px;
+      padding: 0;
+      color: var(--text);
+      border-color: var(--line);
+      background: #121c2b;
+      font-size: 20px;
+    }
+    .error { min-height: 20px; margin-top: 12px !important; color: #ff958c !important; font-weight: 750; }
+
+    .app { min-height: 100dvh; }
+    .topbar {
+      position: sticky;
+      z-index: 20;
+      top: 0;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      padding: 10px max(14px, env(safe-area-inset-right)) 10px max(14px, env(safe-area-inset-left));
+      border-bottom: 1px solid var(--line);
+      background: rgba(8, 13, 24, .94);
+      backdrop-filter: blur(14px);
+    }
+    .topbar .brand img { width: 42px; height: 42px; }
+    .topbar .brand strong { font-size: 16px; }
+    .top-actions { display: flex; gap: 8px; }
+    main { width: min(100%, 1180px); margin: 0 auto; padding: 20px 14px 48px; }
+
+    .heading {
+      display: flex;
+      align-items: end;
+      justify-content: space-between;
+      gap: 18px;
+      margin-bottom: 15px;
+    }
+    .heading h1 { margin: 0; font-size: clamp(26px, 5vw, 42px); line-height: 1; }
+    .heading p { margin: 7px 0 0; color: var(--muted); }
+    .live-state { color: var(--muted); font-size: 12px; font-weight: 800; text-align: right; }
+    .live-state.ok::before { content: ""; display: inline-block; width: 8px; height: 8px; margin-right: 7px; border-radius: 50%; background: var(--green); }
+
+    .filters {
+      display: flex;
+      gap: 7px;
+      overflow-x: auto;
+      padding: 4px 0 12px;
+      scrollbar-width: none;
+    }
+    .filters::-webkit-scrollbar { display: none; }
+    .filters button { flex: 0 0 auto; }
+    .filters button.active { color: #10151e; border-color: var(--yellow); background: var(--yellow); }
+    .custom-range {
+      display: grid;
+      grid-template-columns: minmax(130px, 1fr) minmax(130px, 1fr) auto;
+      gap: 9px;
+      align-items: end;
+      margin: 0 0 18px;
+      padding: 14px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: rgba(16, 24, 39, .9);
+    }
+
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 10px;
+      margin-bottom: 18px;
+    }
+    .stat {
+      min-height: 112px;
+      padding: 16px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: rgba(16, 24, 39, .94);
+    }
+    .stat span { display: block; color: var(--muted); font-size: 12px; font-weight: 800; text-transform: uppercase; }
+    .stat strong { display: block; margin-top: 8px; font-size: clamp(23px, 4vw, 34px); line-height: 1; color: var(--yellow); }
+    .stat small { display: block; margin-top: 8px; color: var(--muted); }
+
+    .dashboard-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 12px;
+      margin-bottom: 18px;
+    }
+    .panel {
+      min-width: 0;
+      padding: 17px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: rgba(16, 24, 39, .94);
+    }
+    .panel h2 { margin: 0 0 14px; font-size: 16px; }
+    .bar-list { display: grid; gap: 11px; }
+    .bar-row { display: grid; grid-template-columns: minmax(82px, .8fr) minmax(70px, 1.5fr) auto; gap: 9px; align-items: center; font-size: 12px; }
+    .bar-row strong { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .track { height: 7px; overflow: hidden; border-radius: 4px; background: #263247; }
+    .fill { height: 100%; border-radius: inherit; background: linear-gradient(90deg, var(--yellow), var(--orange)); }
+    .bar-row span { color: var(--muted); font-weight: 750; }
+    .empty { color: var(--muted); line-height: 1.5; }
+
+    .orders-panel { padding: 0; overflow: hidden; }
+    .panel-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 16px 17px;
+      border-bottom: 1px solid var(--line);
+    }
+    .panel-head h2 { margin: 0; }
+    .pill {
+      display: inline-flex;
+      align-items: center;
+      min-height: 28px;
+      padding: 5px 9px;
+      border-radius: 999px;
+      color: var(--yellow);
+      background: rgba(240, 173, 47, .12);
+      font-size: 12px;
+      font-weight: 850;
+    }
+    .orders { display: grid; }
+    .order {
+      display: grid;
+      grid-template-columns: minmax(110px, .75fr) minmax(180px, 1.4fr) minmax(100px, .65fr) auto;
+      gap: 13px;
+      align-items: center;
+      padding: 14px 17px;
+      border-bottom: 1px solid var(--line);
+    }
+    .order:last-child { border-bottom: 0; }
+    .order strong, .order span { min-width: 0; }
+    .order .number { color: var(--yellow); }
+    .order .customer { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .order small { display: block; margin-top: 3px; color: var(--muted); }
+    .status {
+      justify-self: start;
+      padding: 5px 8px;
+      border-radius: 5px;
+      color: #cfe5ff;
+      background: rgba(81, 169, 255, .13);
+      font-size: 11px;
+      font-weight: 850;
+    }
+    .status.done { color: #baf3d4; background: rgba(55, 189, 120, .13); }
+    .status.open { color: #ffe0a1; background: rgba(240, 173, 47, .13); }
+    .amount { text-align: right; font-size: 17px; }
+    .bottom-note { margin: 14px 2px 0; color: var(--muted); font-size: 12px; line-height: 1.5; }
+
+    @media (max-width: 800px) {
+      .stats { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .dashboard-grid { grid-template-columns: 1fr; }
+      .order { grid-template-columns: 1fr auto; gap: 8px 12px; }
+      .order .customer { grid-column: 1 / -1; grid-row: 2; }
+      .order .status { grid-column: 1; grid-row: 3; }
+      .order .amount { grid-column: 2; grid-row: 1; }
+      .custom-range { grid-template-columns: 1fr 1fr; }
+      .custom-range button { grid-column: 1 / -1; }
+    }
+    @media (max-width: 480px) {
+      .topbar .brand small { display: none; }
+      .top-actions .secondary { width: 42px; padding: 0; overflow: hidden; color: transparent; position: relative; }
+      .top-actions .secondary::after { content: "↪"; position: absolute; inset: 0; display: grid; place-items: center; color: var(--text); font-size: 20px; }
+      .heading { align-items: start; }
+      .live-state { max-width: 110px; }
+      .stat { min-height: 100px; padding: 14px; }
+      .stat strong { font-size: 24px; }
+    }
+  </style>
+</head>
+<body>
+  <section class="login" id="loginView">
+    <div class="login-panel">
+      <div class="brand">
+        <img src="/assets/loaded-bowls-logo.jpeg" alt="Loaded Bowls">
+        <div><strong>Loaded Bowls</strong><small>Beveiligde backoffice</small></div>
+      </div>
+      <h1>Live cijfers</h1>
+      <p>Bekijk omzet en orders vanaf ieder toestel. Gebruik dezelfde geheime beheercode als bij de orderapp.</p>
+      <form id="loginForm">
+        <label>Beheercode
+          <input id="secretInput" type="password" autocomplete="current-password" required>
+        </label>
+        <label class="remember"><input id="rememberInput" type="checkbox"> Onthoud op dit toestel</label>
+        <button class="primary" type="submit">Backoffice openen</button>
+        <p class="error" id="loginError"></p>
+      </form>
+    </div>
+  </section>
+
+  <div class="app hidden" id="appView">
+    <header class="topbar">
+      <div class="brand">
+        <img src="/assets/loaded-bowls-logo.jpeg" alt="">
+        <div><strong>Loaded Bowls</strong><small>Live backoffice</small></div>
+      </div>
+      <div class="top-actions">
+        <button class="icon-button" id="refreshBtn" type="button" title="Vernieuwen" aria-label="Vernieuwen">↻</button>
+        <button class="secondary" id="logoutBtn" type="button">Uitloggen</button>
+      </div>
+    </header>
+
+    <main>
+      <div class="heading">
+        <div>
+          <h1>Live overzicht</h1>
+          <p id="periodLabel">Vandaag</p>
+        </div>
+        <div class="live-state" id="liveState">Verbinden...</div>
+      </div>
+
+      <nav class="filters" aria-label="Rapportperiode">
+        <button class="secondary active" data-range="day" type="button">Vandaag</button>
+        <button class="secondary" data-range="week" type="button">Week</button>
+        <button class="secondary" data-range="month" type="button">Maand</button>
+        <button class="secondary" data-range="quarter" type="button">Kwartaal</button>
+        <button class="secondary" data-range="year" type="button">Jaar</button>
+        <button class="secondary" data-range="custom" type="button">Andere periode</button>
+      </nav>
+
+      <section class="custom-range hidden" id="customRange">
+        <label>Van<input id="startDate" type="date"></label>
+        <label>Tot<input id="endDate" type="date"></label>
+        <button class="primary" id="applyDatesBtn" type="button">Periode tonen</button>
+      </section>
+
+      <section class="stats" id="stats"></section>
+
+      <section class="dashboard-grid">
+        <article class="panel"><h2>Betaalmethodes</h2><div class="bar-list" id="paymentBars"></div></article>
+        <article class="panel"><h2>Verkoopkanalen</h2><div class="bar-list" id="sourceBars"></div></article>
+        <article class="panel"><h2>BTW-overzicht</h2><div class="bar-list" id="vatBars"></div></article>
+      </section>
+
+      <section class="panel orders-panel">
+        <div class="panel-head">
+          <h2>Bestellingen</h2>
+          <span class="pill" id="orderCount">0 orders</span>
+        </div>
+        <div class="orders" id="orders"></div>
+      </section>
+      <p class="bottom-note">De mobiele backoffice toont live cloudgegevens van webshop en kassa. Gebruik de lokale backoffice voor productbeheer, personeel en volledige Excel-export.</p>
+    </main>
+  </div>
+
+  <script>
+    (() => {
+      const START_MS = Date.parse("2026-07-25T00:00:00+02:00");
+      const money = new Intl.NumberFormat("nl-BE", { style: "currency", currency: "EUR" });
+      const dateTime = new Intl.DateTimeFormat("nl-BE", { dateStyle: "short", timeStyle: "short", timeZone: "Europe/Brussels" });
+      const loginView = document.querySelector("#loginView");
+      const appView = document.querySelector("#appView");
+      const secretInput = document.querySelector("#secretInput");
+      const rememberInput = document.querySelector("#rememberInput");
+      const loginError = document.querySelector("#loginError");
+      const liveState = document.querySelector("#liveState");
+      let secret = sessionStorage.getItem("loaded-mobile-backoffice-secret") || localStorage.getItem("loaded-mobile-backoffice-secret") || "";
+      let allOrders = [];
+      let range = "day";
+      let customStart = "";
+      let customEnd = "";
+      let refreshTimer = null;
+
+      function escapeHtml(value) {
+        return String(value ?? "").replace(/[&<>"']/g, (character) => ({
+          "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#039;"
+        })[character]);
+      }
+
+      function toNumber(value) {
+        const number = Number(value);
+        return Number.isFinite(number) ? number : 0;
+      }
+
+      function orderData(record) {
+        return record?.order && typeof record.order === "object" ? record.order : {};
+      }
+
+      function createdDate(record) {
+        const value = record?.createdAt || record?.paidAt || orderData(record).createdAt;
+        const date = new Date(value || 0);
+        return Number.isNaN(date.getTime()) ? new Date(0) : date;
+      }
+
+      function orderTotal(record) {
+        const order = orderData(record);
+        return toNumber(order.total ?? record?.amount?.value);
+      }
+
+      function orderSubtotal(record) {
+        const order = orderData(record);
+        const itemsTotal = (order.items || []).reduce((sum, item) => sum + toNumber(item.price) * Math.max(1, toNumber(item.qty || 1)), 0);
+        return toNumber(order.subtotal || itemsTotal || orderTotal(record));
+      }
+
+      function orderDiscount(record) {
+        const order = orderData(record);
+        return Math.min(orderSubtotal(record), toNumber(order.discount?.amount || order.discountAmount));
+      }
+
+      function isTest(record) {
+        const order = orderData(record);
+        return Boolean(order.test || order.isTest) || /test/i.test(String(record?.paymentStatus || "")) || /test klant/i.test(String(order.customer?.name || order.customerName || ""));
+      }
+
+      function isCancelled(record) {
+        return String(record?.status || "").toLowerCase().includes("geannul");
+      }
+
+      function isOpen(record) {
+        const order = orderData(record);
+        return record?.paymentStatus === "pay_later" || String(order.paymentStatus || "").toLowerCase() === "open";
+      }
+
+      function sourceName(record) {
+        const source = String(orderData(record).source || "").toLowerCase();
+        if (source === "kassa" || source === "pos" || String(record?.displayOrderNumber || "").startsWith("KLB")) return "Kassa";
+        if (source.includes("takeaway")) return "Takeaway";
+        if (source.includes("uber")) return "Uber Eats";
+        if (source.includes("deliveroo")) return "Deliveroo";
+        return "Webshop";
+      }
+
+      function paymentName(record) {
+        const order = orderData(record);
+        return order.payment || order.paymentMethod || record?.paymentLabel || (isOpen(record) ? "Later betalen" : "Online");
+      }
+
+      function orderType(record) {
+        const order = orderData(record);
+        return order.type || order.customer?.method || "Afhalen";
+      }
+
+      function customerName(record) {
+        const order = orderData(record);
+        return order.customerName || order.customer?.name || "Klant";
+      }
+
+      function itemVatRate(record, item) {
+        if (orderType(record) !== "Ter plaatse") return 6;
+        const text = `${item?.vatType || ""} ${item?.category || ""} ${item?.name || ""}`.toLowerCase();
+        return /drink|drank|cola|water|latte|mojito|kefir/.test(text) ? 21 : 12;
+      }
+
+      function vatBreakdown(record) {
+        const totals = { 6: 0, 12: 0, 21: 0 };
+        const order = orderData(record);
+        const total = orderTotal(record);
+        const subtotal = orderSubtotal(record);
+        const factor = subtotal > 0 ? total / subtotal : 1;
+        const items = Array.isArray(order.items) ? order.items : [];
+        if (!items.length) {
+          totals[orderType(record) === "Ter plaatse" ? 12 : 6] = total;
+          return totals;
+        }
+        items.forEach((item) => {
+          const gross = toNumber(item.price) * Math.max(1, toNumber(item.qty || 1)) * factor;
+          totals[itemVatRate(record, item)] += gross;
+        });
+        return totals;
+      }
+
+      function rangeBounds(selectedRange) {
+        const now = new Date();
+        const start = new Date(now);
+        const end = new Date(now);
+        start.setHours(0, 0, 0, 0);
+        end.setHours(23, 59, 59, 999);
+        if (selectedRange === "custom" && customStart && customEnd) {
+          return {
+            start: new Date(`${customStart}T00:00:00`),
+            end: new Date(`${customEnd}T23:59:59.999`)
+          };
+        }
+        if (selectedRange === "week") {
+          const day = start.getDay() || 7;
+          start.setDate(start.getDate() - day + 1);
+        }
+        if (selectedRange === "month") start.setDate(1);
+        if (selectedRange === "quarter") start.setMonth(Math.floor(start.getMonth() / 3) * 3, 1);
+        if (selectedRange === "year") start.setMonth(0, 1);
+        return { start, end };
+      }
+
+      function selectedOrders() {
+        const { start, end } = rangeBounds(range);
+        return allOrders.filter((record) => {
+          const date = createdDate(record);
+          return date.getTime() >= START_MS && date >= start && date <= end;
+        });
+      }
+
+      function periodText() {
+        const { start, end } = rangeBounds(range);
+        const format = (date) => date.toLocaleDateString("nl-BE");
+        const labels = { day: "Vandaag", week: "Deze week", month: "Deze maand", quarter: "Dit kwartaal", year: "Dit jaar" };
+        return range === "day" ? labels.day : `${labels[range] || "Gekozen periode"}: ${format(start)} - ${format(end)}`;
+      }
+
+      function barRows(values, formatter = (value) => money.format(value)) {
+        const entries = Object.entries(values).sort((a, b) => b[1] - a[1]);
+        const maximum = Math.max(...entries.map(([, value]) => value), 1);
+        if (!entries.length) return '<p class="empty">Nog geen gegevens.</p>';
+        return entries.map(([name, value]) => `
+          <div class="bar-row">
+            <strong>${escapeHtml(name)}</strong>
+            <div class="track"><div class="fill" style="width:${Math.max(3, value / maximum * 100)}%"></div></div>
+            <span>${escapeHtml(formatter(value))}</span>
+          </div>
+        `).join("");
+      }
+
+      function render() {
+        const periodOrders = selectedOrders().filter((record) => !isTest(record));
+        const validOrders = periodOrders.filter((record) => !isCancelled(record));
+        const paidOrders = validOrders.filter((record) => !isOpen(record));
+        const openOrders = validOrders.filter(isOpen);
+        const gross = paidOrders.reduce((sum, record) => sum + orderTotal(record), 0);
+        const discount = paidOrders.reduce((sum, record) => sum + orderDiscount(record), 0);
+        const paymentTotals = {};
+        const sourceTotals = {};
+        const vatGross = { 6: 0, 12: 0, 21: 0 };
+
+        paidOrders.forEach((record) => {
+          const total = orderTotal(record);
+          const payment = paymentName(record);
+          const source = sourceName(record);
+          paymentTotals[payment] = (paymentTotals[payment] || 0) + total;
+          sourceTotals[source] = (sourceTotals[source] || 0) + total;
+          const breakdown = vatBreakdown(record);
+          [6, 12, 21].forEach((rate) => { vatGross[rate] += breakdown[rate]; });
+        });
+
+        const vatAmounts = {};
+        let vatTotal = 0;
+        [6, 12, 21].forEach((rate) => {
+          vatAmounts[`BTW ${rate}%`] = vatGross[rate] - vatGross[rate] / (1 + rate / 100);
+          vatTotal += vatAmounts[`BTW ${rate}%`];
+        });
+
+        document.querySelector("#periodLabel").textContent = periodText();
+        document.querySelector("#stats").innerHTML = [
+          ["Omzet", money.format(gross), `${paidOrders.length} betaalde orders`],
+          ["Netto", money.format(gross - vatTotal), `BTW ${money.format(vatTotal)}`],
+          ["Gemiddeld", money.format(paidOrders.length ? gross / paidOrders.length : 0), "per betaalde order"],
+          ["Openstaand", money.format(openOrders.reduce((sum, record) => sum + orderTotal(record), 0)), `${openOrders.length} orders`],
+          ["Korting", money.format(discount), "in deze periode"],
+          ["Alle orders", String(validOrders.length), `${periodOrders.length - validOrders.length} geannuleerd`]
+        ].map(([label, value, sub]) => `<article class="stat"><span>${label}</span><strong>${value}</strong><small>${sub}</small></article>`).join("");
+
+        document.querySelector("#paymentBars").innerHTML = barRows(paymentTotals);
+        document.querySelector("#sourceBars").innerHTML = barRows(sourceTotals);
+        document.querySelector("#vatBars").innerHTML = barRows(vatAmounts);
+        document.querySelector("#orderCount").textContent = `${validOrders.length} orders`;
+
+        const sorted = [...periodOrders].sort((a, b) => createdDate(b) - createdDate(a));
+        document.querySelector("#orders").innerHTML = sorted.length ? sorted.map((record) => {
+          const status = isCancelled(record) ? "Geannuleerd" : isOpen(record) ? "Openstaand" : (record.status || "Nieuw");
+          const statusClass = /geleverd|afgehaald|klaar/i.test(status) ? "done" : isOpen(record) ? "open" : "";
+          return `
+            <article class="order">
+              <strong class="number">${escapeHtml(record.displayOrderNumber || record.id || "-")}</strong>
+              <span class="customer">${escapeHtml(customerName(record))}<small>${escapeHtml(sourceName(record))} · ${escapeHtml(orderType(record))} · ${escapeHtml(dateTime.format(createdDate(record)))}</small></span>
+              <span class="status ${statusClass}">${escapeHtml(status)}</span>
+              <strong class="amount">${escapeHtml(money.format(orderTotal(record)))}</strong>
+            </article>
+          `;
+        }).join("") : '<p class="empty" style="padding:18px">Geen bestellingen in deze periode.</p>';
+      }
+
+      async function apiOrders() {
+        const response = await fetch("/api/orders?limit=2000", {
+          headers: { "x-admin-secret": secret },
+          cache: "no-store"
+        });
+        const data = await response.json().catch(() => ({}));
+        if (!response.ok) throw new Error(data.error || `Verbinding gaf status ${response.status}.`);
+        return Array.isArray(data.orders) ? data.orders : [];
+      }
+
+      async function refresh(showError = true) {
+        liveState.className = "live-state";
+        liveState.textContent = "Gegevens ophalen...";
+        try {
+          allOrders = await apiOrders();
+          liveState.className = "live-state ok";
+          liveState.textContent = `Live · ${new Date().toLocaleTimeString("nl-BE", { hour: "2-digit", minute: "2-digit" })}`;
+          loginError.textContent = "";
+          render();
+          return true;
+        } catch (error) {
+          liveState.className = "live-state";
+          liveState.textContent = "Geen verbinding";
+          if (showError) loginError.textContent = error.message;
+          return false;
+        }
+      }
+
+      function showApp() {
+        loginView.classList.add("hidden");
+        appView.classList.remove("hidden");
+        window.clearInterval(refreshTimer);
+        refreshTimer = window.setInterval(() => {
+          if (document.visibilityState === "visible") refresh(false);
+        }, 20000);
+      }
+
+      function logout() {
+        secret = "";
+        sessionStorage.removeItem("loaded-mobile-backoffice-secret");
+        localStorage.removeItem("loaded-mobile-backoffice-secret");
+        window.clearInterval(refreshTimer);
+        appView.classList.add("hidden");
+        loginView.classList.remove("hidden");
+        secretInput.value = "";
+        secretInput.focus();
+      }
+
+      document.querySelector("#loginForm").addEventListener("submit", async (event) => {
+        event.preventDefault();
+        secret = secretInput.value.trim();
+        if (!secret) return;
+        loginError.textContent = "Code controleren...";
+        if (!await refresh(true)) return;
+        sessionStorage.setItem("loaded-mobile-backoffice-secret", secret);
+        if (rememberInput.checked) localStorage.setItem("loaded-mobile-backoffice-secret", secret);
+        showApp();
+      });
+
+      document.querySelector("#refreshBtn").addEventListener("click", () => refresh(false));
+      document.querySelector("#logoutBtn").addEventListener("click", logout);
+      document.querySelectorAll("[data-range]").forEach((button) => {
+        button.addEventListener("click", () => {
+          range = button.dataset.range;
+          document.querySelectorAll("[data-range]").forEach((item) => item.classList.toggle("active", item === button));
+          document.querySelector("#customRange").classList.toggle("hidden", range !== "custom");
+          if (range !== "custom") render();
+        });
+      });
+      document.querySelector("#applyDatesBtn").addEventListener("click", () => {
+        customStart = document.querySelector("#startDate").value;
+        customEnd = document.querySelector("#endDate").value;
+        if (!customStart || !customEnd) return alert("Kies een begin- en einddatum.");
+        if (customStart > customEnd) return alert("De begindatum moet voor de einddatum liggen.");
+        render();
+      });
+
+      const today = new Date().toLocaleDateString("sv-SE");
+      document.querySelector("#startDate").value = today;
+      document.querySelector("#endDate").value = today;
+
+      if (secret) {
+        secretInput.value = secret;
+        refresh(false).then((ok) => {
+          if (ok) showApp();
+          else logout();
+        });
+      }
+    })();
+  </script>
+</body>
+</html>
