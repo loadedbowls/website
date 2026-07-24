@@ -17,7 +17,7 @@ export default async function handler(req, res) {
 
   if (req.method === "GET") {
     try {
-      const orders = await listOrders();
+      const orders = await listOrders(req.query?.limit);
       return res.status(200).json({ orders });
     } catch (error) {
       return res.status(500).json({ error: error.message });
