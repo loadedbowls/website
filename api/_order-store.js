@@ -131,7 +131,7 @@ export async function saveOrder(payload) {
 
   await storeSet(key, record);
   await storeLPush(ORDER_LIST_KEY, id);
-  await storeLTrim(ORDER_LIST_KEY, 0, 199);
+  await storeLTrim(ORDER_LIST_KEY, 0, 4999);
   return record;
 }
 
@@ -162,11 +162,16 @@ export async function savePaidOrder(payload) {
   });
 }
 
-export async function listOrders() {
-  const ids = await storeLRange(ORDER_LIST_KEY, 0, 99);
+export async function listOrders(requestedLimit = 100) {
+  const limit = Math.min(Math.max(Number(requestedLimit) || 100, 1), 5000);
+  const ids = await storeLRange(ORDER_LIST_KEY, 0, limit - 1);
   if (!Array.isArray(ids) || !ids.length) return [];
 
-  const values = await storeMGet(ids.map((id) => `${ORDER_KEY_PREFIX}${id}`));
+  const keys = ids.map((id) => `${ORDER_KEY_PREFIX}${id}`);
+  const values = [];
+  for (let index = 0; index < keys.length; index += 250) {
+    values.push(...await storeMGet(keys.slice(index, index + 250)));
+  }
   return values.map(parseOrder).filter(Boolean);
 }
 
