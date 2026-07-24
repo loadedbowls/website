@@ -130,6 +130,12 @@ export async function saveDriverLocation(driver, input) {
   }
 
   const locations = await listDriverLocations();
+  const previous = locations[driver.id];
+  const previousTime = new Date(previous?.updatedAt || 0).getTime();
+  const nextTime = new Date(updatedAt).getTime();
+  if (previous && Number.isFinite(previousTime) && Number.isFinite(nextTime) && nextTime < previousTime) {
+    return previous;
+  }
   const location = {
     driverId: driver.id,
     driverName: driver.name,
