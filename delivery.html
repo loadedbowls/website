@@ -389,6 +389,9 @@
       let currentFilter = "today";
       let currentDriver = null;
       let trackingWatchId = null;
+      let trackingHeartbeatId = null;
+      let wakeLock = null;
+      let locationRequestBusy = false;
       let hasActiveDeliveries = false;
 
       function escapeHtml(value = "") {
@@ -668,6 +671,52 @@
         setTrackingStatus("Tracking actief", true);
       }
 
+      function requestFreshLocation() {
+        if (!hasActiveDeliveries || !trackingPermissionAllowed() || locationRequestBusy) return;
+        if (!("geolocation" in navigator)) return;
+        locationRequestBusy = true;
+        navigator.geolocation.getCurrentPosition(
+          (position) => {
+            sendDriverLocation(position)
+              .catch((error) => setTrackingStatus(error.message))
+              .finally(() => {
+                locationRequestBusy = false;
+              });
+          },
+          (error) => {
+            locationRequestBusy = false;
+            const denied = error.code === error.PERMISSION_DENIED;
+            if (denied) localStorage.removeItem("loadedDriverTrackingAllowed");
+            setTrackingStatus(denied ? "GPS geweigerd" : "GPS opnieuw proberen...");
+            refreshPermissionControls();
+          },
+          { enableHighAccuracy: true, maximumAge: 0, timeout: 15000 }
+        );
+      }
+
+      async function keepScreenAwake() {
+        if (!("wakeLock" in navigator) || wakeLock || document.hidden) return;
+        try {
+          wakeLock = await navigator.wakeLock.request("screen");
+          wakeLock.addEventListener("release", () => {
+            wakeLock = null;
+          });
+        } catch {
+          wakeLock = null;
+        }
+      }
+
+      function startTrackingHeartbeat() {
+        if (trackingHeartbeatId !== null) return;
+        requestFreshLocation();
+        trackingHeartbeatId = window.setInterval(requestFreshLocation, 7000);
+      }
+
+      function stopTrackingHeartbeat() {
+        if (trackingHeartbeatId !== null) window.clearInterval(trackingHeartbeatId);
+        trackingHeartbeatId = null;
+      }
+
       function startTracking() {
         if (!("geolocation" in navigator)) {
           setTrackingStatus("GPS niet ondersteund");
@@ -687,6 +736,8 @@
           },
           { enableHighAccuracy: true, maximumAge: 15000, timeout: 20000 }
         );
+        startTrackingHeartbeat();
+        keepScreenAwake();
         refreshPermissionControls();
       }
 
@@ -695,6 +746,11 @@
           navigator.geolocation.clearWatch(trackingWatchId);
         }
         trackingWatchId = null;
+        stopTrackingHeartbeat();
+        if (wakeLock) {
+          wakeLock.release().catch(() => {});
+          wakeLock = null;
+        }
         setTrackingStatus("Geen actieve levering");
         refreshPermissionControls();
       }
@@ -853,6 +909,17 @@
 
       refreshPermissionControls();
       window.setInterval(loadOrders, 10000);
+      window.addEventListener("focus", () => {
+        loadOrders();
+        updateAutoTracking();
+      });
+      document.addEventListener("visibilitychange", () => {
+        if (!document.hidden) {
+          loadOrders();
+          updateAutoTracking();
+          keepScreenAwake();
+        }
+      });
     </script>
   </body>
 </html>
