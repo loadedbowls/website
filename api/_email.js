@@ -10,12 +10,6 @@ function orderNumber(record) {
   return record?.displayOrderNumber || record?.order?.orderNumber || record?.order?.orderId || record?.order?.id || record?.id || "je bestelling";
 }
 
-function cancelUrl(record) {
-  if (!record?.cancelToken) return "";
-  const baseUrl = (process.env.SITE_URL || "https://loadedbowls.be").replace(/\/$/, "");
-  return `${baseUrl}/api/cancel-order?token=${encodeURIComponent(record.cancelToken)}`;
-}
-
 function itemList(record) {
   const items = Array.isArray(record?.order?.items) ? record.order.items : [];
   if (!items.length) return "";
@@ -87,18 +81,11 @@ export async function sendOrderReceivedEmail(record) {
   const deliveryNote = customer.method === "Levering"
     ? `<p style="margin:14px 0 0;color:#e1a72f"><strong>Levering:</strong> je krijgt nog een mail zodra je bestelling onderweg is.</p>`
     : "";
-  const cancellationLink = cancelUrl(record);
-  const cancellationButton = cancellationLink
-    ? `<div style="margin:24px 0 4px;padding-top:20px;border-top:1px solid #263444">
-        <p style="font-size:13px;line-height:1.45;color:#b9b2a6;margin:0 0 12px">Toch annuleren? Dat kan zolang de keuken nog niet met je bestelling is gestart.</p>
-        <a href="${cancellationLink}" style="display:inline-block;background:#fff8e8;color:#071018;text-decoration:none;font-size:14px;font-weight:800;padding:11px 15px;border-radius:8px">Bestelling annuleren</a>
-      </div>`
-    : "";
   const html = baseEmail({
     title: "Bestelling ontvangen",
     intro: "we hebben je bestelling goed ontvangen en starten met voorbereiden.",
     record,
-    extra: `${itemList(record)}${deliveryNote}${cancellationButton}`
+    extra: `${itemList(record)}${deliveryNote}`
   });
 
   const ok = await sendMail({ to: customer.email, subject, html });
