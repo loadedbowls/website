@@ -1,4 +1,3 @@
-
 const signatures = [
   {
     id: "loaded-fire-chicken",
@@ -266,6 +265,16 @@ function showToast(message) {
   showToast.timer = window.setTimeout(() => toast.classList.remove("show"), 2600);
 }
 
+function escapeMarkup(value) {
+  return String(value ?? "").replace(/[&<>"']/g, (character) => ({
+    "&": "&amp;",
+    "<": "&lt;",
+    ">": "&gt;",
+    '"': "&quot;",
+    "'": "&#39;"
+  }[character]));
+}
+
 const translations = {
   nl: {
     navBuild: "Build",
@@ -300,7 +309,7 @@ const translations = {
     checkoutTitle: "Order <span>now.</span>",
     openingHoursTitle: "Openingsuren",
     openingHoursText: "Maandag - zaterdag: 11:00 - 15:00 en 17:00 - 22:00. Zondag gesloten.",
-    formNote: "Levering kan binnen 6 km van Loaded Bowls in Gent. Bereiding en levering duren gemiddeld 25-30 minuten.",
+    formNote: "Levering kan binnen 7 km van Loaded Bowls in Gent. Bereiding en levering duren gemiddeld 25-30 minuten.",
     findKicker: "/06 — Kom een bowl halen",
     findTitle: "Find the <span>drip.</span>",
     findCopy: "Walk-in, take-away en delivery in Gent. Bestellen kan online, aan de counter of via je favoriete delivery app. Bereiding en levering duurt gemiddeld 25-30 minuten.",
@@ -308,7 +317,7 @@ const translations = {
     route: "Route",
     whenTitle: "Wanneer?",
     copyright: "© 2026 Loaded Bowls. Alle rechten voorbehouden.",
-    termsText: "Online bestellingen zijn pas definitief na betaling. Levering is mogelijk binnen 6 km van Sint-Amandstraat 24, 9000 Gent. Bereiding en levering duren gemiddeld 25-30 minuten, afhankelijk van drukte en bereikbaarheid. Afhalen kan tijdens de openingsuren. Prijzen en beschikbaarheid kunnen wijzigen.",
+    termsText: "Online bestellingen zijn pas definitief na betaling. Levering is mogelijk binnen 7 km van Sint-Amandstraat 24, 9000 Gent. Bereiding en levering duren gemiddeld 25-30 minuten, afhankelijk van drukte en bereikbaarheid. Afhalen kan tijdens de openingsuren. Prijzen en beschikbaarheid kunnen wijzigen.",
     closedKicker: "Momenteel gesloten",
     closedTitle: "We zijn nu gesloten.",
     continueBrowsing: "Toch verder kijken",
@@ -350,6 +359,8 @@ const translations = {
     edit: "Wijzig",
     decrease: "Verminder",
     increase: "Verhoog",
+    bowlNameLabel: "Naam voor bowl {number}",
+    bowlNamePlaceholder: "bv. Jashan",
     noOrders: "Nog geen orders ontvangen.",
     chooseBaseProtein: "Kies minstens je basis en proteine.",
     chooseBaseSauce: "Kies eerst basis en saus voor deze signature bowl.",
@@ -363,7 +374,7 @@ const translations = {
     orderReceivedDelivery: "Bestelling ontvangen. Je krijgt een bevestigingsmail. Controleer ook je spam. Zodra je bestelling onderweg is, krijg je opnieuw een mail.",
     fullAddress: "Vul een volledig leveradres in. Afhalen kan altijd.",
     checkingAddress: "We controleren of je binnen onze leverzone van 6 km ligt...",
-    deliveryZoneError: "Levering kan enkel binnen 6 km van Loaded Bowls in Gent.",
+    deliveryZoneError: "Levering kan enkel binnen 7 km van Loaded Bowls in Gent.",
     deliveryOk: "Levering mogelijk: ongeveer {distance} km van Loaded Bowls.",
     addressCheckUnavailable: "Adrescontrole is tijdelijk niet beschikbaar. Probeer opnieuw of kies afhalen.",
     methods: ["Afhalen", "Levering", "Ter plaatse eten"],
@@ -402,7 +413,7 @@ const translations = {
     checkoutTitle: "Order <span>now.</span>",
     openingHoursTitle: "Opening hours",
     openingHoursText: "Monday - Saturday: 11:00 - 15:00 and 17:00 - 22:00. Sunday closed.",
-    formNote: "Delivery is possible within 6 km of Loaded Bowls in Ghent. Preparation and delivery take around 25-30 minutes.",
+    formNote: "Delivery is possible within 7 km of Loaded Bowls in Ghent. Preparation and delivery take around 25-30 minutes.",
     findKicker: "/06 — Come grab a bowl",
     findTitle: "Find the <span>drip.</span>",
     findCopy: "Walk-in, take-away and delivery in Ghent. Order online, at the counter or via your favourite delivery app. Preparation and delivery take around 25-30 minutes.",
@@ -410,7 +421,7 @@ const translations = {
     route: "Route",
     whenTitle: "When?",
     copyright: "© 2026 Loaded Bowls. All rights reserved.",
-    termsText: "Online orders are final after payment. Delivery is possible within 6 km of Sint-Amandstraat 24, 9000 Ghent. Preparation and delivery take around 25-30 minutes depending on traffic and workload. Pickup is possible during opening hours. Prices and availability may change.",
+    termsText: "Online orders are final after payment. Delivery is possible within 7 km of Sint-Amandstraat 24, 9000 Ghent. Preparation and delivery take around 25-30 minutes depending on traffic and workload. Pickup is possible during opening hours. Prices and availability may change.",
     closedKicker: "Currently closed",
     closedTitle: "We are closed now.",
     continueBrowsing: "Continue browsing",
@@ -452,6 +463,8 @@ const translations = {
     edit: "Edit",
     decrease: "Decrease",
     increase: "Increase",
+    bowlNameLabel: "Name for bowl {number}",
+    bowlNamePlaceholder: "e.g. Jashan",
     noOrders: "No orders received yet.",
     chooseBaseProtein: "Choose at least your base and protein.",
     chooseBaseSauce: "Choose a base and sauce for this signature bowl first.",
@@ -465,7 +478,7 @@ const translations = {
     orderReceivedDelivery: "Order received. You will get a confirmation e-mail. Please also check spam. When your order is on its way, you will receive another e-mail.",
     fullAddress: "Fill in a complete delivery address. Pickup is always possible.",
     checkingAddress: "We are checking whether you are within our 6 km delivery zone...",
-    deliveryZoneError: "Delivery is only possible within 6 km of Loaded Bowls in Ghent.",
+    deliveryZoneError: "Delivery is only possible within 7 km of Loaded Bowls in Ghent.",
     deliveryOk: "Delivery possible: about {distance} km from Loaded Bowls.",
     addressCheckUnavailable: "Address check is temporarily unavailable. Try again or choose pickup.",
     methods: ["Pickup", "Delivery", "Eat in"],
@@ -504,7 +517,7 @@ const translations = {
     checkoutTitle: "Commander <span>maintenant.</span>",
     openingHoursTitle: "Heures d'ouverture",
     openingHoursText: "Lundi - samedi: 11:00 - 15:00 et 17:00 - 22:00. Dimanche ferme.",
-    formNote: "Livraison possible dans un rayon de 6 km autour de Loaded Bowls a Gand. Preparation et livraison prennent environ 25-30 minutes.",
+    formNote: "Livraison possible dans un rayon de 7 km autour de Loaded Bowls a Gand. Preparation et livraison prennent environ 25-30 minutes.",
     findKicker: "/06 — Viens chercher un bowl",
     findTitle: "Find the <span>drip.</span>",
     findCopy: "Walk-in, take-away et livraison a Gand. Commandez en ligne, au comptoir ou via votre app de livraison preferee. Preparation et livraison prennent environ 25-30 minutes.",
@@ -512,7 +525,7 @@ const translations = {
     route: "Itineraire",
     whenTitle: "Quand?",
     copyright: "© 2026 Loaded Bowls. Tous droits reserves.",
-    termsText: "Les commandes en ligne sont definitives apres paiement. Livraison possible dans un rayon de 6 km autour de Sint-Amandstraat 24, 9000 Gand. Preparation et livraison prennent environ 25-30 minutes selon l'affluence et l'accessibilite. Retrait possible pendant les heures d'ouverture. Prix et disponibilite peuvent changer.",
+    termsText: "Les commandes en ligne sont definitives apres paiement. Livraison possible dans un rayon de 7 km autour de Sint-Amandstraat 24, 9000 Gand. Preparation et livraison prennent environ 25-30 minutes selon l'affluence et l'accessibilite. Retrait possible pendant les heures d'ouverture. Prix et disponibilite peuvent changer.",
     closedKicker: "Actuellement ferme",
     closedTitle: "Nous sommes fermes.",
     continueBrowsing: "Voir le menu",
@@ -554,6 +567,8 @@ const translations = {
     edit: "Modifier",
     decrease: "Diminuer",
     increase: "Augmenter",
+    bowlNameLabel: "Nom pour le bowl {number}",
+    bowlNamePlaceholder: "p. ex. Jashan",
     noOrders: "Aucune commande recue.",
     chooseBaseProtein: "Choisissez au moins votre base et proteine.",
     chooseBaseSauce: "Choisissez d'abord une base et une sauce.",
@@ -567,7 +582,7 @@ const translations = {
     orderReceivedDelivery: "Commande recue. Vous recevrez un e-mail de confirmation. Verifiez aussi les spams. Quand votre commande sera en route, vous recevrez un nouvel e-mail.",
     fullAddress: "Indiquez une adresse complete. Le retrait est toujours possible.",
     checkingAddress: "Nous verifions si vous etes dans notre zone de livraison de 6 km...",
-    deliveryZoneError: "La livraison est possible uniquement dans un rayon de 6 km autour de Loaded Bowls a Gand.",
+    deliveryZoneError: "La livraison est possible uniquement dans un rayon de 7 km autour de Loaded Bowls a Gand.",
     deliveryOk: "Livraison possible: environ {distance} km de Loaded Bowls.",
     addressCheckUnavailable: "La verification d'adresse est temporairement indisponible. Reessayez ou choisissez le retrait.",
     methods: ["A emporter", "Livraison", "Sur place"],
@@ -606,7 +621,7 @@ const translations = {
     checkoutTitle: "Jetzt <span>bestellen.</span>",
     openingHoursTitle: "Oeffnungszeiten",
     openingHoursText: "Montag - Samstag: 11:00 - 15:00 und 17:00 - 22:00. Sonntag geschlossen.",
-    formNote: "Lieferung ist innerhalb von 6 km von Loaded Bowls in Gent moeglich. Zubereitung und Lieferung dauern ca. 25-30 Minuten.",
+    formNote: "Lieferung ist innerhalb von 7 km von Loaded Bowls in Gent moeglich. Zubereitung und Lieferung dauern ca. 25-30 Minuten.",
     findKicker: "/06 — Komm eine Bowl holen",
     findTitle: "Find the <span>drip.</span>",
     findCopy: "Walk-in, Take-away und Lieferung in Gent. Bestelle online, am Counter oder ueber deine Lieblings-Lieferapp. Zubereitung und Lieferung dauern ca. 25-30 Minuten.",
@@ -614,7 +629,7 @@ const translations = {
     route: "Route",
     whenTitle: "Wann?",
     copyright: "© 2026 Loaded Bowls. Alle Rechte vorbehalten.",
-    termsText: "Online-Bestellungen sind nach Zahlung verbindlich. Lieferung ist innerhalb von 6 km von Sint-Amandstraat 24, 9000 Gent moeglich. Zubereitung und Lieferung dauern ca. 25-30 Minuten, je nach Auslastung und Erreichbarkeit. Abholung ist waehrend der Oeffnungszeiten moeglich. Preise und Verfuegbarkeit koennen sich aendern.",
+    termsText: "Online-Bestellungen sind nach Zahlung verbindlich. Lieferung ist innerhalb von 7 km von Sint-Amandstraat 24, 9000 Gent moeglich. Zubereitung und Lieferung dauern ca. 25-30 Minuten, je nach Auslastung und Erreichbarkeit. Abholung ist waehrend der Oeffnungszeiten moeglich. Preise und Verfuegbarkeit koennen sich aendern.",
     closedKicker: "Derzeit geschlossen",
     closedTitle: "Wir sind geschlossen.",
     continueBrowsing: "Trotzdem ansehen",
@@ -656,6 +671,8 @@ const translations = {
     edit: "Aendern",
     decrease: "Verringern",
     increase: "Erhoehen",
+    bowlNameLabel: "Name fuer Bowl {number}",
+    bowlNamePlaceholder: "z. B. Jashan",
     noOrders: "Noch keine Bestellungen erhalten.",
     chooseBaseProtein: "Waehle mindestens Basis und Protein.",
     chooseBaseSauce: "Waehle zuerst Basis und Sauce.",
@@ -669,7 +686,7 @@ const translations = {
     orderReceivedDelivery: "Bestellung erhalten. Du bekommst eine Bestaetigungs-E-Mail. Bitte auch Spam pruefen. Sobald deine Bestellung unterwegs ist, bekommst du nochmals eine E-Mail.",
     fullAddress: "Gib eine vollstaendige Lieferadresse ein. Abholung ist immer moeglich.",
     checkingAddress: "Wir pruefen, ob du in unserer 6-km-Lieferzone bist...",
-    deliveryZoneError: "Lieferung ist nur innerhalb von 6 km von Loaded Bowls in Gent moeglich.",
+    deliveryZoneError: "Lieferung ist nur innerhalb von 7 km von Loaded Bowls in Gent moeglich.",
     deliveryOk: "Lieferung moeglich: ca. {distance} km von Loaded Bowls.",
     addressCheckUnavailable: "Adresspruefung ist voruebergehend nicht verfuegbar. Versuche es erneut oder waehle Abholung.",
     methods: ["Abholung", "Lieferung", "Vor Ort essen"],
@@ -840,8 +857,15 @@ function addLine(line) {
   const existing = cart.find((item) => item.key === line.key);
   if (existing) {
     existing.quantity += 1;
+    if (existing.category === "bowl") {
+      existing.bowlNames = [...(existing.bowlNames || []), ""];
+    }
   } else {
-    cart.push({ ...line, quantity: 1 });
+    cart.push({
+      ...line,
+      quantity: 1,
+      bowlNames: line.category === "bowl" ? [""] : []
+    });
   }
 
   renderCart();
@@ -856,13 +880,19 @@ function saveCartLine(line) {
 
   const current = cart.find((item) => item.key === editingCartKey);
   const quantity = current?.quantity || 1;
+  const bowlNames = line.category === "bowl"
+    ? Array.from({ length: quantity }, (_, index) => current?.bowlNames?.[index] || "")
+    : [];
   cart = cart.filter((item) => item.key !== editingCartKey);
 
   const existing = cart.find((item) => item.key === line.key);
   if (existing) {
     existing.quantity += quantity;
+    if (line.category === "bowl") {
+      existing.bowlNames = [...(existing.bowlNames || []), ...bowlNames];
+    }
   } else {
-    cart.push({ ...line, quantity });
+    cart.push({ ...line, quantity, bowlNames });
   }
 
   editingCartKey = "";
@@ -882,7 +912,8 @@ function closeModal(modal) {
 }
 
 function renderSignatureExtraGroup(title, items) {
-  const selectedValue = renderSignatureExtraGroup.selected?.shift() || "";
+  const selectedExtra = renderSignatureExtraGroup.selected?.shift() || "";
+  const selectedValue = typeof selectedExtra === "object" ? selectedExtra.name : selectedExtra;
   return `
     <label class="signature-extra-select">
       ${title}
@@ -1007,20 +1038,44 @@ function renderCart() {
   if (!lines.length) {
     cartItems.innerHTML = `<div class="empty-state">${t("emptyCart")}</div>`;
   } else {
-    cartItems.innerHTML = lines.map((item) => `
+    cartItems.innerHTML = lines.map((item) => {
+      const bowlNames = item.category === "bowl"
+        ? Array.from({ length: item.quantity }, (_, index) => item.bowlNames?.[index] || "")
+        : [];
+      item.bowlNames = bowlNames;
+      return `
       <div class="cart-line">
         <div>
-          <strong>${item.name}</strong>
-          <p>${item.details ? `${item.details} · ` : ""}${money.format(item.price)} ${t("each")}</p>
-          ${item.config ? `<button class="cart-edit" type="button" data-edit="${item.key}">${t("edit")}</button>` : ""}
+          <strong>${escapeMarkup(item.name)}</strong>
+          <p>${item.details ? `${escapeMarkup(item.details)} · ` : ""}${money.format(item.price)} ${t("each")}</p>
+          ${item.config ? `<button class="cart-edit" type="button" data-edit="${escapeMarkup(item.key)}">${t("edit")}</button>` : ""}
+          ${bowlNames.length ? `
+            <div class="cart-bowl-names">
+              ${bowlNames.map((name, index) => `
+                <label>
+                  <span>${t("bowlNameLabel", { number: index + 1 })}</span>
+                  <input
+                    type="text"
+                    maxlength="40"
+                    autocomplete="off"
+                    placeholder="${t("bowlNamePlaceholder")}"
+                    value="${escapeMarkup(name)}"
+                    data-bowl-name="${escapeMarkup(item.key)}"
+                    data-bowl-index="${index}"
+                  >
+                </label>
+              `).join("")}
+            </div>
+          ` : ""}
         </div>
-        <div class="qty" aria-label="Aantal ${item.name}">
-          <button class="qty-button" type="button" data-minus="${item.key}" aria-label="${t("decrease")}">-</button>
+        <div class="qty" aria-label="Aantal ${escapeMarkup(item.name)}">
+          <button class="qty-button" type="button" data-minus="${escapeMarkup(item.key)}" aria-label="${t("decrease")}">-</button>
           <span>${item.quantity}</span>
-          <button class="qty-button" type="button" data-plus="${item.key}" aria-label="${t("increase")}">+</button>
+          <button class="qty-button" type="button" data-plus="${escapeMarkup(item.key)}" aria-label="${t("increase")}">+</button>
         </div>
       </div>
-    `).join("");
+    `;
+    }).join("");
   }
 
   const summary = getCartSummary(lines);
@@ -1033,6 +1088,12 @@ function changeQuantity(key, direction) {
   if (!line) return;
 
   line.quantity += direction;
+  if (line.category === "bowl") {
+    const bowlNames = Array.isArray(line.bowlNames) ? line.bowlNames : [];
+    if (direction > 0) bowlNames.push("");
+    if (direction < 0) bowlNames.pop();
+    line.bowlNames = bowlNames;
+  }
   if (line.quantity <= 0) {
     cart = cart.filter((item) => item.key !== key);
   }
@@ -1093,10 +1154,10 @@ function openBuilderForEdit(config = {}) {
   setSelectValue(form, "sauce1", config.sauces?.[0]);
   setSelectValue(form, "sauce2", config.sauces?.[1]);
   setSelectValue(form, "finish", config.finish);
-  setSelectValue(form, "extraProtein", config.extras?.[0]);
-  setSelectValue(form, "extraTopping", config.extras?.[1]);
-  setSelectValue(form, "extraSauce", config.extras?.[2]);
-  setSelectValue(form, "extraFinish", config.extras?.[3]);
+  setSelectValue(form, "extraProtein", config.extras?.[0]?.name || config.extras?.[0]);
+  setSelectValue(form, "extraTopping", config.extras?.[1]?.name || config.extras?.[1]);
+  setSelectValue(form, "extraSauce", config.extras?.[2]?.name || config.extras?.[2]);
+  setSelectValue(form, "extraFinish", config.extras?.[3]?.name || config.extras?.[3]);
   form.querySelector(".builder-submit").innerHTML = `${editingCartKey ? t("saveChange") : t("add")} <span>→</span>`;
   openModal(builderModal);
 }
@@ -1152,8 +1213,8 @@ document.querySelector("#builderForm").addEventListener("submit", (event) => {
     key: `custom-${size}-${base}-${protein}-${toppings.join("-")}-${saucesChosen.join("-")}-${finish || "geen-afwerking"}-${extras.map((item) => item.name).join("-")}`.toLowerCase().replaceAll(" ", "-"),
     id: "custom-bowl",
     category: "bowl",
-    name: `Make Your Own Bowl ${size}`,
-    details: `${base}, ${protein}, toppings: ${toppingsText}, sauzen: ${saucesText}, afwerking: ${finish || t("noFinish")}. ${extrasText}`,
+    name: "Make Your Own Bowl",
+    details: `Maat: ${size}, basis: ${base}, proteine: ${protein}, sauzen: ${saucesText}, toppings: ${toppingsText}, afwerking: ${finish || t("noFinish")}. ${extrasText}`,
     price,
     config: {
       type: "custom",
@@ -1163,12 +1224,8 @@ document.querySelector("#builderForm").addEventListener("submit", (event) => {
       toppings,
       sauces: saucesChosen,
       finish,
-      extras: [
-        formData.get("extraProtein") || "",
-        formData.get("extraTopping") || "",
-        formData.get("extraSauce") || "",
-        formData.get("extraFinish") || ""
-      ]
+      basePrice: Number(selected.dataset.price),
+      extras
     }
   });
   closeModal(builderModal);
@@ -1217,8 +1274,8 @@ signatureModalBody.addEventListener("submit", (event) => {
     key: `${item.id}-${size}-${base}-${sauce}-${extras.map((extra) => extra.name).join("-")}`.toLowerCase().replaceAll(" ", "-"),
     id: item.id,
     category: "bowl",
-    name: `${item.name} ${size}`,
-    details: `Basis: ${base}, saus: ${sauce}, proteine: ${item.protein}, standaard toppings: ${item.chips.join(", ")}, afwerking: ${item.finish}. ${extrasText}`,
+    name: item.name,
+    details: `Maat: ${size}, basis: ${base}, saus: ${sauce}, proteine: ${item.protein}, standaard toppings: ${item.chips.join(", ")}, afwerking: ${item.finish}. ${extrasText}`,
     price: Number(selectedSize.dataset.price) + extraTotal,
     config: {
       type: "signature",
@@ -1226,7 +1283,11 @@ signatureModalBody.addEventListener("submit", (event) => {
       size,
       base,
       sauce,
-      extras: extras.map((extra) => extra.name)
+      protein: item.protein,
+      standardToppings: item.chips.slice(1),
+      finish: item.finish,
+      basePrice: Number(selectedSize.dataset.price),
+      extras
     }
   });
   closeModal(signatureModal);
@@ -1237,9 +1298,11 @@ document.querySelector("#sweet").addEventListener("click", (event) => {
   if (!button) return;
 
   const item = getSimpleProduct(button.dataset.simple);
+  const category = desserts.some((dessert) => dessert.id === item.id) ? "dessert" : "drink";
   addLine({
     key: item.id,
     id: item.id,
+    category,
     name: item.name,
     details: "",
     price: item.price
@@ -1267,6 +1330,18 @@ cartItems.addEventListener("click", (event) => {
   }
   if (plus) changeQuantity(plus.dataset.plus, 1);
   if (minus) changeQuantity(minus.dataset.minus, -1);
+});
+
+cartItems.addEventListener("input", (event) => {
+  const input = event.target.closest("[data-bowl-name]");
+  if (!input) return;
+
+  const line = cart.find((item) => item.key === input.dataset.bowlName);
+  const index = Number(input.dataset.bowlIndex);
+  if (!line || !Number.isInteger(index) || index < 0 || index >= line.quantity) return;
+
+  line.bowlNames = Array.from({ length: line.quantity }, (_, nameIndex) => line.bowlNames?.[nameIndex] || "");
+  line.bowlNames[index] = input.value.trimStart().slice(0, 40);
 });
 
 orderForm.addEventListener("submit", async (event) => {
