@@ -1,12 +1,10 @@
 import { kv } from "@vercel/kv";
 import { createClient } from "redis";
-import { randomBytes } from "node:crypto";
 
 const ORDER_LIST_KEY = "loaded-bowls:orders";
 const ORDER_KEY_PREFIX = "loaded-bowls:order:";
 const PENDING_ORDER_KEY_PREFIX = "loaded-bowls:pending-order:";
 const ORDER_COUNTER_PREFIX = "loaded-bowls:counter:";
-const CANCEL_TOKEN_KEY_PREFIX = "loaded-bowls:cancel-token:";
 let redisClient;
 
 async function getRedisClient() {
@@ -81,20 +79,6 @@ function parseOrder(value) {
   }
 }
 
-function parseScalar(value) {
-  if (value === null || value === undefined) return null;
-  if (typeof value !== "string") return value;
-  try {
-    return JSON.parse(value);
-  } catch {
-    return value;
-  }
-}
-
-function createCancelToken() {
-  return randomBytes(24).toString("hex");
-}
-
 export function requireAdmin(req, res) {
   const expected = process.env.ADMIN_ORDERS_SECRET;
   const received = req.headers["x-admin-secret"] || req.query?.secret;
@@ -119,14 +103,7 @@ export async function saveOrder(payload) {
 
   const key = `${ORDER_KEY_PREFIX}${id}`;
   const existing = parseOrder(await storeGet(key));
-  if (existing) {
-    if (existing.cancelToken) return existing;
-    const cancelToken = createCancelToken();
-    const updated = { ...existing, cancelToken };
-    await storeSet(key, updated);
-    await storeSet(`${CANCEL_TOKEN_KEY_PREFIX}${cancelToken}`, id);
-    return updated;
-  }
+  if (existing) return existing;
 
   const orderDate = new Date(payload.createdAt || payload.paidAt || Date.now());
   const year = orderDate.toLocaleDateString("nl-BE", {
@@ -147,41 +124,15 @@ export async function saveOrder(payload) {
     paymentStatus: payload.paymentStatus || "paid",
     paymentLabel: payload.paymentLabel || "Online betaald",
     status: "Nieuw",
-    cancelToken: createCancelToken(),
     emailEvents: {},
     amount: payload.amount,
     order: metadata
   };
 
   await storeSet(key, record);
-  await storeSet(`${CANCEL_TOKEN_KEY_PREFIX}${record.cancelToken}`, id);
   await storeLPush(ORDER_LIST_KEY, id);
   await storeLTrim(ORDER_LIST_KEY, 0, 4999);
   return record;
-}
-
-export async function getOrderByCancelToken(token) {
-  if (!token || !/^[a-f0-9]{48}$/i.test(String(token))) return null;
-  const id = parseScalar(await storeGet(`${CANCEL_TOKEN_KEY_PREFIX}${token}`));
-  if (!id) return null;
-  return getOrderById(String(id));
-}
-
-export async function cancelOrderByToken(token, reason) {
-  const existing = await getOrderByCancelToken(token);
-  if (!existing) return { outcome: "not-found", order: null };
-  if (existing.status === "Geannuleerd") return { outcome: "already-cancelled", order: existing };
-  if ((existing.status || "Nieuw") !== "Nieuw") return { outcome: "too-late", order: existing };
-
-  const cleanReason = String(reason || "").trim().slice(0, 500);
-  if (!cleanReason) return { outcome: "reason-required", order: existing };
-
-  const order = await updateOrderStatus(existing.id, "Geannuleerd", {
-    cancellationReason: cleanReason,
-    cancelledBy: "Klant",
-    cancelledAt: new Date().toISOString()
-  });
-  return { outcome: "cancelled", order };
 }
 
 export async function savePendingOrder(order) {
