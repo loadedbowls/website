@@ -1,4 +1,4 @@
-const DELIVERY_RADIUS_KM = 6;
+const DELIVERY_RADIUS_KM = 7;
 
 const SHOP = {
   lat: 51.042810087083,
