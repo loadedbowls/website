@@ -30,6 +30,26 @@
       </div>
     </header>
 
+    <aside class="delivery-choice" aria-label="Bestellen en bezorgen">
+      <div class="delivery-choice-inner section-shell">
+        <div class="delivery-choice-copy">
+          <span class="delivery-choice-badge" data-i18n="directOrderBadge">Voordeligst via onze site</span>
+          <p>
+            <strong data-i18n="directOrderTitle">Afhalen of ter plaatse eten</strong>
+            <span data-i18n="directOrderCopy">Bestel hier rechtstreeks aan onze voordeligste prijzen.</span>
+          </p>
+        </div>
+        <div class="delivery-partners">
+          <span data-i18n="deliveryPartnerTitle">Liever laten bezorgen?</span>
+          <div class="delivery-partner-links">
+            <a class="delivery-partner takeaway" href="https://www.takeaway.com/be/menu/crema-coffee-shop-gent?c_id=97f803df-bfb5-4483-b5ae-6303fb9cce24" target="_blank" rel="noreferrer">Takeaway.com <span aria-hidden="true">↗</span></a>
+            <a class="delivery-partner deliveroo" href="https://deliveroo.be/nl-be/menu/ghent/overpoort-plateau/loaded-bowls" target="_blank" rel="noreferrer">Deliveroo <span aria-hidden="true">↗</span></a>
+            <a class="delivery-partner uber-eats" href="https://www.ubereats.com/be/store/loaded-bowls-fries-%26-more/xY8Og7W8V1yjAMBemFZlow" target="_blank" rel="noreferrer">Uber Eats <span aria-hidden="true">↗</span></a>
+          </div>
+        </div>
+      </div>
+    </aside>
+
     <main id="home">
       <section class="hero section-shell">
         <div class="hero-copy">
@@ -40,7 +60,7 @@
             <a class="ghost-btn" href="#signatures" data-i18n="seeSignatures">See signatures</a>
           </div>
           <div class="base-line">Frieten <span>•</span> Nachos <span>•</span> Rijst <span>•</span></div>
-          <p class="micro">Gevestigd in Gent. Bereiding en levering duurt gemiddeld 25-30 minuten.</p>
+          <p class="micro" data-i18n="heroMicro">Bestel hier voordeliger voor afhalen of ter plaatse eten.</p>
         </div>
 
         <div class="hero-card">
@@ -315,7 +335,6 @@
             <span data-i18n="labelMethod">Keuze</span>
             <select name="method" id="orderMethod" required>
               <option value="Afhalen">Afhalen</option>
-              <option value="Levering">Levering</option>
               <option value="Ter plaatse eten">Ter plaatse eten</option>
             </select>
           </label>
@@ -329,10 +348,6 @@
             <strong data-i18n="openingHoursTitle">Openingsuren</strong>
             <span data-i18n="openingHoursText">Maandag - zaterdag: 11:00 - 15:00 en 17:00 - 22:00. Zondag gesloten.</span>
           </div>
-          <label id="deliveryAddressLabel">
-            <span data-i18n="labelAddress">Leveradres</span>
-            <input name="address" autocomplete="street-address" placeholder="Straat, nummer en gemeente">
-          </label>
           <label>
             <span data-i18n="labelNote">Opmerking</span>
             <textarea name="note" rows="4" placeholder="Allergie, extra info of opmerking"></textarea>
@@ -341,11 +356,11 @@
             <span data-i18n="labelPayment">Betaling</span>
             <select name="paymentChoice" id="paymentChoice" required>
               <option value="online">Online betalen</option>
-              <option value="later">Betalen bij afhaal/levering</option>
+              <option value="later">Betalen bij afhalen / ter plaatse</option>
             </select>
           </label>
           <button class="primary-btn builder-submit" type="submit" id="checkoutSubmit">Verder naar betaling <span>→</span></button>
-          <p class="form-note" data-i18n="formNote">Levering kan binnen 8 km van Loaded Bowls in Gent. Bereiding en levering duren gemiddeld 25-30 minuten.</p>
+          <p class="form-note" data-i18n="formNote">Via onze website bestel je voor afhalen of ter plaatse eten. Voor bezorging kies je bovenaan een bezorgpartner.</p>
         </form>
       </section>
 
@@ -353,7 +368,7 @@
         <div class="find-copy">
           <p class="section-kicker" data-i18n="findKicker">/06 — Kom een bowl halen</p>
           <h2 data-i18n-html="findTitle" data-cms-key="location.title" data-cms-label="Locatie titel" data-cms-type="html">Find the <span>drip.</span></h2>
-          <p data-i18n="findCopy" data-cms-key="location.copy" data-cms-label="Locatie uitleg" data-cms-type="text">Walk-in, take-away en delivery in Gent. Bestellen kan online, aan de counter of via je favoriete delivery app. Bereiding en levering duurt gemiddeld 25-30 minuten.</p>
+          <p data-i18n="findCopy">Eet gezellig ter plaatse of haal je bestelling af in Gent. Voor bezorging bestel je via Takeaway.com, Deliveroo of Uber Eats.</p>
           <div class="find-actions">
             <a class="primary-btn" href="#order"><span data-i18n="pickupOrder">Bestel afhaal</span> <span>→</span></a>
             <a class="ghost-btn" href="https://www.google.com/maps/search/?api=1&query=Sint-Amandstraat%2024%209000%20Gent" target="_blank" rel="noreferrer" data-i18n="route">Route</a>
@@ -438,7 +453,7 @@
         <span data-i18n="copyright">© 2026 Loaded Bowls. Alle rechten voorbehouden.</span>
       </div>
       <p data-i18n="termsText">
-        Online bestellingen zijn pas definitief na betaling. Levering is mogelijk binnen 8 km van Sint-Amandstraat 24, 9000 Gent. Bereiding en levering duren gemiddeld 25-30 minuten, afhankelijk van drukte en bereikbaarheid. Afhalen kan tijdens de openingsuren. Prijzen en beschikbaarheid kunnen wijzigen.
+        Via deze website bestel je voor afhalen of ter plaatse eten. Online bestellingen zijn pas definitief na betaling. Bestellen voor bezorging verloopt via Takeaway.com, Deliveroo of Uber Eats. Prijzen en beschikbaarheid kunnen per verkoopkanaal verschillen.
       </p>
     </footer>
 
