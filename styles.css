@@ -119,6 +119,121 @@ button {
   gap: 10px;
 }
 
+.delivery-choice {
+  position: relative;
+  z-index: 10;
+  border-bottom: 1px solid rgba(241, 159, 12, 0.34);
+  background: #15161b;
+  box-shadow: 0 14px 34px rgba(0, 0, 0, 0.24);
+}
+
+.delivery-choice-inner {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 28px;
+  min-height: 88px;
+  padding-block: 13px;
+}
+
+.delivery-choice-copy {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  min-width: 0;
+}
+
+.delivery-choice-badge {
+  flex: 0 0 auto;
+  border: 1px solid var(--orange);
+  border-radius: 6px;
+  padding: 8px 10px;
+  color: #17120a;
+  background: var(--orange);
+  font: 900 0.72rem/1 var(--body);
+  text-transform: uppercase;
+}
+
+.delivery-choice-copy p {
+  display: grid;
+  gap: 4px;
+  margin: 0;
+}
+
+.delivery-choice-copy strong {
+  font-family: var(--chunk);
+  font-size: 1.18rem;
+  text-transform: uppercase;
+}
+
+.delivery-choice-copy p span {
+  color: var(--muted);
+  font-size: 0.88rem;
+}
+
+.delivery-partners {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 13px;
+}
+
+.delivery-partners > span {
+  color: var(--text);
+  font-weight: 900;
+  white-space: nowrap;
+}
+
+.delivery-partner-links {
+  display: grid;
+  grid-template-columns: repeat(3, max-content);
+  gap: 8px;
+}
+
+.delivery-partner {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  min-height: 40px;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  padding: 8px 12px;
+  background: #0d0e12;
+  font-size: 0.8rem;
+  font-weight: 900;
+  white-space: nowrap;
+  transition: transform 160ms ease, border-color 160ms ease, background 160ms ease;
+}
+
+.delivery-partner:hover {
+  transform: translateY(-2px);
+}
+
+.delivery-partner.takeaway {
+  border-color: #ff7a1a;
+}
+
+.delivery-partner.takeaway:hover {
+  background: rgba(255, 122, 26, 0.14);
+}
+
+.delivery-partner.deliveroo {
+  border-color: #00ccbc;
+}
+
+.delivery-partner.deliveroo:hover {
+  background: rgba(0, 204, 188, 0.12);
+}
+
+.delivery-partner.uber-eats {
+  border-color: #5fb709;
+}
+
+.delivery-partner.uber-eats:hover {
+  background: rgba(95, 183, 9, 0.12);
+}
+
 .language-select {
   min-height: 34px;
   border: 1px solid var(--line);
@@ -222,7 +337,7 @@ button {
   grid-template-columns: minmax(0, 0.95fr) minmax(380px, 0.88fr);
   gap: clamp(32px, 5vw, 86px);
   align-items: center;
-  min-height: calc(100vh - 66px);
+  min-height: calc(100vh - 154px);
   padding: clamp(46px, 6vw, 96px) 0 54px;
 }
 
@@ -1550,10 +1665,24 @@ body.modal-open {
     justify-content: space-between;
     overflow-x: auto;
     padding-bottom: 7px;
+    scrollbar-width: none;
+  }
+
+  .nav::-webkit-scrollbar {
+    display: none;
   }
 
   .top-actions {
     justify-self: end;
+  }
+
+  .delivery-choice-inner {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+
+  .delivery-partners {
+    justify-content: space-between;
   }
 
   .hero,
@@ -1602,6 +1731,44 @@ body.modal-open {
 
   .topbar {
     padding-inline: 14px;
+  }
+
+  .nav {
+    justify-content: flex-start;
+    gap: 24px;
+  }
+
+  .delivery-choice-inner {
+    align-items: stretch;
+    min-height: 0;
+    padding-block: 12px;
+  }
+
+  .delivery-choice-copy,
+  .delivery-partners {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .delivery-choice-badge {
+    padding: 6px 8px;
+    font-size: 0.65rem;
+  }
+
+  .delivery-partner-links {
+    width: 100%;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .delivery-partner {
+    min-width: 0;
+    padding-inline: 7px;
+    font-size: 0.7rem;
+  }
+
+  .hero {
+    min-height: auto;
   }
 
   h1 {
