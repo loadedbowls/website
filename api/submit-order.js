@@ -3,6 +3,8 @@ import { forwardToPrinter } from "./_print-forward.js";
 import { sendOrderReceivedEmail } from "./_email.js";
 import { sendNewOrderPush } from "./_push.js";
 
+const ALLOWED_WEBSHOP_METHODS = new Set(["Afhalen", "Ter plaatse eten"]);
+
 export default async function handler(req, res) {
   if (req.method !== "POST") {
     res.setHeader("Allow", "POST");
@@ -19,13 +21,17 @@ export default async function handler(req, res) {
     return res.status(400).json({ error: "Klantgegevens ontbreken." });
   }
 
+  if (!ALLOWED_WEBSHOP_METHODS.has(order.customer.method)) {
+    return res.status(400).json({ error: "Via de webshop kan je enkel afhalen of ter plaatse eten." });
+  }
+
   try {
     const orderId = order.id || `LB-${Date.now()}`;
     const payload = {
       paymentId: null,
       createdAt: new Date().toISOString(),
       paymentStatus: "pay_later",
-      paymentLabel: order.paymentMethod || "Betalen bij afhaal/levering",
+      paymentLabel: order.paymentMethod || "Betalen bij afhalen / ter plaatse",
       amount: {
         currency: "EUR",
         value: Number(order.total || 0).toFixed(2)
