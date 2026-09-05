@@ -1173,7 +1173,7 @@ function trackWebsiteVisit() {
     visitorId = createVisitorId();
   }
 
-  fetch("/api/analytics-visit", {
+  fetch("/api/site-config", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ visitorId }),
