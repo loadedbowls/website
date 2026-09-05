@@ -1,15 +1,15 @@
 {
-  "name": "Loaded Bowls Orders",
-  "short_name": "LB Orders",
-  "start_url": "/mobile-orders.html",
+  "name": "Loaded Bowls Bezoekers",
+  "short_name": "Bezoekers",
+  "start_url": "/bezoekers.html",
   "scope": "/",
   "display": "standalone",
-  "background_color": "#07111d",
-  "theme_color": "#07111d",
+  "background_color": "#080d18",
+  "theme_color": "#080d18",
   "icons": [
     {
       "src": "/assets/loaded-bowls-logo.jpeg",
-      "sizes": "512x512",
+      "sizes": "1254x1254",
       "type": "image/jpeg",
       "purpose": "any maskable"
     }
