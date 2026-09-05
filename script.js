@@ -1153,6 +1153,35 @@ function renderOrders() {
   `).join("");
 }
 
+function createVisitorId() {
+  if (globalThis.crypto?.randomUUID) return globalThis.crypto.randomUUID();
+  return `lb_${Date.now().toString(36)}_${Math.random().toString(36).slice(2)}_${Math.random().toString(36).slice(2)}`;
+}
+
+function trackWebsiteVisit() {
+  if (!/^https?:$/.test(window.location.protocol)) return;
+
+  const storageKey = "loadedBowlsVisitorId";
+  let visitorId = "";
+  try {
+    visitorId = localStorage.getItem(storageKey) || "";
+    if (!/^[a-zA-Z0-9_-]{16,100}$/.test(visitorId)) {
+      visitorId = createVisitorId();
+      localStorage.setItem(storageKey, visitorId);
+    }
+  } catch {
+    visitorId = createVisitorId();
+  }
+
+  fetch("/api/analytics-visit", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ visitorId }),
+    credentials: "same-origin",
+    keepalive: true
+  }).catch(() => {});
+}
+
 if (builderModalBody && orderForm) {
   builderModalBody.appendChild(document.querySelector("#builderForm"));
 }
@@ -1565,3 +1594,4 @@ updateCheckoutButtonLabel();
 showClosedModalIfNeeded();
 renderCart();
 renderOrders();
+trackWebsiteVisit();
