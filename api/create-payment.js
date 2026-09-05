@@ -1,5 +1,7 @@
 import { savePendingOrder } from "./_order-store.js";
 
+const ALLOWED_WEBSHOP_METHODS = new Set(["Afhalen", "Ter plaatse eten"]);
+
 function getBaseUrl(req) {
   if (process.env.SITE_URL) return process.env.SITE_URL.replace(/\/$/, "");
   const host = req.headers["x-forwarded-host"] || req.headers.host;
@@ -28,6 +30,10 @@ export default async function handler(req, res) {
 
   if (!order.customer?.name || !order.customer?.phone || !order.customer?.email || !order.customer?.method || !order.customer?.orderTime) {
     return res.status(400).json({ error: "Klantgegevens ontbreken." });
+  }
+
+  if (!ALLOWED_WEBSHOP_METHODS.has(order.customer.method)) {
+    return res.status(400).json({ error: "Via de webshop kan je enkel afhalen of ter plaatse eten." });
   }
 
   const baseUrl = getBaseUrl(req);
