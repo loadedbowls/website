@@ -5,6 +5,7 @@ import { createClient } from "redis";
 const SITE_CONFIG_KEY = "loaded-bowls:site-config";
 const ANALYTICS_PREFIX = "loaded-bowls:analytics";
 const VISITOR_MARKER_SECONDS = 60 * 60 * 48;
+const DELIVERY_PLATFORMS = ["takeaway", "deliveroo", "uber-eats"];
 let redisClient;
 
 async function getRedisClient() {
@@ -102,18 +103,65 @@ export async function recordSiteVisit(visitorId) {
   return { date, uniqueVisitors, pageViews };
 }
 
+export async function recordDeliveryPartnerClick(visitorId, platform) {
+  const date = brusselsDateKey();
+  const visitorHash = createHash("sha256").update(visitorId).digest("hex");
+  const clicksKey = analyticsCountKey(date, `partner:${platform}:clicks`);
+  const uniqueClickersKey = analyticsCountKey(date, `partner:${platform}:unique`);
+  const visitorMarkerKey = `${ANALYTICS_PREFIX}:${date}:partner:${platform}:visitor:${visitorHash}`;
+  const redis = await getRedisClient();
+
+  if (redis) {
+    const clicks = await redis.incr(clicksKey);
+    const firstClickToday = await redis.set(visitorMarkerKey, "1", {
+      NX: true,
+      EX: VISITOR_MARKER_SECONDS
+    });
+    const uniqueClickers = firstClickToday
+      ? await redis.incr(uniqueClickersKey)
+      : Number(await redis.get(uniqueClickersKey) || 0);
+    return { date, platform, uniqueClickers, clicks };
+  }
+
+  const clicks = await kv.incr(clicksKey);
+  const firstClickToday = await kv.set(visitorMarkerKey, "1", {
+    nx: true,
+    ex: VISITOR_MARKER_SECONDS
+  });
+  const uniqueClickers = firstClickToday
+    ? await kv.incr(uniqueClickersKey)
+    : Number(await kv.get(uniqueClickersKey) || 0);
+  return { date, platform, uniqueClickers, clicks };
+}
+
 export async function getSiteVisitStats(days = 30) {
   const dates = recentDateKeys(days);
-  const keys = dates.flatMap((date) => [
-    analyticsCountKey(date, "unique"),
-    analyticsCountKey(date, "pageviews")
-  ]);
+  const metricsPerDate = [
+    "unique",
+    "pageviews",
+    ...DELIVERY_PLATFORMS.flatMap((platform) => [
+      `partner:${platform}:unique`,
+      `partner:${platform}:clicks`
+    ])
+  ];
+  const keys = dates.flatMap((date) => metricsPerDate.map((metric) => analyticsCountKey(date, metric)));
   const values = await readMany(keys);
-  return dates.map((date, index) => ({
-    date,
-    uniqueVisitors: Number(values[index * 2] || 0),
-    pageViews: Number(values[index * 2 + 1] || 0)
-  }));
+  return dates.map((date, index) => {
+    const offset = index * metricsPerDate.length;
+    const partners = {};
+    DELIVERY_PLATFORMS.forEach((platform, platformIndex) => {
+      partners[platform] = {
+        uniqueClickers: Number(values[offset + 2 + platformIndex * 2] || 0),
+        clicks: Number(values[offset + 3 + platformIndex * 2] || 0)
+      };
+    });
+    return {
+      date,
+      uniqueVisitors: Number(values[offset] || 0),
+      pageViews: Number(values[offset + 1] || 0),
+      partners
+    };
+  });
 }
 
 export function requireSiteAdmin(req, res) {
