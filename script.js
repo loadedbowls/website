@@ -1158,9 +1158,7 @@ function createVisitorId() {
   return `lb_${Date.now().toString(36)}_${Math.random().toString(36).slice(2)}_${Math.random().toString(36).slice(2)}`;
 }
 
-function trackWebsiteVisit() {
-  if (!/^https?:$/.test(window.location.protocol)) return;
-
+function getAnalyticsVisitorId() {
   const storageKey = "loadedBowlsVisitorId";
   let visitorId = "";
   try {
@@ -1172,14 +1170,31 @@ function trackWebsiteVisit() {
   } catch {
     visitorId = createVisitorId();
   }
+  return visitorId;
+}
+
+function sendAnalyticsEvent(action, details = {}) {
+  if (!/^https?:$/.test(window.location.protocol)) return;
 
   fetch("/api/site-config", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ visitorId }),
+    body: JSON.stringify({ action, visitorId: getAnalyticsVisitorId(), ...details }),
     credentials: "same-origin",
     keepalive: true
   }).catch(() => {});
+}
+
+function trackWebsiteVisit() {
+  sendAnalyticsEvent("visit");
+}
+
+function trackDeliveryPartnerClicks() {
+  document.addEventListener("click", (event) => {
+    const link = event.target.closest("[data-delivery-partner]");
+    if (!link) return;
+    sendAnalyticsEvent("partner-click", { platform: link.dataset.deliveryPartner });
+  });
 }
 
 if (builderModalBody && orderForm) {
@@ -1595,3 +1610,4 @@ showClosedModalIfNeeded();
 renderCart();
 renderOrders();
 trackWebsiteVisit();
+trackDeliveryPartnerClicks();
