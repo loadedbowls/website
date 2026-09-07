@@ -1,6 +1,7 @@
 import {
   getSiteConfig,
   getSiteVisitStats,
+  recordDeliveryPartnerClick,
   recordSiteVisit,
   requireSiteAdmin,
   setSiteConfig
@@ -8,6 +9,7 @@ import {
 
 const BOT_USER_AGENT = /bot|crawler|spider|crawling|preview|facebookexternalhit|slurp|bingpreview|whatsapp/i;
 const VISITOR_ID_PATTERN = /^[a-zA-Z0-9_-]{16,100}$/;
+const DELIVERY_PLATFORMS = new Set(["takeaway", "deliveroo", "uber-eats"]);
 
 export default async function handler(req, res) {
   res.setHeader("Access-Control-Allow-Origin", "*");
@@ -51,7 +53,18 @@ export default async function handler(req, res) {
     }
 
     try {
-      await recordSiteVisit(visitorId);
+      const action = String(req.body?.action || "visit");
+      if (action === "partner-click") {
+        const platform = String(req.body?.platform || "").trim().toLowerCase();
+        if (!DELIVERY_PLATFORMS.has(platform)) {
+          return res.status(400).json({ error: "Ongeldig bezorgplatform." });
+        }
+        await recordDeliveryPartnerClick(visitorId, platform);
+      } else if (action === "visit") {
+        await recordSiteVisit(visitorId);
+      } else {
+        return res.status(400).json({ error: "Ongeldige analyticsactie." });
+      }
       return res.status(200).json({ ok: true, counted: true });
     } catch (error) {
       console.error("Could not record website visit:", error);
