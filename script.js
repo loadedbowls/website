@@ -1023,6 +1023,7 @@ function renderSignatures() {
       </div>
     </article>
   `).join("");
+  if (typeof renderSandwiches === "function") renderSandwiches();
 }
 
 function renderSimpleList(target, items) {
@@ -1387,6 +1388,12 @@ cartItems.addEventListener("click", (event) => {
       if (!item) return;
       renderSignatureModal(item, line.config);
       openModal(signatureModal);
+    } else if (line.config.type === "sandwich") {
+      const item = sandwiches.find(item => item.id === line.config.sandwichId);
+      if (item) { renderSandwichModal(item, line.config); openModal(signatureModal); }
+    } else if (line.config.type === "snack") {
+      const item = snacks.find(item => item.id === line.config.snackId);
+      if (item) { renderSnackModal(item, line.config); openModal(signatureModal); }
     } else if (line.config.type === "custom") {
       openBuilderForEdit(line.config);
     }
