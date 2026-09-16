@@ -15,6 +15,8 @@
       <nav class="nav" aria-label="Hoofdnavigatie">
         <a href="#bases" data-i18n="navBuild">Build</a>
         <a href="#signatures" data-i18n="navMenu">Menu</a>
+        <a href="#sandwiches">Sandwiches</a>
+        <a href="#snacks">Snacks</a>
         <a href="#sweet" data-i18n="navDrinks">Drinks</a>
         <a href="#find" data-i18n="navFind">Find us</a>
         <a href="#order" data-i18n="navCheckout">Checkout</a>
@@ -285,11 +287,21 @@
         <div class="menu-heading">
           <div>
             <p class="section-kicker" data-i18n="signatureKicker">/03 — Signature bowls</p>
-            <h2 data-i18n-html="signatureTitle" data-cms-key="signatures.title" data-cms-label="Signature bowls titel" data-cms-type="html">Signature <span>bowls.</span></h2>
+            <h2 >Loaded <span>Bowls</span></h2>
           </div>
           <p data-i18n="signatureIntro" data-cms-key="signatures.intro" data-cms-label="Signature bowls uitleg" data-cms-type="text">Basis naar keuze · Medium / Large</p>
         </div>
-        <div class="signature-grid" id="signatureGrid"></div>
+        <div class="carousel-controls"><span>Swipe of gebruik de pijlen</span><button type="button" data-slide="-1" data-target="signatureGrid" aria-label="Vorige bowls">←</button><button type="button" data-slide="1" data-target="signatureGrid" aria-label="Volgende bowls">→</button></div><div class="signature-grid" id="signatureGrid" tabindex="0" aria-label="bowls — horizontaal bladeren"></div>
+      </section>
+
+      <section id="sandwiches" class="signatures section-shell">
+        <div class="split-heading"><div><p class="section-kicker">Loaded sandwiches</p><h2>Loaded <span>Sandwiches</span></h2></div><p>Groot belegd. Vol van smaak.</p></div>
+        <div class="carousel-controls"><span>Swipe of gebruik de pijlen</span><button type="button" data-slide="-1" data-target="sandwichGrid" aria-label="Vorige sandwiches">←</button><button type="button" data-slide="1" data-target="sandwichGrid" aria-label="Volgende sandwiches">→</button></div><div class="sandwich-grid" id="sandwichGrid" tabindex="0" aria-label="sandwiches — horizontaal bladeren"></div>
+      </section>
+
+      <section id="snacks" class="signatures section-shell">
+        <div class="split-heading"><div><h2>Snacks</h2></div><p>Voor erbij of om te delen. Extra saus €0,70.</p></div>
+        <div class="carousel-controls"><span>Swipe of gebruik de pijlen</span><button type="button" data-slide="-1" data-target="snackGrid" aria-label="Vorige snacks">←</button><button type="button" data-slide="1" data-target="snackGrid" aria-label="Volgende snacks">→</button></div><div class="sandwich-grid" id="snackGrid" tabindex="0" aria-label="Snacks — horizontaal bladeren"></div>
       </section>
 
       <section id="sweet" class="sweet section-shell">
@@ -486,6 +498,8 @@
 
     <div class="toast" id="toast" role="status" aria-live="polite"></div>
     <script src="script.js"></script>
+    <script src="sandwiches.js"></script>
     <script src="site-editor.js"></script>
   </body>
 </html>
+
