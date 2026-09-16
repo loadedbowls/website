@@ -1,10 +1,10 @@
 // Toppings follow the corresponding bowl, including CMS updates.
 const sandwiches = [
-  { id: 'sandwich-falafel', image: 'assets/menu/sandwich-falafel.jpg', name: 'Falafel Fresh', bowlId: 'loaded-falafel', price: 7 },
-  { id: 'sandwich-kebab', image: 'assets/menu/sandwich-kebab.jpg', name: 'The Kebab', bowlId: 'loaded-kebab', price: 7.9 },
-  { id: 'sandwich-chicken-kebab', image: 'assets/menu/sandwich-chicken-kebab.jpg', name: 'Spicy Chicken Kebab', bowlId: 'loaded-chicken-kebab', price: 7.9 },
-  { id: 'sandwich-pulled', image: 'assets/menu/sandwich-pulled.jpg', name: 'BBQ Pulled', bowlId: 'loaded-pulled-chicken', price: 8.5 },
-  { id: 'sandwich-crispy', image: 'assets/menu/sandwich-crispy.jpg', name: 'The Crispy', bowlId: 'loaded-crispy-chicken', price: 9 }
+  { id: 'sandwich-falafel', image: 'assets/sandwich-falafel.jpg', name: 'Falafel Fresh', bowlId: 'loaded-falafel', price: 7 },
+  { id: 'sandwich-kebab', image: 'assets/sandwich-kebab.jpg', name: 'The Kebab', bowlId: 'loaded-kebab', price: 7.9 },
+  { id: 'sandwich-chicken-kebab', image: 'assets/sandwich-chicken-kebab.jpg', name: 'Spicy Chicken Kebab', bowlId: 'loaded-chicken-kebab', price: 7.9 },
+  { id: 'sandwich-pulled', image: 'assets/sandwich-pulled.jpg', name: 'BBQ Pulled', bowlId: 'loaded-pulled-chicken', price: 8.5 },
+  { id: 'sandwich-crispy', image: 'assets/sandwich-crispy.jpg', name: 'The Crispy', bowlId: 'loaded-crispy-chicken', price: 9 }
 ];
 const sandwichUpgrades = [
   { name: '', label: 'Geen extra', price: 0 },
@@ -74,12 +74,12 @@ signatureModalBody.addEventListener('submit', event => {
 renderSandwiches();
 
 const snacks = [
-  { id: 'snack-chicken-nuggets', image: 'assets/menu/snack-chicken-nuggets.png', name: 'Chicken Nuggets', quantity: '6 stuks', price: 4 },
-  { id: 'snack-chili-cheese', image: 'assets/menu/snack-chili-cheese.png', name: 'Chili Cheese Nuggets', quantity: '6 stuks', price: 4.5 },
-  { id: 'snack-mozzarella', image: 'assets/menu/snack-mozzarella.png', name: 'Mozzarella Sticks', quantity: '5 stuks', price: 4.5 },
-  { id: 'snack-onion-rings', image: 'assets/menu/snack-onion-rings.png', name: 'Onion Rings', quantity: '6–8 stuks', price: 3.5 },
-  { id: 'snack-tenders', image: 'assets/menu/snack-tenders.png', name: 'Chicken Tenders', quantity: '3 stuks', price: 5.5 },
-  { id: 'snack-hot-wings', image: 'assets/menu/snack-hot-wings.png', name: 'Hot Chicken Wings', quantity: '5 stuks', price: 5.5 },
+  { id: 'snack-chicken-nuggets', image: 'assets/snack-chicken-nuggets.png', name: 'Chicken Nuggets', quantity: '6 stuks', price: 4 },
+  { id: 'snack-chili-cheese', image: 'assets/snack-chili-cheese.png', name: 'Chili Cheese Nuggets', quantity: '6 stuks', price: 4.5 },
+  { id: 'snack-mozzarella', image: 'assets/snack-mozzarella.png', name: 'Mozzarella Sticks', quantity: '5 stuks', price: 4.5 },
+  { id: 'snack-onion-rings', image: 'assets/snack-onion-rings.png', name: 'Onion Rings', quantity: '6–8 stuks', price: 3.5 },
+  { id: 'snack-tenders', image: 'assets/snack-tenders.png', name: 'Chicken Tenders', quantity: '3 stuks', price: 5.5 },
+  { id: 'snack-hot-wings', image: 'assets/snack-hot-wings.png', name: 'Hot Chicken Wings', quantity: '5 stuks', price: 5.5 },
   { id: 'snack-mix-box', name: 'Loaded Mix Box', quantity: '13 stuks', price: 10.9, includedSauces: 2,
     description: '3 Chicken Nuggets · 3 Chili Cheese Nuggets · 3 Mozzarella Sticks · 4 Onion Rings' }
 ];
@@ -143,3 +143,4 @@ for (const id of ['signatureGrid','sandwichGrid','snackGrid']) {
   new MutationObserver(update).observe(shelf,{childList:true});
   update();
 }
+
