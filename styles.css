@@ -1905,3 +1905,90 @@ body.modal-open {
     width: 100%;
   }
 }
+/* Compact menu: full product details remain in the existing choice dialog. */
+#signatures,#sandwiches{scroll-margin-top:130px;padding-block:28px}
+#signatures .menu-heading,#sandwiches .split-heading{margin-bottom:18px;gap:8px}
+#signatures h2,#sandwiches h2{font-size:clamp(1.8rem,4vw,3rem)}
+.signature-grid,.sandwich-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px}
+.signature-card{min-height:0;padding:16px;display:flex;flex-direction:column;gap:8px}
+.signature-card-photo{height:110px;aspect-ratio:auto;margin:0}
+.signature-head{grid-template-columns:1fr;gap:6px}
+.signature-head h3,.sandwich-card h3{font-size:1.25rem;line-height:1.15;margin:0}
+.signature-card .protein,.signature-card .chips,.signature-card .finish{display:none}
+.signature-card .badge{position:static;align-self:flex-start;min-height:0;padding:3px 6px;font-size:11px;letter-spacing:0}
+.signature-price{min-width:0;text-align:left;display:flex;gap:8px;align-items:baseline}
+.signature-price small{font-size:12px;letter-spacing:0;margin:0}
+.signature-price strong{font-family:inherit;font-size:15px}
+.signature-price br{display:none}
+.signature-card .card-actions{margin-top:auto}
+.signature-card .add-button,.sandwich-card .add-button{width:100%;min-height:44px;padding:8px;font-size:14px;letter-spacing:0}
+.sandwich-card{border:1px solid var(--line);background:var(--panel-dark);border-radius:8px;padding:16px;display:flex;flex-direction:column;gap:10px}
+.sandwich-card>strong,.sandwich-card>small{color:var(--orange)}
+.sandwich-card p{font-size:14px;line-height:1.4;margin:0}
+.sandwich-card .add-button{margin-top:auto}
+@media(max-width:680px){
+ #signatures,#sandwiches{scroll-margin-top:135px;padding-block:12px}
+ #signatures .menu-heading,#sandwiches .split-heading{margin-bottom:10px;gap:2px}
+ #signatures .section-kicker,#sandwiches .section-kicker{display:none}
+ #signatures .menu-heading>p,#sandwiches .split-heading>p{margin:2px 0;font-size:13px;line-height:1.3}
+ #signatures h2,#sandwiches h2{font-size:26px;line-height:1.1;margin:0}
+ .signature-grid,.sandwich-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:7px}
+ .signature-card{padding:8px;gap:5px}
+ .signature-card-photo,.signature-card .badge{display:none}
+ .signature-head h3{font-family:inherit;font-size:14px;line-height:1.15;min-height:32px;letter-spacing:0}
+ .signature-head{gap:3px}
+ .signature-price{gap:4px;flex-wrap:wrap}
+ .signature-price small{font-size:10px}
+ .signature-price strong{font-size:12px;white-space:nowrap}
+ .signature-card .card-actions{padding:0}
+ .signature-card .add-button{min-height:44px;padding:6px;font-size:13px}
+ .sandwich-card{padding:10px;gap:8px}
+ .sandwich-card h3{font-family:inherit;font-size:16px}
+ .sandwich-card p{font-size:12px}
+}
+
+@media(max-width:680px){.topbar{gap:4px}#signatures,#sandwiches{scroll-margin-top:110px;padding-block:8px}.signature-card{padding:7px;gap:4px}}
+@media(max-width:680px){.location-head{flex-wrap:wrap}.location-head span{max-width:100%;overflow-wrap:anywhere}}
+#snacks{scroll-margin-top:130px;padding-block:28px}#snacks .split-heading{margin-bottom:18px;gap:8px}#snacks h2{font-size:clamp(1.8rem,4vw,3rem)}
+@media(max-width:680px){#snacks{scroll-margin-top:110px;padding-block:8px}#snacks h2{font-size:26px;line-height:1.1;margin:0}#snacks .split-heading{gap:2px;margin-bottom:10px}#snacks .split-heading>p{font-size:13px;line-height:1.3;margin:2px 0}}
+/* Horizontal category shelves and smaller introduction photos. */
+.hero{min-height:0;padding-block:32px;gap:28px}
+.hero-card{width:min(100%,360px);min-height:0;justify-self:center}
+.hero-card img{min-height:0;height:230px;object-fit:cover}
+.hero-label,.hero-price{position:relative;inset:auto;margin:8px}
+.base-feature{grid-template-columns:minmax(180px,260px) minmax(0,1fr);gap:28px}
+.base-photo{width:min(100%,260px);justify-self:center}
+.base-photo img{min-height:0;height:180px;object-fit:cover}
+#signatureGrid,#sandwichGrid,#snackGrid{display:grid;grid-template-columns:none;grid-auto-flow:column;grid-auto-columns:260px;gap:14px;overflow-x:auto;overscroll-behavior-x:contain;scroll-snap-type:x mandatory;scroll-padding-inline:2px;padding:4px 2px 12px;scrollbar-color:var(--orange) var(--panel-dark);scrollbar-width:thin}
+#signatureGrid>article,#sandwichGrid>article,#snackGrid>article{scroll-snap-align:start;min-width:0}
+#signatures h2,#sandwiches h2,#snacks h2{font-size:clamp(32px,5vw,56px);line-height:1.05;margin:0}
+#signatures .section-kicker,#sandwiches .section-kicker{display:none}
+.carousel-controls{display:flex;justify-content:flex-end;align-items:center;gap:8px;margin:0 0 10px}
+.carousel-controls>span{font-size:13px;color:var(--muted);margin-right:auto}
+.carousel-controls button{width:44px;height:44px;border:1px solid var(--line-hot);border-radius:8px;background:var(--panel-dark);color:var(--orange);font-size:23px;cursor:pointer}
+.carousel-controls button:disabled{opacity:.35;cursor:default}
+@media(max-width:680px){
+ .hero{padding-block:20px;gap:20px}
+ .hero-card{width:230px;min-height:0}
+ .hero-card img{height:150px;min-height:0}
+ .hero-label,.hero-price{margin:5px 10px}
+ .hero-label strong,.hero-price strong{font-size:18px}
+ .base-feature{grid-template-columns:1fr;gap:16px}
+ .base-photo{width:210px}.base-photo img{height:140px;min-height:0}
+ .base-photo span{top:8px;left:8px;padding:5px 7px;font-size:10px;letter-spacing:0}
+ #signatureGrid,#sandwichGrid,#snackGrid{grid-auto-columns:72%;gap:12px}
+ #signatureGrid .signature-card{padding:12px;gap:8px}
+ #signatureGrid .signature-card-photo{display:block;height:110px;margin:0}
+ #signatureGrid .signature-head h3{font-size:18px;min-height:42px}
+ #signatureGrid .signature-price strong{font-size:14px}
+ #signatureGrid .signature-price small{font-size:12px}
+ #sandwichGrid .sandwich-card{padding:14px;gap:10px}
+ #sandwichGrid .sandwich-card h3{font-size:20px}
+ #sandwichGrid .sandwich-card p{font-size:14px}
+ #signatures,#sandwiches,#snacks{padding-block:20px}
+}
+@media(prefers-reduced-motion:reduce){#signatureGrid,#sandwichGrid,#snackGrid{scroll-behavior:auto}}
+.menu-product-photo{display:block;width:100%;height:170px;object-fit:cover;object-position:center 57%;border-radius:8px;background:#101114}
+#snackGrid .menu-product-photo{height:160px;object-position:center}
+.menu-detail-photo{display:block;width:100%;height:220px;object-fit:contain;border-radius:8px;background:#101114}
+@media(max-width:680px){.menu-product-photo{height:155px}#snackGrid .menu-product-photo{height:125px}}
