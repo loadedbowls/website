@@ -1992,3 +1992,9 @@ body.modal-open {
 #snackGrid .menu-product-photo{height:160px;object-position:center}
 .menu-detail-photo{display:block;width:100%;height:220px;object-fit:contain;border-radius:8px;background:#101114}
 @media(max-width:680px){.menu-product-photo{height:155px}#snackGrid .menu-product-photo{height:125px}}
+
+.ingredient-choices { border: 1px solid var(--line, #ccc); border-radius: 8px; padding: 14px; margin: 0; min-width: 0; }
+.ingredient-choices legend { font-weight: 700; padding: 0 5px; }
+.ingredient-choices p { margin: 0 0 10px; font-size: 14px; }
+.modal-form .ingredient-choice { display: flex; flex-direction: row; align-items: center; gap: 10px; min-height: 44px; cursor: pointer; }
+.modal-form .ingredient-choice input { width: 20px; height: 20px; flex: 0 0 20px; margin: 0; accent-color: #f36f21; }
