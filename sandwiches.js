@@ -36,6 +36,7 @@ function renderSandwichModal(item, config = {}) {
         <option value="" disabled ${config.sauce ? '' : 'selected'}>Kies je saus</option>
         ${sauces.map(sauce => `<option value="${sauce}"${optionSelected(sauce, config.sauce)}>${sauce}</option>`).join('')}
       </select></label>
+      ${renderIngredientChoices([...sandwichToppings(item), ...bowl.finish.split(" + ")], config)}
       <label>Make it loaded<select name="upgrade">
         ${sandwichUpgrades.map(extra => `<option value="${extra.name}"${optionSelected(extra.name, config.upgrade || '')}>${extra.label}${extra.price ? ' + ' + money.format(extra.price) : ''}</option>`).join('')}
       </select></label>
@@ -62,11 +63,11 @@ signatureModalBody.addEventListener('submit', event => {
   if (!item || !sauces.includes(sauce) || !extra || !form.reportValidity()) return;
   const bowl = sandwichBowl(item);
   saveCartLine({
-    key: `${item.id}-${sauce}-${extra.name}`.toLowerCase().replaceAll(' ', '-'),
+    key: `${item.id}-${sauce}-${extra.name}-${JSON.stringify(omittedIngredients)}`.toLowerCase().replaceAll(' ', '-'),
     id: item.id, category: 'sandwich', name: item.name,
-    details: `Sandwich · ${bowl.protein} · ${sandwichToppings(item).join(', ')} · ${bowl.finish}. Saus: ${sauce}. ${extra.name || 'Geen extra'}`,
+    details: `Sandwich · ${bowl.protein} · ${included.join(", ") || "Geen standaard ingrediënten"}.${omittedIngredients.length ? ` Zonder: ${omittedIngredients.join(", ")}.` : ""} Saus: ${sauce}. ${extra.name || 'Geen extra'}`,
     price: item.price + extra.price,
-    config: { type: 'sandwich', sandwichId: item.id, sauce, upgrade: extra.name,
+    config: { type: 'sandwich', sandwichId: item.id, sauce, upgrade: extra.name, omittedIngredients,
       basePrice: item.price, extras: extra.name ? [{ name: extra.name, price: extra.price }] : [] }
   });
   closeModal(signatureModal);
