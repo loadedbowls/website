@@ -877,14 +877,14 @@ function addLine(line) {
   const existing = cart.find((item) => item.key === line.key);
   if (existing) {
     existing.quantity += 1;
-    if (existing.category === "bowl") {
+    if (["bowl", "sandwich"].includes(existing.category)) {
       existing.bowlNames = [...(existing.bowlNames || []), ""];
     }
   } else {
     cart.push({
       ...line,
       quantity: 1,
-      bowlNames: line.category === "bowl" ? [""] : []
+      bowlNames: ["bowl", "sandwich"].includes(line.category) ? [""] : []
     });
   }
 
@@ -900,7 +900,7 @@ function saveCartLine(line) {
 
   const current = cart.find((item) => item.key === editingCartKey);
   const quantity = current?.quantity || 1;
-  const bowlNames = line.category === "bowl"
+  const bowlNames = ["bowl", "sandwich"].includes(line.category)
     ? Array.from({ length: quantity }, (_, index) => current?.bowlNames?.[index] || "")
     : [];
   cart = cart.filter((item) => item.key !== editingCartKey);
@@ -908,7 +908,7 @@ function saveCartLine(line) {
   const existing = cart.find((item) => item.key === line.key);
   if (existing) {
     existing.quantity += quantity;
-    if (line.category === "bowl") {
+    if (["bowl", "sandwich"].includes(line.category)) {
       existing.bowlNames = [...(existing.bowlNames || []), ...bowlNames];
     }
   } else {
@@ -954,6 +954,18 @@ function optionSelected(value, selected) {
   return value === selected ? " selected" : "";
 }
 
+function standardIngredients(item) {
+  const fixedSauces = item.chips[0] === "Saus naar keuze" ? [] : (item.chips[0] || "").split(" + ");
+  return [...new Set([...fixedSauces, ...item.chips.slice(1), ...(item.finish || "").split(" + ")].filter(Boolean))];
+}
+function renderIngredientChoices(ingredients, config = {}) {
+  return '<fieldset class="ingredient-choices"><legend>Standaard ingrediënten</legend><p>Vink uit wat je niet wenst. De prijs blijft gelijk.</p>' + ingredients.map((ingredient, index) => '<label class="ingredient-choice"><input type="checkbox" name="includedIngredient" value="' + index + '"' + ((config.omittedIngredients || []).includes(ingredient) ? '' : ' checked') + '><span>' + escapeMarkup(ingredient) + '</span></label>').join('') + '</fieldset>';
+}
+function readIngredientChoices(form, ingredients) {
+  const selected = new Set(new FormData(form).getAll("includedIngredient"));
+  return ingredients.filter((ingredient, index) => !selected.has(String(index)));
+}
+
 function renderSignatureModal(item, config = {}) {
   signatureModalTitle.textContent = item.name;
   const image = getSignatureImage(item, "Large");
@@ -989,6 +1001,7 @@ function renderSignatureModal(item, config = {}) {
           </select>
         </label>
       </div>
+      ${renderIngredientChoices(standardIngredients(item), config)}
       <div class="signature-extra-tabs" aria-label="Extra opties voor ${item.name}">
         ${renderSignatureExtraGroup(t("extraProtein"), signatureExtras.protein)}
         ${renderSignatureExtraGroup(t("extraToppings"), signatureExtras.toppings)}
@@ -1060,7 +1073,7 @@ function renderCart() {
     cartItems.innerHTML = `<div class="empty-state">${t("emptyCart")}</div>`;
   } else {
     cartItems.innerHTML = lines.map((item) => {
-      const bowlNames = item.category === "bowl"
+      const bowlNames = ["bowl", "sandwich"].includes(item.category)
         ? Array.from({ length: item.quantity }, (_, index) => item.bowlNames?.[index] || "")
         : [];
       item.bowlNames = bowlNames;
@@ -1074,7 +1087,7 @@ function renderCart() {
             <div class="cart-bowl-names">
               ${bowlNames.map((name, index) => `
                 <label>
-                  <span>${t("bowlNameLabel", { number: index + 1 })}</span>
+                  <span>${(item.category === "sandwich" ? t("bowlNameLabel", { number: index + 1 }).replace(/bowl/i, "sandwich") : t("bowlNameLabel", { number: index + 1 }))}</span>
                   <input
                     type="text"
                     maxlength="40"
@@ -1109,7 +1122,7 @@ function changeQuantity(key, direction) {
   if (!line) return;
 
   line.quantity += direction;
-  if (line.category === "bowl") {
+  if (["bowl", "sandwich"].includes(line.category)) {
     const bowlNames = Array.isArray(line.bowlNames) ? line.bowlNames : [];
     if (direction > 0) bowlNames.push("");
     if (direction < 0) bowlNames.pop();
@@ -1316,6 +1329,8 @@ signatureModalBody.addEventListener("submit", (event) => {
   const size = formData.get("size");
   const base = formData.get("base");
   const sauce = formData.get("sauce");
+  const omittedIngredients = readIngredientChoices(form, standardIngredients(item));
+  const included = (name) => !omittedIngredients.includes(name);
   const sizeSelect = form.elements.size;
   const selectedSize = sizeSelect.options[sizeSelect.selectedIndex];
   const extras = [...form.querySelectorAll("[data-signature-extra-select]")]
@@ -1336,11 +1351,11 @@ signatureModalBody.addEventListener("submit", (event) => {
   }
 
   saveCartLine({
-    key: `${item.id}-${size}-${base}-${sauce}-${extras.map((extra) => extra.name).join("-")}`.toLowerCase().replaceAll(" ", "-"),
+    key: `${item.id}-${size}-${base}-${sauce}-${JSON.stringify(omittedIngredients)}-${extras.map((extra) => extra.name).join("-")}`.toLowerCase().replaceAll(" ", "-"),
     id: item.id,
     category: "bowl",
     name: item.name,
-    details: `Maat: ${size}, basis: ${base}, saus: ${sauce}, proteine: ${item.protein}, standaard toppings: ${item.chips.join(", ")}, afwerking: ${item.finish}. ${extrasText}`,
+    details: `Maat: ${size}, basis: ${base}, saus: ${sauce}, proteine: ${item.protein}, standaard ingrediënten: ${standardIngredients(item).filter(included).join(", ") || "Geen"}.${omittedIngredients.length ? ` Zonder: ${omittedIngredients.join(", ")}.` : ""} ${extrasText}`,
     price: Number(selectedSize.dataset.price) + extraTotal,
     config: {
       type: "signature",
@@ -1470,7 +1485,10 @@ orderForm.addEventListener("submit", async (event) => {
       routeCheckedAt: deliveryInfo?.routeCheckedAt || "",
       note
     },
-    items: lines,
+    items: lines.map(line => {
+      const names = (line.bowlNames || []).map((name, index) => name.trim() ? (index + 1) + ': ' + name.trim() : '').filter(Boolean);
+      return { ...line, details: (line.details || '') + (names.length ? '. Namen: ' + names.join(', ') : '') };
+    }),
     subtotal: summary.subtotal,
     discount: summary.discount,
     promotion: "",
