@@ -62,6 +62,9 @@ signatureModalBody.addEventListener('submit', event => {
   const extra = sandwichUpgrades.find(extra => extra.name === data.get('upgrade'));
   if (!item || !sauces.includes(sauce) || !extra || !form.reportValidity()) return;
   const bowl = sandwichBowl(item);
+  const ingredients = [...sandwichToppings(item), ...bowl.finish.split(" + ")];
+  const omittedIngredients = readIngredientChoices(form, ingredients);
+  const included = ingredients.filter(name => !omittedIngredients.includes(name));
   saveCartLine({
     key: `${item.id}-${sauce}-${extra.name}-${JSON.stringify(omittedIngredients)}`.toLowerCase().replaceAll(' ', '-'),
     id: item.id, category: 'sandwich', name: item.name,
